@@ -88,16 +88,16 @@ export const Financeiro = () => {
   const calcularCustoReal = (ordem: OrdemServico): number => {
     let custoTotal = 0;
 
-    // Calcular custo das peças utilizadas (sistema antigo) - com fallback mais preciso
-    if (ordem.pecasUtilizadas) {
+    // Calcular custo das peças utilizadas (sistema antigo)
+    if (ordem.pecasUtilizadas && ordem.pecasUtilizadas.length > 0) {
       custoTotal += ordem.pecasUtilizadas.reduce((total, peca) => {
         // Usar 70% do valor unitário como estimativa de custo se não há dados de custo
         return total + (peca.valorUnitario * peca.quantidade * 0.7);
       }, 0);
     }
 
-    // Calcular custo dos produtos utilizados (sistema novo) - priorizar dados reais de custo
-    if (ordem.produtosUtilizados) {
+    // Calcular custo dos produtos utilizados (sistema novo)
+    if (ordem.produtosUtilizados && ordem.produtosUtilizados.length > 0) {
       custoTotal += ordem.produtosUtilizados.reduce((total, produtoUtilizado) => {
         const produto = produtos.find(p => p.id === produtoUtilizado.produtoId);
         if (produto && produto.precoCusto > 0) {
@@ -113,6 +113,7 @@ export const Financeiro = () => {
     return custoTotal;
   };
 
+  // Filtrar ordens pelo período selecionado
   const ordensFiltradas = ordens.filter(ordem => {
     if (!dataInicio || !dataFim) return true;
     
@@ -123,6 +124,7 @@ export const Financeiro = () => {
     return dataOrdem >= inicio && dataOrdem <= fim;
   });
 
+  // Filtrar entradas financeiras pelo período selecionado
   const entradasFiltradas = financialEntries.filter(entrada => {
     if (!dataInicio || !dataFim) return true;
     
@@ -133,21 +135,24 @@ export const Financeiro = () => {
     return dataEntrada >= inicio && dataEntrada <= fim && entrada.status === 'pago';
   });
 
+  // Apenas ordens finalizadas e pagas
   const ordensFinalizadas = ordensFiltradas.filter(ordem => ordem.finalizada && ordem.statusPagamento === 'pago');
 
+  // Cálculos corrigidos das receitas e despesas
   const receitaOrdens = ordensFinalizadas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0);
   const receitaEntradas = entradasFiltradas.filter(e => e.tipo === 'receita').reduce((acc, entrada) => acc + entrada.valor, 0);
   const despesaEntradas = entradasFiltradas.filter(e => e.tipo === 'despesa').reduce((acc, entrada) => acc + entrada.valor, 0);
-
-  // Calcular custo total das ordens usando a função corrigida
-  const custoTotalOrdens = ordensFinalizadas.reduce((acc, ordem) => {
+  
+  // Calcular custos reais das ordens (custo das peças/produtos utilizados)
+  const custoOrdens = ordensFinalizadas.reduce((acc, ordem) => {
     return acc + calcularCustoReal(ordem);
   }, 0);
 
+  // Cálculos financeiros corrigidos
   const calculosFinanceiros: FinancialData = {
     receita: receitaOrdens + receitaEntradas,
-    despesa: despesaEntradas + custoTotalOrdens, // Incluir custos das ordens nas despesas
-    lucro: (receitaOrdens + receitaEntradas) - (despesaEntradas + custoTotalOrdens),
+    despesa: despesaEntradas + custoOrdens,
+    lucro: (receitaOrdens + receitaEntradas) - (despesaEntradas + custoOrdens),
     ordens: ordensFinalizadas.length,
     ticket: ordensFinalizadas.length > 0 ? receitaOrdens / ordensFinalizadas.length : 0
   };
@@ -322,7 +327,7 @@ export const Financeiro = () => {
         </div>
       </div>
 
-      {/* Cards de Resumo - com melhor precisão dos cálculos */}
+      {/* Cards de Resumo */}
       <div className="grid grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
