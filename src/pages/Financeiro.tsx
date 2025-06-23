@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Package } from 'lucide-react';
 import { OrdemServico, Cliente } from '../types';
@@ -7,6 +8,7 @@ import { FinancialEntryModal } from '../components/financial/FinancialEntryModal
 
 interface FinancialData {
   receita: number;
+  despesa: number;
   lucro: number;
   ordens: number;
   ticket: number;
@@ -15,6 +17,7 @@ interface FinancialData {
 interface OrderFinancial extends OrdemServico {
   cliente: Cliente;
   lucroCalculado: number;
+  fonte: 'OS';
 }
 
 interface FinancialEntry {
@@ -28,6 +31,16 @@ interface FinancialEntry {
   status: 'pendente' | 'pago';
   observacoes?: string;
 }
+
+interface FinancialEntryWithSource extends FinancialEntry {
+  fonte: 'entrada';
+  cliente?: { nome: string };
+  numero?: string;
+  dataAbertura?: string;
+  lucroCalculado?: number;
+}
+
+type UnifiedFinancialItem = OrderFinancial | FinancialEntryWithSource;
 
 export const Financeiro = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
@@ -77,17 +90,31 @@ export const Financeiro = () => {
     return dataOrdem >= inicio && dataOrdem <= fim;
   });
 
+  const entradasFiltradas = financialEntries.filter(entrada => {
+    if (!dataInicio || !dataFim) return true;
+    
+    const dataEntrada = new Date(entrada.dataVencimento);
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    
+    return dataEntrada >= inicio && dataEntrada <= fim && entrada.status === 'pago';
+  });
+
   const ordensFinalizadas = ordensFiltradas.filter(ordem => ordem.finalizada && ordem.statusPagamento === 'pago');
 
+  const receitaOrdens = ordensFinalizadas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0);
+  const receitaEntradas = entradasFiltradas.filter(e => e.tipo === 'receita').reduce((acc, entrada) => acc + entrada.valor, 0);
+  const despesaEntradas = entradasFiltradas.filter(e => e.tipo === 'despesa').reduce((acc, entrada) => acc + entrada.valor, 0);
+
   const calculosFinanceiros: FinancialData = {
-    receita: ordensFinalizadas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0),
-    lucro: ordensFinalizadas.reduce((acc, ordem) => {
-      const custosPecas = (ordem.pecasUtilizadas || []).reduce((total, peca) => total + (peca.valorUnitario * peca.quantidade * 0.7), 0); // 30% de margem nas peças
-      const lucroOrdem = (ordem.valorFinal || ordem.valorTotal || 0) - custosPecas;
-      return acc + lucroOrdem;
+    receita: receitaOrdens + receitaEntradas,
+    despesa: despesaEntradas,
+    lucro: (receitaOrdens + receitaEntradas) - despesaEntradas - ordensFinalizadas.reduce((acc, ordem) => {
+      const custosPecas = (ordem.pecasUtilizadas || []).reduce((total, peca) => total + (peca.valorUnitario * peca.quantidade * 0.7), 0);
+      return acc + custosPecas;
     }, 0),
     ordens: ordensFinalizadas.length,
-    ticket: ordensFinalizadas.length > 0 ? ordensFinalizadas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0) / ordensFinalizadas.length : 0
+    ticket: ordensFinalizadas.length > 0 ? receitaOrdens / ordensFinalizadas.length : 0
   };
 
   const ordensComClientes: OrderFinancial[] = ordensFinalizadas.map(ordem => {
@@ -98,55 +125,83 @@ export const Financeiro = () => {
     return {
       ...ordem,
       cliente: cliente!,
-      lucroCalculado
+      lucroCalculado,
+      fonte: 'OS' as const
     };
   });
 
-  const colunas: Column<OrderFinancial>[] = [
+  const entradasComFonte: FinancialEntryWithSource[] = entradasFiltradas.map(entrada => ({
+    ...entrada,
+    fonte: 'entrada' as const,
+    cliente: { nome: 'N/A' },
+    numero: entrada.tipo === 'receita' ? 'REC' : 'DESP',
+    dataAbertura: entrada.dataVencimento,
+    lucroCalculado: entrada.tipo === 'receita' ? entrada.valor : -entrada.valor
+  }));
+
+  const dadosUnificados: UnifiedFinancialItem[] = [...ordensComClientes, ...entradasComFonte];
+
+  const colunas: Column<UnifiedFinancialItem>[] = [
+    {
+      key: 'fonte',
+      label: 'Tipo',
+      render: (item) => (
+        <span className={`px-2 py-1 rounded text-xs font-medium ${
+          item.fonte === 'OS' ? 'bg-blue-100 text-blue-800' : 
+          (item as FinancialEntryWithSource).tipo === 'receita' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {item.fonte === 'OS' ? 'OS' : (item as FinancialEntryWithSource).tipo === 'receita' ? 'REC' : 'DESP'}
+        </span>
+      )
+    },
     {
       key: 'numero',
-      label: 'OS',
-      render: (ordem) => `#${ordem.numero}`
+      label: 'Número',
+      render: (item) => item.fonte === 'OS' ? `#${item.numero}` : `${item.numero}-${item.id.slice(-4)}`
+    },
+    {
+      key: 'descricao',
+      label: 'Descrição',
+      render: (item) => item.fonte === 'OS' ? `${item.marca} ${item.modelo}` : (item as FinancialEntryWithSource).descricao
     },
     {
       key: 'cliente.nome',
       label: 'Cliente',
-      render: (ordem) => ordem.cliente?.nome || 'N/A'
+      render: (item) => item.cliente?.nome || 'N/A'
     },
     {
       key: 'dataAbertura',
       label: 'Data',
-      render: (ordem) => new Date(ordem.dataAbertura).toLocaleDateString('pt-BR')
+      render: (item) => new Date(item.dataAbertura || item.dataVencimento).toLocaleDateString('pt-BR')
     },
     {
-      key: 'valorFinal',
-      label: 'Receita',
-      render: (ordem) => formatCurrency(ordem.valorFinal || ordem.valorTotal || 0),
-      className: 'text-right'
-    },
-    {
-      key: 'lucroCalculado',
-      label: 'Lucro Est.',
-      render: (ordem) => (
-        <span className={`font-medium ${ordem.lucroCalculado >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {formatCurrency(ordem.lucroCalculado)}
-        </span>
-      ),
+      key: 'valor',
+      label: 'Valor',
+      render: (item) => {
+        const valor = item.fonte === 'OS' ? (item.valorFinal || item.valorTotal || 0) : (item as FinancialEntryWithSource).valor;
+        const isNegative = item.fonte === 'entrada' && (item as FinancialEntryWithSource).tipo === 'despesa';
+        return (
+          <span className={isNegative ? 'text-red-600 font-medium' : 'text-green-600 font-medium'}>
+            {isNegative ? '-' : ''}{formatCurrency(valor)}
+          </span>
+        );
+      },
       className: 'text-right'
     },
     {
       key: 'formaPagamento',
       label: 'Pagamento',
-      render: (ordem) => {
+      render: (item) => {
         const formasPagamento = {
           dinheiro: '💵 Dinheiro',
           cartao_credito: '💳 Crédito',
           cartao_debito: '💳 Débito',
           pix: '📱 PIX',
           transferencia: '🏦 Transferência',
-          parcelado: '📊 Parcelado'
+          parcelado: '📊 Parcelado',
+          boleto: '📄 Boleto'
         };
-        return formasPagamento[ordem.formaPagamento as keyof typeof formasPagamento] || ordem.formaPagamento;
+        return formasPagamento[item.formaPagamento as keyof typeof formasPagamento] || item.formaPagamento;
       }
     }
   ];
@@ -219,70 +274,84 @@ export const Financeiro = () => {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div className="grid grid-cols-5 gap-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <DollarSign className="h-6 w-6 text-green-600" />
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-green-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Receita Total</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(calculosFinanceiros.receita)}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-500">Receita Total</p>
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.receita)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-red-100 rounded-lg">
+              <TrendingDown className="h-5 w-5 text-red-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Lucro Estimado</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(calculosFinanceiros.lucro)}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-500">Despesa Total</p>
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.despesa)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <DollarSign className="h-5 w-5 text-blue-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Ordens Pagas</p>
-              <p className="text-2xl font-bold text-gray-900">{calculosFinanceiros.ordens}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-500">Lucro Líquido</p>
+              <p className={`text-lg font-bold ${calculosFinanceiros.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(calculosFinanceiros.lucro)}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-orange-600" />
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <FileText className="h-5 w-5 text-purple-600" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Ticket Médio</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(calculosFinanceiros.ticket)}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-500">Ordens Pagas</p>
+              <p className="text-lg font-bold text-gray-900">{calculosFinanceiros.ordens}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <div className="flex items-center">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-orange-600" />
+            </div>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-500">Ticket Médio</p>
+              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.ticket)}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabela de Ordens Financeiras */}
+      {/* Tabela Unificada */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold flex items-center">
             <FileText className="mr-2 text-blue-600" size={20} />
-            Ordens Finalizadas no Período
+            Movimentação Financeira no Período
           </h3>
         </div>
         <div className="p-6">
           <SortableTable
-            data={ordensComClientes}
+            data={dadosUnificados}
             columns={colunas}
-            keyExtractor={(ordem) => ordem.id}
-            emptyMessage="Nenhuma ordem finalizada no período"
+            keyExtractor={(item) => `${item.fonte}-${item.id}`}
+            emptyMessage="Nenhuma movimentação financeira no período"
             emptyIcon={<DollarSign size={48} className="text-gray-300" />}
           />
         </div>
