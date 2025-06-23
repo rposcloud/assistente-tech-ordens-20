@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,14 +7,15 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { HomePage } from './pages/HomePage';
 import { Login } from './pages/Login';
+import { Cadastro } from './pages/Cadastro';
 import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
 import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
 import { Financeiro } from './pages/Financeiro';
 import { PortalCliente } from './pages/PortalCliente';
-import { LandingPage } from './pages/LandingPage';
 
 const queryClient = new QueryClient();
 
@@ -25,9 +27,10 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LandingPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/portal/:token" element={<PortalCliente />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>
@@ -63,7 +66,7 @@ const App = () => (
                 </Layout>
               </ProtectedRoute>
             } />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
