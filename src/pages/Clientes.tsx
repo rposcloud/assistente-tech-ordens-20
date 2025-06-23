@@ -1,26 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, X } from 'lucide-react';
-
-interface Cliente {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-}
+import { Cliente } from '../types';
+import { InputMask } from '../components/forms/InputMask';
+import { AddressForm } from '../components/forms/AddressForm';
+import { useMask } from '../hooks/useMask';
+import { formatCPF, formatCNPJ, formatPhone } from '../utils/masks';
 
 export const Clientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Cliente | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Partial<Cliente>>({
     nome: '',
     email: '',
     telefone: '',
-    endereco: ''
+    cpfCnpj: '',
+    tipoDocumento: 'cpf',
+    dataNascimento: '',
+    cep: '',
+    endereco: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    observacoes: ''
   });
+
+  const phoneMask = useMask('phone');
 
   useEffect(() => {
     const clientesSalvos = localStorage.getItem('clientes');
@@ -48,23 +57,17 @@ export const Clientes = () => {
       const novoCliente: Cliente = {
         id: Date.now().toString(),
         ...formData
-      };
+      } as Cliente;
       saveClientes([...clientes, novoCliente]);
     }
 
-    setFormData({ nome: '', email: '', telefone: '', endereco: '' });
-    setShowModal(false);
-    setEditingClient(null);
+    closeModal();
   };
 
   const handleEdit = (cliente: Cliente) => {
     setEditingClient(cliente);
-    setFormData({
-      nome: cliente.nome,
-      email: cliente.email,
-      telefone: cliente.telefone,
-      endereco: cliente.endereco
-    });
+    setFormData({ ...cliente });
+    phoneMask.setValue(cliente.telefone);
     setShowModal(true);
   };
 
@@ -78,12 +81,58 @@ export const Clientes = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditingClient(null);
-    setFormData({ nome: '', email: '', telefone: '', endereco: '' });
+    setFormData({
+      nome: '',
+      email: '',
+      telefone: '',
+      cpfCnpj: '',
+      tipoDocumento: 'cpf',
+      dataNascimento: '',
+      cep: '',
+      endereco: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      observacoes: ''
+    });
+    phoneMask.reset();
+  };
+
+  const handlePhoneChange = (value: string) => {
+    phoneMask.handleChange(value);
+    setFormData({ ...formData, telefone: value });
+  };
+
+  const handleDocumentChange = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '');
+    let maskedValue = '';
+    let tipoDocumento: 'cpf' | 'cnpj' = 'cpf';
+
+    if (cleanValue.length <= 11) {
+      maskedValue = formatCPF(value);
+      tipoDocumento = 'cpf';
+    } else {
+      maskedValue = formatCNPJ(value);
+      tipoDocumento = 'cnpj';
+    }
+
+    setFormData({ 
+      ...formData, 
+      cpfCnpj: maskedValue,
+      tipoDocumento 
+    });
+  };
+
+  const handleAddressChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
   };
 
   const clientesFiltrados = clientes.filter(cliente =>
     cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.cpfCnpj.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -123,7 +172,8 @@ export const Clientes = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endereço</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPF/CNPJ</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cidade</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
@@ -139,8 +189,11 @@ export const Clientes = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{cliente.telefone}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{cliente.endereco}</div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{cliente.cpfCnpj}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{cliente.cidade}/{cliente.estado}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -170,66 +223,107 @@ export const Clientes = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">
-                {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
-              </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
-                <X size={24} />
-              </button>
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">
+                  {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
+                </h3>
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Dados Pessoais */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                <h4 className="text-md font-medium mb-4 text-gray-800">Dados Pessoais</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                    <InputMask
+                      value={formData.nome || ''}
+                      onChange={(value) => setFormData({ ...formData, nome: value })}
+                      placeholder="Nome completo"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <InputMask
+                      value={formData.email || ''}
+                      onChange={(value) => setFormData({ ...formData, email: value })}
+                      placeholder="email@exemplo.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                    <InputMask
+                      value={phoneMask.value}
+                      onChange={handlePhoneChange}
+                      placeholder="(11) 99999-9999"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ *</label>
+                    <InputMask
+                      value={formData.cpfCnpj || ''}
+                      onChange={handleDocumentChange}
+                      placeholder="000.000.000-00"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                    <input
+                      type="date"
+                      value={formData.dataNascimento || ''}
+                      onChange={(e) => setFormData({ ...formData, dataNascimento: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Endereço */}
+              <div>
+                <h4 className="text-md font-medium mb-4 text-gray-800">Endereço</h4>
+                <AddressForm
+                  cep={formData.cep || ''}
+                  endereco={formData.endereco || ''}
+                  numero={formData.numero || ''}
+                  complemento={formData.complemento || ''}
+                  bairro={formData.bairro || ''}
+                  cidade={formData.cidade || ''}
+                  estado={formData.estado || ''}
+                  onAddressChange={handleAddressChange}
                 />
               </div>
 
+              {/* Observações */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                <input
-                  type="tel"
-                  required
-                  value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                 <textarea
-                  required
-                  value={formData.endereco}
-                  onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+                  value={formData.observacoes || ''}
+                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={3}
+                  placeholder="Observações adicionais..."
                 />
               </div>
 
-              <div className="flex space-x-3 pt-4">
+              <div className="flex space-x-3 pt-4 border-t">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounde d-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
