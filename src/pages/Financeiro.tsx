@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Package } from 'lucide-react';
-import { OrdemServico, Cliente } from '../types';
+import { OrdemServico, Cliente, Produto } from '../types';
 import { formatCurrency } from '../utils/masks';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { FinancialEntryModal } from '../components/financial/FinancialEntryModal';
@@ -45,6 +44,7 @@ type UnifiedFinancialItem = OrderFinancial | FinancialEntryWithSource;
 export const Financeiro = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [periodo, setPeriodo] = useState('mes');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
@@ -53,6 +53,7 @@ export const Financeiro = () => {
   useEffect(() => {
     const ordensSalvas = localStorage.getItem('ordens');
     const clientesSalvos = localStorage.getItem('clientes');
+    const produtosSalvos = localStorage.getItem('produtos');
     const entradaFinanceira = localStorage.getItem('financialEntries');
     
     if (ordensSalvas) {
@@ -60,6 +61,9 @@ export const Financeiro = () => {
     }
     if (clientesSalvos) {
       setClientes(JSON.parse(clientesSalvos));
+    }
+    if (produtosSalvos) {
+      setProdutos(JSON.parse(produtosSalvos));
     }
     if (entradaFinanceira) {
       setFinancialEntries(JSON.parse(entradaFinanceira));
@@ -78,6 +82,28 @@ export const Financeiro = () => {
     const updatedEntries = [...financialEntries, entry];
     setFinancialEntries(updatedEntries);
     localStorage.setItem('financialEntries', JSON.stringify(updatedEntries));
+  };
+
+  const calcularCustoReal = (ordem: OrdemServico): number => {
+    let custoTotal = 0;
+
+    // Calcular custo das peças utilizadas (sistema antigo)
+    if (ordem.pecasUtilizadas) {
+      custoTotal += ordem.pecasUtilizadas.reduce((total, peca) => {
+        return total + (peca.valorUnitario * peca.quantidade * 0.7); // Fallback para peças antigas
+      }, 0);
+    }
+
+    // Calcular custo dos produtos utilizados (sistema novo)
+    if (ordem.produtosUtilizados) {
+      custoTotal += ordem.produtosUtilizados.reduce((total, produtoUtilizado) => {
+        const produto = produtos.find(p => p.id === produtoUtilizado.produtoId);
+        const precoCusto = produto ? produto.precoCusto : produtoUtilizado.valorUnitario * 0.7;
+        return total + (precoCusto * produtoUtilizado.quantidade);
+      }, 0);
+    }
+
+    return custoTotal;
   };
 
   const ordensFiltradas = ordens.filter(ordem => {
@@ -110,8 +136,7 @@ export const Financeiro = () => {
     receita: receitaOrdens + receitaEntradas,
     despesa: despesaEntradas,
     lucro: (receitaOrdens + receitaEntradas) - despesaEntradas - ordensFinalizadas.reduce((acc, ordem) => {
-      const custosPecas = (ordem.pecasUtilizadas || []).reduce((total, peca) => total + (peca.valorUnitario * peca.quantidade * 0.7), 0);
-      return acc + custosPecas;
+      return acc + calcularCustoReal(ordem);
     }, 0),
     ordens: ordensFinalizadas.length,
     ticket: ordensFinalizadas.length > 0 ? receitaOrdens / ordensFinalizadas.length : 0
@@ -119,8 +144,8 @@ export const Financeiro = () => {
 
   const ordensComClientes: OrderFinancial[] = ordensFinalizadas.map(ordem => {
     const cliente = clientes.find(c => c.id === ordem.clienteId);
-    const custosPecas = (ordem.pecasUtilizadas || []).reduce((total, peca) => total + (peca.valorUnitario * peca.quantidade * 0.7), 0);
-    const lucroCalculado = (ordem.valorFinal || ordem.valorTotal || 0) - custosPecas;
+    const custoReal = calcularCustoReal(ordem);
+    const lucroCalculado = (ordem.valorFinal || ordem.valorTotal || 0) - custoReal;
     
     return {
       ...ordem,

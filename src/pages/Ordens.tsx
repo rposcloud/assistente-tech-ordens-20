@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Search, Edit, X, Printer, Download, Wrench, Package, DollarSign, Calendar, FileText, AlertCircle, User, Smartphone, CreditCard, Check, Filter } from 'lucide-react';
 import { OrdemServico, Cliente, PecaUtilizada, Produto } from '../types';
 import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency, parseCurrency } from '../utils/masks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GenerateLinkModal } from '../components/portal/GenerateLinkModal';
 
 export const Ordens = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
