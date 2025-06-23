@@ -1,4 +1,3 @@
-
 export interface Cliente {
   id: string;
   nome: string;
@@ -29,6 +28,7 @@ export interface OrdemServico {
   diagnosticoTecnico?: string;
   solucaoAplicada?: string;
   pecasUtilizadas?: PecaUtilizada[];
+  produtosUtilizados?: ProdutoUtilizado[];
   valorMaoObra: number;
   valorTotal: number;
   prazoEntrega?: string;
@@ -55,3 +55,6 @@ export interface EnderecoViaCep {
   localidade: string;
   uf: string;
 }
+
+// Re-export from produto.ts
+export type { Produto, ProdutoUtilizado } from './produto';

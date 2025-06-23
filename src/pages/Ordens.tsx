@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Search, Edit, X, Printer, Download } from 'lucide-react';
-import { OrdemServico, Cliente, PecaUtilizada } from '../types';
+import { Plus, Search, Edit, X, Printer, Download, Wrench, Package, DollarSign, Calendar, FileText, AlertCircle, User, Smartphone } from 'lucide-react';
+import { OrdemServico, Cliente, PecaUtilizada, Produto } from '../types';
 import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency, parseCurrency } from '../utils/masks';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const Ordens = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -41,12 +43,16 @@ export const Ordens = () => {
   useEffect(() => {
     const ordensSalvas = localStorage.getItem('ordens');
     const clientesSalvos = localStorage.getItem('clientes');
+    const produtosSalvos = localStorage.getItem('produtos');
     
     if (ordensSalvas) {
       setOrdens(JSON.parse(ordensSalvas));
     }
     if (clientesSalvos) {
       setClientes(JSON.parse(clientesSalvos));
+    }
+    if (produtosSalvos) {
+      setProdutos(JSON.parse(produtosSalvos));
     }
   }, []);
 
@@ -186,6 +192,21 @@ export const Ordens = () => {
     }
   };
 
+  const adicionarProdutoCadastrado = (produto: Produto, quantidade: number = 1) => {
+    const peca: PecaUtilizada = {
+      id: Date.now().toString(),
+      nome: produto.nome,
+      quantidade: quantidade,
+      valorUnitario: produto.precoVenda,
+      valorTotal: quantidade * produto.precoVenda
+    };
+
+    setFormData({
+      ...formData,
+      pecasUtilizadas: [...(formData.pecasUtilizadas || []), peca]
+    });
+  };
+
   const removerPeca = (id: string) => {
     setFormData({
       ...formData,
@@ -225,18 +246,21 @@ export const Ordens = () => {
   };
 
   const tipoEquipamentoOptions = [
-    { value: 'smartphone', label: 'Smartphone' },
-    { value: 'notebook', label: 'Notebook' },
-    { value: 'desktop', label: 'Desktop' },
-    { value: 'tablet', label: 'Tablet' },
-    { value: 'outros', label: 'Outros' }
+    { value: 'smartphone', label: 'Smartphone', icon: Smartphone },
+    { value: 'notebook', label: 'Notebook', icon: Package },
+    { value: 'desktop', label: 'Desktop', icon: Package },
+    { value: 'tablet', label: 'Tablet', icon: Package },
+    { value: 'outros', label: 'Outros', icon: Package }
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ordens de Serviço</h1>
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <Wrench className="mr-3 text-blue-600" size={32} />
+            Ordens de Serviço
+          </h1>
           <p className="text-gray-600">Gerencie as ordens de serviço</p>
         </div>
         <button
@@ -280,10 +304,14 @@ export const Ordens = () => {
               {ordensFiltradas.map((ordem) => (
                 <tr key={ordem.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">#{ordem.numero}</div>
+                    <div className="text-sm font-medium text-gray-900 flex items-center">
+                      <Wrench className="mr-2 text-blue-500" size={16} />
+                      #{ordem.numero}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-gray-900 flex items-center">
+                      <User className="mr-2 text-gray-400" size={16} />
                       {ordem.cliente?.nome || 'Cliente não encontrado'}
                     </div>
                   </td>
@@ -299,7 +327,10 @@ export const Ordens = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatCurrency(ordem.valorTotal)}</div>
+                    <div className="text-sm text-gray-900 flex items-center">
+                      <DollarSign className="mr-1 text-green-500" size={16} />
+                      {formatCurrency(ordem.valorTotal)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
@@ -335,19 +366,21 @@ export const Ordens = () => {
           </table>
           {ordensFiltradas.length === 0 && (
             <div className="text-center py-8 text-gray-500">
+              <Wrench size={48} className="mx-auto mb-4 text-gray-300" />
               Nenhuma ordem de serviço encontrada
             </div>
           )}
         </div>
       </div>
 
-      {/* Modal de Formulário */}
+      {/* Modal de Formulário Aprimorado */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Wrench className="mr-2 text-blue-600" size={24} />
                   {editingOrder ? 'Editar Ordem' : 'Nova Ordem de Serviço'}
                 </h3>
                 <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
@@ -356,288 +389,339 @@ export const Ordens = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Dados Básicos */}
-              <div>
-                <h4 className="text-md font-medium mb-4 text-gray-800">Dados Básicos</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-                    <select
-                      required
-                      value={formData.clienteId || ''}
-                      onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Selecione um cliente</option>
-                      {clientes.map(cliente => (
-                        <option key={cliente.id} value={cliente.id}>
-                          {cliente.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+            <form onSubmit={handleSubmit}>
+              <Tabs defaultValue="equipamento" className="p-6">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="equipamento" className="flex items-center">
+                    <Smartphone className="mr-2" size={16} />
+                    Equipamento
+                  </TabsTrigger>
+                  <TabsTrigger value="diagnostico" className="flex items-center">
+                    <AlertCircle className="mr-2" size={16} />
+                    Diagnóstico
+                  </TabsTrigger>
+                  <TabsTrigger value="pecas" className="flex items-center">
+                    <Package className="mr-2" size={16} />
+                    Peças & Valores
+                  </TabsTrigger>
+                  <TabsTrigger value="status" className="flex items-center">
+                    <Calendar className="mr-2" size={16} />
+                    Status & Prazos
+                  </TabsTrigger>
+                </TabsList>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Equipamento *</label>
-                    <select
-                      value={formData.tipoEquipamento || 'smartphone'}
-                      onChange={(e) => setFormData({ ...formData, tipoEquipamento: e.target.value as any })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {tipoEquipamentoOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <TabsContent value="equipamento" className="space-y-4 mt-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-4 flex items-center">
+                      <User className="mr-2" size={18} />
+                      Dados Básicos
+                    </h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+                        <select
+                          required
+                          value={formData.clienteId || ''}
+                          onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Selecione um cliente</option>
+                          {clientes.map(cliente => (
+                            <option key={cliente.id} value={cliente.id}>
+                              {cliente.nome}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select
-                      value={formData.status || 'aguardando_diagnostico'}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {Object.entries(statusTexts).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Equipamento *</label>
+                        <select
+                          value={formData.tipoEquipamento || 'smartphone'}
+                          onChange={(e) => setFormData({ ...formData, tipoEquipamento: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {tipoEquipamentoOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-              {/* Equipamento */}
-              <div>
-                <h4 className="text-md font-medium mb-4 text-gray-800">Informações do Equipamento</h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.marca || ''}
-                      onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Ex: Samsung, Apple, Dell..."
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.marca || ''}
+                          onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Ex: Samsung, Apple, Dell..."
+                        />
+                      </div>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.modelo || ''}
-                      onChange={(e) => setFormData({ ...formData, modelo: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Ex: Galaxy S21, iPhone 13, Inspiron..."
-                    />
-                  </div>
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.modelo || ''}
+                          onChange={(e) => setFormData({ ...formData, modelo: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Ex: Galaxy S21, iPhone 13, Inspiron..."
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Número de Série</label>
-                    <input
-                      type="text"
-                      value={formData.numeroSerie || ''}
-                      onChange={(e) => setFormData({ ...formData, numeroSerie: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Número de série do equipamento"
-                    />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Número de Série</label>
+                        <input
+                          type="text"
+                          value={formData.numeroSerie || ''}
+                          onChange={(e) => setFormData({ ...formData, numeroSerie: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Número de série do equipamento"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
 
-              {/* Descrições */}
-              <div>
-                <h4 className="text-md font-medium mb-4 text-gray-800">Descrições</h4>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Defeito Relatado pelo Cliente *</label>
-                    <textarea
-                      required
-                      value={formData.defeitoRelatado || ''}
-                      onChange={(e) => setFormData({ ...formData, defeitoRelatado: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      rows={3}
-                      placeholder="Descreva o problema relatado pelo cliente..."
-                    />
+                <TabsContent value="diagnostico" className="space-y-4 mt-6">
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-yellow-900 mb-4 flex items-center">
+                      <AlertCircle className="mr-2" size={18} />
+                      Descrições Técnicas
+                    </h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Defeito Relatado pelo Cliente *</label>
+                        <textarea
+                          required
+                          value={formData.defeitoRelatado || ''}
+                          onChange={(e) => setFormData({ ...formData, defeitoRelatado: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Descreva o problema relatado pelo cliente..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Diagnóstico Técnico</label>
+                        <textarea
+                          value={formData.diagnosticoTecnico || ''}
+                          onChange={(e) => setFormData({ ...formData, diagnosticoTecnico: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Diagnóstico detalhado do problema..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Solução Aplicada</label>
+                        <textarea
+                          value={formData.solucaoAplicada || ''}
+                          onChange={(e) => setFormData({ ...formData, solucaoAplicada: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Descreva a solução aplicada..."
+                        />
+                      </div>
+                    </div>
                   </div>
+                </TabsContent>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Diagnóstico Técnico</label>
-                    <textarea
-                      value={formData.diagnosticoTecnico || ''}
-                      onChange={(e) => setFormData({ ...formData, diagnosticoTecnico: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      rows={3}
-                      placeholder="Diagnóstico detalhado do problema..."
-                    />
+                <TabsContent value="pecas" className="space-y-4 mt-6">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-4 flex items-center">
+                      <Package className="mr-2" size={18} />
+                      Peças e Componentes
+                    </h4>
+                    
+                    {/* Lista de peças */}
+                    {(formData.pecasUtilizadas || []).length > 0 && (
+                      <div className="mb-4">
+                        <table className="w-full border border-gray-300 text-sm">
+                          <thead className="bg-gray-100">
+                            <tr>
+                              <th className="border border-gray-300 px-2 py-1 text-left">Peça</th>
+                              <th className="border border-gray-300 px-2 py-1 text-center">Qtd</th>
+                              <th className="border border-gray-300 px-2 py-1 text-right">Valor Unit.</th>
+                              <th className="border border-gray-300 px-2 py-1 text-right">Total</th>
+                              <th className="border border-gray-300 px-2 py-1 text-center">Ação</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(formData.pecasUtilizadas || []).map((peca) => (
+                              <tr key={peca.id}>
+                                <td className="border border-gray-300 px-2 py-1">{peca.nome}</td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">{peca.quantidade}</td>
+                                <td className="border border-gray-300 px-2 py-1 text-right">{formatCurrency(peca.valorUnitario)}</td>
+                                <td className="border border-gray-300 px-2 py-1 text-right">{formatCurrency(peca.valorTotal)}</td>
+                                <td className="border border-gray-300 px-2 py-1 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => removerPeca(peca.id)}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* Produtos cadastrados */}
+                    {produtos.filter(p => p.categoria === 'peca' && p.ativo).length > 0 && (
+                      <div className="mb-4">
+                        <h5 className="text-sm font-medium mb-2">Produtos Cadastrados:</h5>
+                        <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                          {produtos.filter(p => p.categoria === 'peca' && p.ativo).map(produto => (
+                            <button
+                              key={produto.id}
+                              type="button"
+                              onClick={() => adicionarProdutoCadastrado(produto)}
+                              className="text-left p-2 border border-gray-200 rounded hover:bg-gray-50 text-xs"
+                            >
+                              <div className="font-medium">{produto.nome}</div>
+                              <div className="text-gray-500">{formatCurrency(produto.precoVenda)}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Adicionar nova peça */}
+                    <div className="border border-gray-200 rounded-lg p-4 bg-white">
+                      <h5 className="text-sm font-medium mb-3">Adicionar Peça Manual</h5>
+                      <div className="grid grid-cols-4 gap-3">
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Nome da peça"
+                            value={novaPeca.nome}
+                            onChange={(e) => setNovaPeca({ ...novaPeca, nome: e.target.value })}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            placeholder="Qtd"
+                            min="1"
+                            value={novaPeca.quantidade}
+                            onChange={(e) => setNovaPeca({ ...novaPeca, quantidade: Number(e.target.value) })}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="number"
+                            placeholder="Valor unitário"
+                            step="0.01"
+                            min="0"
+                            value={novaPeca.valorUnitario}
+                            onChange={(e) => setNovaPeca({ ...novaPeca, valorUnitario: Number(e.target.value) })}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={adicionarPeca}
+                            className="w-full px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            Adicionar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 bg-white p-3 rounded border">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-medium">Mão de Obra:</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.valorMaoObra || 0}
+                          onChange={(e) => setFormData({ ...formData, valorMaoObra: Number(e.target.value) })}
+                          className="w-32 px-2 py-1 text-sm border border-gray-300 rounded"
+                        />
+                      </div>
+                      <div className="flex justify-between text-lg font-bold border-t pt-2">
+                        <span>TOTAL:</span>
+                        <span className="text-blue-600">{formatCurrency(formData.valorTotal || 0)}</span>
+                      </div>
+                    </div>
                   </div>
+                </TabsContent>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Solução Aplicada</label>
-                    <textarea
-                      value={formData.solucaoAplicada || ''}
-                      onChange={(e) => setFormData({ ...formData, solucaoAplicada: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      rows={3}
-                      placeholder="Descreva a solução aplicada..."
-                    />
-                  </div>
-                </div>
-              </div>
+                <TabsContent value="status" className="space-y-4 mt-6">
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-purple-900 mb-4 flex items-center">
+                      <Calendar className="mr-2" size={18} />
+                      Status e Controle
+                    </h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select
+                          value={formData.status || 'aguardando_diagnostico'}
+                          onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {Object.entries(statusTexts).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
+                        </select>
+                      </div>
 
-              {/* Peças Utilizadas */}
-              <div>
-                <h4 className="text-md font-medium mb-4 text-gray-800">Peças Utilizadas</h4>
-                
-                {/* Lista de peças */}
-                {(formData.pecasUtilizadas || []).length > 0 && (
-                  <div className="mb-4">
-                    <table className="w-full border border-gray-300 text-sm">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="border border-gray-300 px-2 py-1 text-left">Peça</th>
-                          <th className="border border-gray-300 px-2 py-1 text-center">Qtd</th>
-                          <th className="border border-gray-300 px-2 py-1 text-right">Valor Unit.</th>
-                          <th className="border border-gray-300 px-2 py-1 text-right">Total</th>
-                          <th className="border border-gray-300 px-2 py-1 text-center">Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(formData.pecasUtilizadas || []).map((peca) => (
-                          <tr key={peca.id}>
-                            <td className="border border-gray-300 px-2 py-1">{peca.nome}</td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">{peca.quantidade}</td>
-                            <td className="border border-gray-300 px-2 py-1 text-right">{formatCurrency(peca.valorUnitario)}</td>
-                            <td className="border border-gray-300 px-2 py-1 text-right">{formatCurrency(peca.valorTotal)}</td>
-                            <td className="border border-gray-300 px-2 py-1 text-center">
-                              <button
-                                type="button"
-                                onClick={() => removerPeca(peca.id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <X size={14} />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega</label>
+                        <input
+                          type="date"
+                          value={formData.prazoEntrega || ''}
+                          onChange={(e) => setFormData({ ...formData, prazoEntrega: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
 
-                {/* Adicionar nova peça */}
-                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                  <h5 className="text-sm font-medium mb-3">Adicionar Peça</h5>
-                  <div className="grid grid-cols-4 gap-3">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Nome da peça"
-                        value={novaPeca.nome}
-                        onChange={(e) => setNovaPeca({ ...novaPeca, nome: e.target.value })}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Garantia (dias)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={formData.garantia || 90}
+                          onChange={(e) => setFormData({ ...formData, garantia: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                        <FileText className="mr-1" size={16} />
+                        Observações Internas
+                      </label>
+                      <textarea
+                        value={formData.observacoesInternas || ''}
+                        onChange={(e) => setFormData({ ...formData, observacoesInternas: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        rows={3}
+                        placeholder="Observações para uso interno..."
                       />
                     </div>
-                    <div>
-                      <input
-                        type="number"
-                        placeholder="Qtd"
-                        min="1"
-                        value={novaPeca.quantidade}
-                        onChange={(e) => setNovaPeca({ ...novaPeca, quantidade: Number(e.target.value) })}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="number"
-                        placeholder="Valor unitário"
-                        step="0.01"
-                        min="0"
-                        value={novaPeca.valorUnitario}
-                        onChange={(e) => setNovaPeca({ ...novaPeca, valorUnitario: Number(e.target.value) })}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <button
-                        type="button"
-                        onClick={adicionarPeca}
-                        className="w-full px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                      >
-                        Adicionar
-                      </button>
-                    </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+              </Tabs>
 
-              {/* Valores e Prazos */}
-              <div>
-                <h4 className="text-md font-medium mb-4 text-gray-800">Valores e Prazos</h4>
-                <div className="grid grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Valor Mão de Obra</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.valorMaoObra || 0}
-                      onChange={(e) => setFormData({ ...formData, valorMaoObra: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Valor Total</label>
-                    <input
-                      type="text"
-                      value={formatCurrency(formData.valorTotal || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
-                      disabled
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega</label>
-                    <input
-                      type="date"
-                      value={formData.prazoEntrega || ''}
-                      onChange={(e) => setFormData({ ...formData, prazoEntrega: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Garantia (dias)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.garantia || 90}
-                      onChange={(e) => setFormData({ ...formData, garantia: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Observações */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observações Internas</label>
-                <textarea
-                  value={formData.observacoesInternas || ''}
-                  onChange={(e) => setFormData({ ...formData, observacoesInternas: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                  placeholder="Observações para uso interno..."
-                />
-              </div>
-
-              <div className="flex space-x-3 pt-4 border-t">
+              <div className="flex space-x-3 px-6 py-4 border-t bg-gray-50">
                 <button
                   type="button"
                   onClick={closeModal}
