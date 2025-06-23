@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Package, DollarSign, Hash, Tag } from 'lucide-react';
 import { Produto } from '../../types/produto';
-import { formatCurrency, parseCurrency } from '../../utils/masks';
+import { CurrencyInput } from '../ui/currency-input';
+import { useToast } from '../ui/use-toast';
 
 interface ProductFormProps {
   produto?: Produto;
@@ -11,6 +12,8 @@ interface ProductFormProps {
 }
 
 export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => {
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     codigo: produto?.codigo || '',
     nome: produto?.nome || '',
@@ -24,27 +27,50 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
     tempoEstimado: produto?.tempoEstimado || 0
   });
 
-  const [precoCustoFormatado, setPrecoCustoFormatado] = useState(
-    produto?.precoCusto ? formatCurrency(produto.precoCusto) : ''
-  );
-  const [precoVendaFormatado, setPrecoVendaFormatado] = useState(
-    produto?.precoVenda ? formatCurrency(produto.precoVenda) : ''
-  );
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handlePrecoCustoChange = (value: string) => {
-    setPrecoCustoFormatado(value);
-    const numericValue = value ? parseCurrency(value) : 0;
-    setFormData(prev => ({ ...prev, precoCusto: numericValue }));
-  };
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
 
-  const handlePrecoVendaChange = (value: string) => {
-    setPrecoVendaFormatado(value);
-    const numericValue = parseCurrency(value);
-    setFormData(prev => ({ ...prev, precoVenda: numericValue }));
+    if (!formData.nome.trim()) {
+      newErrors.nome = 'Nome é obrigatório';
+    }
+
+    if (formData.precoVenda <= 0) {
+      newErrors.precoVenda = 'Preço de venda deve ser maior que zero';
+    }
+
+    if (formData.precoCusto < 0) {
+      newErrors.precoCusto = 'Preço de custo não pode ser negativo';
+    }
+
+    if (formData.precoCusto > 0 && formData.precoVenda <= formData.precoCusto) {
+      newErrors.precoVenda = 'Preço de venda deve ser maior que o preço de custo';
+    }
+
+    if (formData.categoria === 'peca' && formData.estoque < 0) {
+      newErrors.estoque = 'Estoque não pode ser negativo';
+    }
+
+    if (formData.categoria === 'servico' && formData.tempoEstimado < 0) {
+      newErrors.tempoEstimado = 'Tempo estimado não pode ser negativo';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast({
+        title: "Erro de validação",
+        description: "Por favor, corrija os erros no formulário.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const produtoData: Produto = {
       id: produto?.id || Date.now().toString(),
@@ -55,6 +81,17 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
     };
 
     onSave(produtoData);
+    
+    toast({
+      title: produto ? "Produto atualizado" : "Produto criado",
+      description: `${formData.nome} foi ${produto ? 'atualizado' : 'criado'} com sucesso.`,
+    });
+  };
+
+  const renderError = (field: string) => {
+    return errors[field] ? (
+      <span className="text-sm text-red-600 mt-1 block">{errors[field]}</span>
+    ) : null;
   };
 
   return (
@@ -106,10 +143,13 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                 type="text"
                 value={formData.nome}
                 onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.nome ? 'border-red-500' : 'border-gray-300'
+                }`}
                 placeholder="Nome do produto ou serviço"
                 required
               />
+              {renderError('nome')}
             </div>
 
             <div>
@@ -130,13 +170,13 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   <DollarSign className="h-4 w-4 inline mr-1" />
                   Preço de Custo (Opcional)
                 </label>
-                <input
-                  type="text"
-                  value={precoCustoFormatado}
-                  onChange={(e) => handlePrecoCustoChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                <CurrencyInput
+                  value={formData.precoCusto}
+                  onChange={(value) => setFormData(prev => ({ ...prev, precoCusto: value }))}
                   placeholder="R$ 0,00"
+                  className={errors.precoCusto ? 'border-red-500' : ''}
                 />
+                {renderError('precoCusto')}
               </div>
 
               <div>
@@ -144,14 +184,14 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   <DollarSign className="h-4 w-4 inline mr-1" />
                   Preço de Venda *
                 </label>
-                <input
-                  type="text"
-                  value={precoVendaFormatado}
-                  onChange={(e) => handlePrecoVendaChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                <CurrencyInput
+                  value={formData.precoVenda}
+                  onChange={(value) => setFormData(prev => ({ ...prev, precoVenda: value }))}
                   placeholder="R$ 0,00"
                   required
+                  className={errors.precoVenda ? 'border-red-500' : ''}
                 />
+                {renderError('precoVenda')}
               </div>
             </div>
 
@@ -164,9 +204,12 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                     type="number"
                     value={formData.estoque}
                     onChange={(e) => setFormData(prev => ({ ...prev, estoque: parseInt(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors.estoque ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     min="0"
                   />
+                  {renderError('estoque')}
                 </div>
 
                 <div>
@@ -192,9 +235,12 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   type="number"
                   value={formData.tempoEstimado}
                   onChange={(e) => setFormData(prev => ({ ...prev, tempoEstimado: parseInt(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.tempoEstimado ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   min="0"
                 />
+                {renderError('tempoEstimado')}
               </div>
             )}
 

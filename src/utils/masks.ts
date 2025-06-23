@@ -1,4 +1,3 @@
-
 export const formatCPF = (value: string): string => {
   const cleanValue = value.replace(/\D/g, '');
   return cleanValue
@@ -40,8 +39,12 @@ export const formatCurrency = (value: number): string => {
 };
 
 export const parseCurrency = (value: string): number => {
+  if (!value || value.trim() === '') return 0;
+  
   // Remove todos os caracteres exceto números, vírgula e ponto
   const cleanValue = value.replace(/[^\d,.-]/g, '');
+  
+  if (!cleanValue) return 0;
   
   // Se contém vírgula, trata como separador decimal brasileiro
   if (cleanValue.includes(',')) {
@@ -50,13 +53,21 @@ export const parseCurrency = (value: string): number => {
       // Remove pontos da parte inteira (milhares) e trata vírgula como decimal
       const integerPart = parts[0].replace(/\./g, '');
       const decimalPart = parts[1].substring(0, 2); // Máximo 2 casas decimais
-      return parseFloat(`${integerPart}.${decimalPart}`) || 0;
+      const result = parseFloat(`${integerPart}.${decimalPart}`);
+      return isNaN(result) ? 0 : result;
     }
   }
   
   // Se não tem vírgula, trata como número normal
-  const numericValue = parseFloat(cleanValue.replace(/\./g, '')) || 0;
-  return numericValue / 100; // Assume que são centavos se não há separador decimal
+  const numericValue = parseFloat(cleanValue.replace(/\./g, ''));
+  if (isNaN(numericValue)) return 0;
+  
+  // Se o valor é muito pequeno, assume que são centavos
+  if (numericValue < 100 && !cleanValue.includes('.')) {
+    return numericValue / 100;
+  }
+  
+  return numericValue;
 };
 
 export const formatCurrencyInput = (value: string): string => {
@@ -68,5 +79,15 @@ export const formatCurrencyInput = (value: string): string => {
   
   // Converte para número e formata como moeda
   const amount = parseFloat(numbers) / 100;
+  
+  // Evita valores inválidos
+  if (isNaN(amount)) return '';
+  
   return formatCurrency(amount);
+};
+
+// Função auxiliar para validar se um valor monetário é válido
+export const isValidCurrency = (value: string): boolean => {
+  const parsed = parseCurrency(value);
+  return parsed >= 0 && !isNaN(parsed);
 };

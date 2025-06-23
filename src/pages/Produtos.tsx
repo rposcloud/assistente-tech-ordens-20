@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Package } from 'lucide-react';
 import { Produto } from '../types';
@@ -32,6 +33,11 @@ export const Produtos = () => {
     setEditingProduto(null);
   };
 
+  const handleEditProduto = (produto: Produto) => {
+    setEditingProduto(produto);
+    setShowModal(true);
+  };
+
   const handleDeleteProduto = (id: string) => {
     const updatedProdutos = produtos.filter(produto => produto.id !== id);
     setProdutos(updatedProdutos);
@@ -60,7 +66,7 @@ export const Produtos = () => {
       render: (produto) => (
         <div className="flex space-x-2">
           <button
-            onClick={() => setEditingProduto(produto)}
+            onClick={() => handleEditProduto(produto)}
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             title="Editar produto"
           >
@@ -141,7 +147,7 @@ export const Produtos = () => {
         </div>
       </div>
 
-      {/* Modal Simplificado */}
+      {/* Modal */}
       {showModal && (
         <ProductForm
           produto={editingProduto}

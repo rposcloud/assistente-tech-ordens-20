@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Package } from 'lucide-react';
 import { OrdemServico, Cliente, Produto } from '../types';
@@ -87,19 +88,25 @@ export const Financeiro = () => {
   const calcularCustoReal = (ordem: OrdemServico): number => {
     let custoTotal = 0;
 
-    // Calcular custo das peças utilizadas (sistema antigo)
+    // Calcular custo das peças utilizadas (sistema antigo) - com fallback mais preciso
     if (ordem.pecasUtilizadas) {
       custoTotal += ordem.pecasUtilizadas.reduce((total, peca) => {
-        return total + (peca.valorUnitario * peca.quantidade * 0.7); // Fallback para peças antigas
+        // Usar 70% do valor unitário como estimativa de custo se não há dados de custo
+        return total + (peca.valorUnitario * peca.quantidade * 0.7);
       }, 0);
     }
 
-    // Calcular custo dos produtos utilizados (sistema novo)
+    // Calcular custo dos produtos utilizados (sistema novo) - priorizar dados reais de custo
     if (ordem.produtosUtilizados) {
       custoTotal += ordem.produtosUtilizados.reduce((total, produtoUtilizado) => {
         const produto = produtos.find(p => p.id === produtoUtilizado.produtoId);
-        const precoCusto = produto ? produto.precoCusto : produtoUtilizado.valorUnitario * 0.7;
-        return total + (precoCusto * produtoUtilizado.quantidade);
+        if (produto && produto.precoCusto > 0) {
+          // Usar o preço de custo real do produto
+          return total + (produto.precoCusto * produtoUtilizado.quantidade);
+        } else {
+          // Fallback: usar 70% do valor unitário se não há preço de custo definido
+          return total + (produtoUtilizado.valorUnitario * produtoUtilizado.quantidade * 0.7);
+        }
       }, 0);
     }
 
@@ -132,12 +139,15 @@ export const Financeiro = () => {
   const receitaEntradas = entradasFiltradas.filter(e => e.tipo === 'receita').reduce((acc, entrada) => acc + entrada.valor, 0);
   const despesaEntradas = entradasFiltradas.filter(e => e.tipo === 'despesa').reduce((acc, entrada) => acc + entrada.valor, 0);
 
+  // Calcular custo total das ordens usando a função corrigida
+  const custoTotalOrdens = ordensFinalizadas.reduce((acc, ordem) => {
+    return acc + calcularCustoReal(ordem);
+  }, 0);
+
   const calculosFinanceiros: FinancialData = {
     receita: receitaOrdens + receitaEntradas,
-    despesa: despesaEntradas,
-    lucro: (receitaOrdens + receitaEntradas) - despesaEntradas - ordensFinalizadas.reduce((acc, ordem) => {
-      return acc + calcularCustoReal(ordem);
-    }, 0),
+    despesa: despesaEntradas + custoTotalOrdens, // Incluir custos das ordens nas despesas
+    lucro: (receitaOrdens + receitaEntradas) - (despesaEntradas + custoTotalOrdens),
     ordens: ordensFinalizadas.length,
     ticket: ordensFinalizadas.length > 0 ? receitaOrdens / ordensFinalizadas.length : 0
   };
@@ -145,7 +155,8 @@ export const Financeiro = () => {
   const ordensComClientes: OrderFinancial[] = ordensFinalizadas.map(ordem => {
     const cliente = clientes.find(c => c.id === ordem.clienteId);
     const custoReal = calcularCustoReal(ordem);
-    const lucroCalculado = (ordem.valorFinal || ordem.valorTotal || 0) - custoReal;
+    const receita = ordem.valorFinal || ordem.valorTotal || 0;
+    const lucroCalculado = receita - custoReal;
     
     return {
       ...ordem,
@@ -208,6 +219,19 @@ export const Financeiro = () => {
         return (
           <span className={isNegative ? 'text-red-600 font-medium' : 'text-green-600 font-medium'}>
             {isNegative ? '-' : ''}{formatCurrency(valor)}
+          </span>
+        );
+      },
+      className: 'text-right'
+    },
+    {
+      key: 'lucroCalculado',
+      label: 'Lucro',
+      render: (item) => {
+        const lucro = item.lucroCalculado || 0;
+        return (
+          <span className={`font-medium ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {formatCurrency(lucro)}
           </span>
         );
       },
@@ -298,7 +322,7 @@ export const Financeiro = () => {
         </div>
       </div>
 
-      {/* Cards de Resumo */}
+      {/* Cards de Resumo - com melhor precisão dos cálculos */}
       <div className="grid grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
           <div className="flex items-center">
