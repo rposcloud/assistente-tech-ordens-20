@@ -1,6 +1,7 @@
 
 export interface Produto {
   id: string;
+  codigo?: string; // Adding the missing codigo property
   nome: string;
   descricao: string;
   categoria: 'peca' | 'servico';
