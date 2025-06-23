@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
 import { Financeiro } from './pages/Financeiro';
 import { PortalCliente } from './pages/PortalCliente';
+import { LandingPage } from './pages/LandingPage';
 
 const queryClient = new QueryClient();
 
@@ -25,7 +25,7 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<LandingPage />} />
             <Route path="/portal/:token" element={<PortalCliente />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={
