@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { OrdemServico, Cliente } from '../../types';
 import { formatCurrency } from '../../utils/masks';
@@ -10,6 +9,17 @@ interface OrderPrintProps {
 
 export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
   ({ ordem, cliente }, ref) => {
+    // Early return if cliente is not available
+    if (!cliente || !ordem) {
+      return (
+        <div ref={ref} className="print-container bg-white p-4 max-w-4xl mx-auto">
+          <div className="text-center text-gray-500">
+            Carregando informações da ordem de serviço...
+          </div>
+        </div>
+      );
+    }
+
     const statusTexts = {
       aguardando_diagnostico: 'Aguardando Diagnóstico',
       aguardando_aprovacao: 'Aguardando Aprovação',
@@ -434,8 +444,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <div className="text-center">
               <div className="signature-line">
                 <p className="font-semibold">Assinatura do Cliente</p>
-                <p className="text-sm text-gray-600 mt-1">{cliente.nome}</p>
-                <p className="text-xs text-gray-500">CPF/CNPJ: {cliente.cpfCnpj}</p>
+                <p className="text-sm text-gray-600 mt-1">{cliente?.nome || 'Cliente'}</p>
+                <p className="text-xs text-gray-500">CPF/CNPJ: {cliente?.cpfCnpj || 'N/A'}</p>
               </div>
             </div>
             <div className="text-center">
