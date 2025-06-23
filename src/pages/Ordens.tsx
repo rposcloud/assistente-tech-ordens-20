@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Search, Edit, X, Printer, Download, Wrench, Package, DollarSign, Calendar, FileText, AlertCircle, User, Smartphone, CreditCard, Check, Filter } from 'lucide-react';
 import { OrdemServico, Cliente, PecaUtilizada, Produto } from '../types';
@@ -180,27 +181,239 @@ export const Ordens = () => {
   };
 
   const handlePrintDocument = () => {
-    if (printRef.current) {
+    if (printRef.current && printingOrder) {
       const printContent = printRef.current.innerHTML;
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(`
+          <!DOCTYPE html>
           <html>
             <head>
-              <title>Ordem de Serviço #${printingOrder?.numero}</title>
+              <title>Ordem de Serviço #${printingOrder.numero}</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <style>
-                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-                @media print { body { margin: 0; padding: 0; } }
-                .print\\:p-4 { padding: 1rem !important; }
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                
+                body { 
+                  font-family: Arial, sans-serif; 
+                  margin: 0; 
+                  padding: 0;
+                  color: #000;
+                  background: white;
+                  font-size: 12px;
+                  line-height: 1.4;
+                }
+                
+                @media print {
+                  body { margin: 0; padding: 0; }
+                  .print-container { 
+                    width: 100%; 
+                    margin: 0; 
+                    padding: 15mm;
+                    page-break-after: always;
+                  }
+                }
+                
+                @media screen {
+                  .print-container { 
+                    max-width: 210mm; 
+                    margin: 0 auto; 
+                    padding: 20px;
+                  }
+                }
+                
+                /* Layout utilities */
+                .flex { display: flex; }
+                .grid { display: grid; }
+                .block { display: block; }
+                .inline-block { display: inline-block; }
+                .w-full { width: 100%; }
+                .text-center { text-align: center; }
+                .text-right { text-align: right; }
+                .text-left { text-align: left; }
+                
+                /* Grid layouts */
+                .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+                .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+                .grid-cols-5 { grid-template-columns: repeat(5, 1fr); }
+                
+                /* Spacing */
+                .gap-2 { gap: 0.5rem; }
+                .gap-4 { gap: 1rem; }
+                .gap-6 { gap: 1.5rem; }
+                .gap-8 { gap: 2rem; }
+                .gap-12 { gap: 3rem; }
+                
+                .space-y-1 > * + * { margin-top: 0.25rem; }
+                .space-y-2 > * + * { margin-top: 0.5rem; }
+                .space-y-3 > * + * { margin-top: 0.75rem; }
+                .space-y-4 > * + * { margin-top: 1rem; }
+                .space-y-6 > * + * { margin-top: 1.5rem; }
+                
+                /* Margins */
+                .mb-1 { margin-bottom: 0.25rem; }
+                .mb-2 { margin-bottom: 0.5rem; }
+                .mb-3 { margin-bottom: 0.75rem; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .mb-8 { margin-bottom: 2rem; }
+                .mb-12 { margin-bottom: 3rem; }
+                .mb-16 { margin-bottom: 4rem; }
+                .mt-1 { margin-top: 0.25rem; }
+                .mt-2 { margin-top: 0.5rem; }
+                .mt-3 { margin-top: 0.75rem; }
+                .mt-4 { margin-top: 1rem; }
+                .mt-6 { margin-top: 1.5rem; }
+                .mt-8 { margin-top: 2rem; }
+                .mt-12 { margin-top: 3rem; }
+                .ml-2 { margin-left: 0.5rem; }
+                .ml-3 { margin-left: 0.75rem; }
+                .mr-1 { margin-right: 0.25rem; }
+                .mr-2 { margin-right: 0.5rem; }
+                
+                /* Padding */
+                .p-2 { padding: 0.5rem; }
+                .p-3 { padding: 0.75rem; }
+                .p-4 { padding: 1rem; }
+                .p-6 { padding: 1.5rem; }
+                .p-8 { padding: 2rem; }
+                .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+                .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+                .px-4 { padding-left: 1rem; padding-right: 1rem; }
+                .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+                .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+                .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+                .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+                .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+                .pt-2 { padding-top: 0.5rem; }
+                .pt-8 { padding-top: 2rem; }
+                .pb-4 { padding-bottom: 1rem; }
+                
+                /* Borders */
+                .border { border: 1px solid #d1d5db; }
+                .border-2 { border: 2px solid #d1d5db; }
+                .border-b { border-bottom: 1px solid #d1d5db; }
+                .border-b-2 { border-bottom: 2px solid #d1d5db; }
+                .border-t { border-top: 1px solid #d1d5db; }
+                .border-l-4 { border-left: 4px solid #d1d5db; }
+                .border-blue-500 { border-color: #3b82f6; }
+                .border-blue-600 { border-color: #2563eb; }
+                .border-green-500 { border-color: #10b981; }
+                .border-yellow-500 { border-color: #f59e0b; }
+                .border-gray-500 { border-color: #6b7280; }
+                .border-b-2.border-blue-600 { border-bottom: 2px solid #2563eb; }
+                .border-l-4.border-blue-500 { border-left: 4px solid #3b82f6; }
+                .border-l-4.border-blue-600 { border-left: 4px solid #2563eb; }
+                .border-l-4.border-green-500 { border-left: 4px solid #10b981; }
+                .border-l-4.border-yellow-500 { border-left: 4px solid #f59e0b; }
+                .border-l-4.border-gray-500 { border-left: 4px solid #6b7280; }
+                
+                /* Background colors */
+                .bg-white { background-color: #ffffff; }
+                .bg-gray-50 { background-color: #f9fafb; }
+                .bg-gray-100 { background-color: #f3f4f6; }
+                .bg-blue-50 { background-color: #eff6ff; }
+                .bg-blue-600 { background-color: #2563eb; }
+                .bg-green-50 { background-color: #f0fdf4; }
+                .bg-yellow-50 { background-color: #fefce8; }
+                
+                /* Text colors */
+                .text-blue-600 { color: #2563eb; }
+                .text-blue-900 { color: #1e3a8a; }
+                .text-green-600 { color: #16a34a; }
+                .text-green-900 { color: #14532d; }
+                .text-yellow-900 { color: #713f12; }
+                .text-gray-500 { color: #6b7280; }
+                .text-gray-600 { color: #4b5563; }
+                .text-gray-700 { color: #374151; }
+                .text-gray-900 { color: #111827; }
+                .text-white { color: #ffffff; }
+                
+                /* Text sizes */
+                .text-xs { font-size: 0.75rem; }
+                .text-sm { font-size: 0.875rem; }
+                .text-base { font-size: 1rem; }
+                .text-lg { font-size: 1.125rem; }
+                .text-xl { font-size: 1.25rem; }
+                .text-2xl { font-size: 1.5rem; }
+                .text-3xl { font-size: 1.875rem; }
+                
+                /* Font weights */
+                .font-medium { font-weight: 500; }
+                .font-semibold { font-weight: 600; }
+                .font-bold { font-weight: 700; }
+                
+                /* Flexbox utilities */
+                .justify-between { justify-content: space-between; }
+                .justify-center { justify-content: center; }
+                .items-center { align-items: center; }
+                .items-start { align-items: flex-start; }
+                
+                /* Tables */
+                .table { 
+                  display: table; 
+                  width: 100%; 
+                  border-collapse: collapse; 
+                  margin: 0.5rem 0;
+                }
+                .table th, .table td { 
+                  border: 1px solid #d1d5db; 
+                  padding: 8px; 
+                  text-align: left; 
+                  vertical-align: top;
+                }
+                .table th { 
+                  background-color: #f3f4f6; 
+                  font-weight: bold; 
+                }
+                .table .text-center { text-align: center; }
+                .table .text-right { text-align: right; }
+                .table .font-bold { font-weight: bold; }
+                
+                /* Signature lines */
+                .signature-line {
+                  border-top: 2px solid #000;
+                  margin-top: 40px;
+                  padding-top: 8px;
+                  text-align: center;
+                  min-height: 60px;
+                }
+                
+                /* Border radius removal for print */
+                .rounded-lg, .rounded { border-radius: 0; }
+                
+                /* Opacity */
+                .opacity-90 { opacity: 0.9; }
+                
+                /* Hide elements in print */
+                .no-print { display: none !important; }
+                
+                @page {
+                  size: A4;
+                  margin: 15mm;
+                }
+                
+                /* Ensure proper page breaks */
+                .page-break-before { page-break-before: always; }
+                .page-break-after { page-break-after: always; }
+                .page-break-inside-avoid { page-break-inside: avoid; }
               </style>
             </head>
             <body>
               ${printContent}
+              <script>
+                window.onload = function() {
+                  window.print();
+                  window.onafterprint = function() {
+                    window.close();
+                  };
+                };
+              </script>
             </body>
           </html>
         `);
         printWindow.document.close();
-        printWindow.print();
       }
     }
   };
@@ -508,32 +721,39 @@ export const Ordens = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {!ordem.finalizada && ordem.status === 'pronto_entrega' && (
+                    <div className="flex items-center space-x-2">
+                      {!ordem.finalizada && ordem.status === 'pronto_entrega' && (
+                        <button
+                          onClick={() => handleFinalizarOS(ordem)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium flex items-center transition-colors"
+                          title="Finalizar OS"
+                        >
+                          <Check size={14} className="mr-1" />
+                          Finalizar
+                        </button>
+                      )}
                       <button
-                        onClick={() => handleFinalizarOS(ordem)}
-                        className="text-green-600 hover:text-green-900 mr-2"
+                        onClick={() => handlePrint(ordem)}
+                        className="text-green-600 hover:text-green-900"
+                        title="Imprimir OS"
                       >
-                        <Check size={16} />
+                        <Printer size={16} />
                       </button>
-                    )}
-                    <button
-                      onClick={() => handlePrint(ordem)}
-                      className="text-green-600 hover:text-green-900 mr-2"
-                    >
-                      <Printer size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(ordem)}
-                      className="text-blue-600 hover:text-blue-900 mr-2"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(ordem.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <X size={16} />
-                    </button>
+                      <button
+                        onClick={() => handleEdit(ordem)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Editar OS"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(ordem.id)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Excluir OS"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -928,28 +1148,32 @@ export const Ordens = () => {
                 Finalizar Ordem de Serviço
               </h3>
 
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600">
-                  <strong>OS #{finalizingOrder.numero}</strong><br/>
-                  Cliente: {clientes.find(c => c.id === finalizingOrder.clienteId)?.nome}<br/>
-                  Equipamento: {finalizingOrder.marca} {finalizingOrder.modelo}
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <div className="text-sm">
+                  <div className="font-bold text-blue-900 mb-2">OS #{finalizingOrder.numero}</div>
+                  <div className="text-blue-800">
+                    <strong>Cliente:</strong> {clientes.find(c => c.id === finalizingOrder.clienteId)?.nome}<br/>
+                    <strong>Equipamento:</strong> {finalizingOrder.marca} {finalizingOrder.modelo}<br/>
+                    <strong>Status Atual:</strong> <span className="font-semibold">{statusTexts[finalizingOrder.status]}</span>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento *</label>
                   <select
                     value={finalizarData.formaPagamento}
                     onChange={(e) => setFinalizarData({ ...finalizarData, formaPagamento: e.target.value as any })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   >
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao_credito">Cartão de Crédito</option>
-                    <option value="cartao_debito">Cartão de Débito</option>
-                    <option value="pix">PIX</option>
-                    <option value="transferencia">Transferência</option>
-                    <option value="parcelado">Parcelado</option>
+                    <option value="dinheiro">💵 Dinheiro</option>
+                    <option value="cartao_credito">💳 Cartão de Crédito</option>
+                    <option value="cartao_debito">💳 Cartão de Débito</option>
+                    <option value="pix">📱 PIX</option>
+                    <option value="transferencia">🏦 Transferência</option>
+                    <option value="parcelado">📊 Parcelado</option>
                   </select>
                 </div>
 
@@ -960,6 +1184,7 @@ export const Ordens = () => {
                       type="number"
                       step="0.01"
                       min="0"
+                      max={finalizingOrder.valorTotal}
                       value={finalizarData.desconto}
                       onChange={(e) => setFinalizarData({ ...finalizarData, desconto: Number(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -980,7 +1205,7 @@ export const Ordens = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Observações do Pagamento</label>
                   <textarea
                     value={finalizarData.observacoesPagamento}
                     onChange={(e) => setFinalizarData({ ...finalizarData, observacoesPagamento: e.target.value })}
@@ -990,27 +1215,40 @@ export const Ordens = () => {
                   />
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Valor Original:</span>
-                    <span>{formatCurrency(finalizingOrder.valorTotal)}</span>
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">Resumo Financeiro</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Valor Original:</span>
+                      <span className="font-semibold">{formatCurrency(finalizingOrder.valorTotal)}</span>
+                    </div>
+                    {finalizarData.desconto > 0 && (
+                      <div className="flex justify-between text-red-600">
+                        <span>Desconto:</span>
+                        <span>-{formatCurrency(finalizarData.desconto)}</span>
+                      </div>
+                    )}
+                    {finalizarData.acrescimo > 0 && (
+                      <div className="flex justify-between text-blue-600">
+                        <span>Acréscimo:</span>
+                        <span>+{formatCurrency(finalizarData.acrescimo)}</span>
+                      </div>
+                    )}
+                    <hr className="my-2 border-green-300" />
+                    <div className="flex justify-between text-lg font-bold text-green-800">
+                      <span>VALOR FINAL:</span>
+                      <span>{formatCurrency((finalizingOrder.valorTotal || 0) - finalizarData.desconto + finalizarData.acrescimo)}</span>
+                    </div>
                   </div>
-                  {finalizarData.desconto > 0 && (
-                    <div className="flex justify-between text-red-600">
-                      <span>Desconto:</span>
-                      <span>-{formatCurrency(finalizarData.desconto)}</span>
+                </div>
+
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                  <div className="flex items-start">
+                    <AlertCircle className="text-yellow-600 mr-2 mt-0.5" size={16} />
+                    <div className="text-sm text-yellow-800">
+                      <strong>Atenção:</strong> Ao finalizar a OS, o status será alterado para "Entregue", 
+                      o pagamento será marcado como "Pago" e não será possível reverter esta ação.
                     </div>
-                  )}
-                  {finalizarData.acrescimo > 0 && (
-                    <div className="flex justify-between text-blue-600">
-                      <span>Acréscimo:</span>
-                      <span>+{formatCurrency(finalizarData.acrescimo)}</span>
-                    </div>
-                  )}
-                  <hr className="my-2" />
-                  <div className="flex justify-between text-xl font-bold text-green-600">
-                    <span>VALOR FINAL:</span>
-                    <span>{formatCurrency((finalizingOrder.valorTotal || 0) - finalizarData.desconto + finalizarData.acrescimo)}</span>
                   </div>
                 </div>
               </div>
@@ -1024,8 +1262,9 @@ export const Ordens = () => {
                 </button>
                 <button
                   onClick={confirmFinalizarOS}
-                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center"
                 >
+                  <Check size={16} className="mr-2" />
                   Finalizar OS
                 </button>
               </div>
