@@ -3,7 +3,7 @@ import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Packag
 import { OrdemServico, Cliente } from '../types';
 import { formatCurrency } from '../utils/masks';
 import { SortableTable, Column } from '../components/ui/sortable-table';
-import { Button } from '../components/ui/button';
+import { FinancialEntryModal } from '../components/financial/FinancialEntryModal';
 
 interface FinancialData {
   receita: number;
@@ -17,22 +17,39 @@ interface OrderFinancial extends OrdemServico {
   lucroCalculado: number;
 }
 
+interface FinancialEntry {
+  id: string;
+  tipo: 'receita' | 'despesa';
+  descricao: string;
+  valor: number;
+  categoria: string;
+  formaPagamento: string;
+  dataVencimento: string;
+  status: 'pendente' | 'pago';
+  observacoes?: string;
+}
+
 export const Financeiro = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [periodo, setPeriodo] = useState('mes');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
+  const [financialEntries, setFinancialEntries] = useState<FinancialEntry[]>([]);
 
   useEffect(() => {
     const ordensSalvas = localStorage.getItem('ordens');
     const clientesSalvos = localStorage.getItem('clientes');
+    const entradaFinanceira = localStorage.getItem('financialEntries');
     
     if (ordensSalvas) {
       setOrdens(JSON.parse(ordensSalvas));
     }
     if (clientesSalvos) {
       setClientes(JSON.parse(clientesSalvos));
+    }
+    if (entradaFinanceira) {
+      setFinancialEntries(JSON.parse(entradaFinanceira));
     }
 
     // Definir período padrão (mês atual)
@@ -43,6 +60,12 @@ export const Financeiro = () => {
     setDataInicio(inicioMes.toISOString().split('T')[0]);
     setDataFim(fimMes.toISOString().split('T')[0]);
   }, []);
+
+  const handleSaveFinancialEntry = (entry: FinancialEntry) => {
+    const updatedEntries = [...financialEntries, entry];
+    setFinancialEntries(updatedEntries);
+    localStorage.setItem('financialEntries', JSON.stringify(updatedEntries));
+  };
 
   const ordensFiltradas = ordens.filter(ordem => {
     if (!dataInicio || !dataFim) return true;
@@ -138,24 +161,7 @@ export const Financeiro = () => {
           </h1>
           <p className="text-gray-600">Controle financeiro e relatórios</p>
         </div>
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={() => alert('Funcionalidade em desenvolvimento')}
-          >
-            <TrendingDown size={18} className="text-red-600" />
-            Contas a Pagar
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={() => alert('Funcionalidade em desenvolvimento')}
-          >
-            <TrendingUp size={18} className="text-green-600" />
-            Contas a Receber
-          </Button>
-        </div>
+        <FinancialEntryModal onSave={handleSaveFinancialEntry} />
       </div>
 
       {/* Filtros de Período */}
