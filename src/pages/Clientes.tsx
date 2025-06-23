@@ -34,7 +34,7 @@ export const Clientes = () => {
   const cnpjMask = useMask('cnpj');
   const phoneMask = useMask('phone');
   const cepMask = useMask('cep');
-  const { address, loading: cepLoading, fetchAddress } = useCep();
+  const { endereco, loading: cepLoading, buscar } = useCep();
 
   useEffect(() => {
     const clientesSalvos = localStorage.getItem('clientes');
@@ -58,21 +58,21 @@ export const Clientes = () => {
   useEffect(() => {
     cepMask.handleChange(formData.cep || '');
     if (cepMask.value && cepMask.value.length === 9) {
-      fetchAddress(cepMask.value);
+      buscar(cepMask.value);
     }
   }, [formData.cep]);
 
   useEffect(() => {
-    if (address) {
+    if (endereco) {
       setFormData(prev => ({
         ...prev,
-        endereco: address.logradouro,
-        bairro: address.bairro,
-        cidade: address.localidade,
-        estado: address.uf
+        endereco: endereco.logradouro,
+        bairro: endereco.bairro,
+        cidade: endereco.localidade,
+        estado: endereco.uf
       }));
     }
-  }, [address]);
+  }, [endereco]);
 
   const saveClientes = (novosClientes: Cliente[]) => {
     localStorage.setItem('clientes', JSON.stringify(novosClientes));

@@ -1,3 +1,4 @@
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -28,7 +29,7 @@ export interface OrdemServico {
   diagnosticoTecnico?: string;
   solucaoAplicada?: string;
   pecasUtilizadas?: PecaUtilizada[];
-  produtosUtilizados?: ProdutoUtilizado[];
+  produtosUtilizados?: import('./produto').ProdutoUtilizado[];
   valorMaoObra: number;
   valorTotal: number;
   prazoEntrega?: string;
