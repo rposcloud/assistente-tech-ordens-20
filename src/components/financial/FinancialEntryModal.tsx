@@ -107,52 +107,80 @@ export const FinancialEntryModal = ({ onSave }: FinancialEntryModalProps) => {
           Nova Entrada
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Entrada Financeira</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-            <Select value={formData.tipo} onValueChange={(value: 'receita' | 'despesa') => setFormData({ ...formData, tipo: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="receita">📈 Receita</SelectItem>
-                <SelectItem value="despesa">📉 Despesa</SelectItem>
-              </SelectContent>
-            </Select>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+              <Select value={formData.tipo} onValueChange={(value: 'receita' | 'despesa') => setFormData({ ...formData, tipo: value })}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="receita">📈 Receita</SelectItem>
+                  <SelectItem value="despesa">📉 Despesa</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+              <Select value={formData.status} onValueChange={(value: 'pendente' | 'pago') => setFormData({ ...formData, status: value })}>
+                <SelectTrigger className="h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pendente">⏳ Pendente</SelectItem>
+                  <SelectItem value="pago">✅ Pago</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Descrição</label>
             <input
               type="text"
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
-            <input
-              type="text"
-              value={formData.valor}
-              onChange={(e) => handleValueChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="R$ 0,00"
-              required
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Valor</label>
+              <input
+                type="text"
+                value={formData.valor}
+                onChange={(e) => handleValueChange(e.target.value)}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="R$ 0,00"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Data Vencimento</label>
+              <input
+                type="date"
+                value={formData.dataVencimento}
+                onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Categoria</label>
             <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
@@ -164,9 +192,9 @@ export const FinancialEntryModal = ({ onSave }: FinancialEntryModalProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Forma de Pagamento</label>
             <Select value={formData.formaPagamento} onValueChange={(value) => setFormData({ ...formData, formaPagamento: value })}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8">
                 <SelectValue placeholder="Selecione a forma de pagamento" />
               </SelectTrigger>
               <SelectContent>
@@ -178,44 +206,20 @@ export const FinancialEntryModal = ({ onSave }: FinancialEntryModalProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
-            <input
-              type="date"
-              value={formData.dataVencimento}
-              onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <Select value={formData.status} onValueChange={(value: 'pendente' | 'pago') => setFormData({ ...formData, status: value })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pendente">⏳ Pendente</SelectItem>
-                <SelectItem value="pago">✅ Pago</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Observações</label>
             <textarea
               value={formData.observacoes}
               onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-              rows={3}
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              rows={2}
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1 h-8 text-sm">
               Cancelar
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit" className="flex-1 h-8 text-sm">
               Salvar
             </Button>
           </div>
