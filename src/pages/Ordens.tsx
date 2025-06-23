@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Search, Edit, X, Printer, Download, Wrench, Package, DollarSign, Calendar, FileText, AlertCircle, User, Smartphone } from 'lucide-react';
+import { Plus, Search, Edit, X, Printer, Download, Wrench, Package, DollarSign, Calendar, FileText, AlertCircle, User, Smartphone, CreditCard, Check, Filter } from 'lucide-react';
 import { OrdemServico, Cliente, PecaUtilizada, Produto } from '../types';
 import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency, parseCurrency } from '../utils/masks';
@@ -14,6 +14,8 @@ export const Ordens = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrdemServico | null>(null);
   const [printingOrder, setPrintingOrder] = useState<OrdemServico | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const [pagamentoFilter, setPagamentoFilter] = useState<string>('todos');
   const printRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState<Partial<OrdemServico>>({
@@ -28,10 +30,17 @@ export const Ordens = () => {
     pecasUtilizadas: [],
     valorMaoObra: 0,
     valorTotal: 0,
+    desconto: 0,
+    acrescimo: 0,
+    valorFinal: 0,
+    formaPagamento: 'dinheiro',
+    statusPagamento: 'pendente',
     prazoEntrega: '',
     garantia: 90,
     status: 'aguardando_diagnostico',
-    observacoesInternas: ''
+    observacoesInternas: '',
+    observacoesPagamento: '',
+    finalizada: false
   });
 
   const [novaPeca, setNovaPeca] = useState({
@@ -57,14 +66,28 @@ export const Ordens = () => {
   }, []);
 
   useEffect(() => {
-    // Calcular valor total automaticamente
+    // Calcular valores automaticamente
     const valorPecas = (formData.pecasUtilizadas || []).reduce((total, peca) => total + peca.valorTotal, 0);
     const valorTotal = (formData.valorMaoObra || 0) + valorPecas;
+    const desconto = formData.desconto || 0;
+    const acrescimo = formData.acrescimo || 0;
+    const valorFinal = valorTotal - desconto + acrescimo;
     
-    if (valorTotal !== formData.valorTotal) {
-      setFormData(prev => ({ ...prev, valorTotal }));
+    // Calcular lucro (assumindo 30% de custo sobre peças)
+    const custoPecas = valorPecas * 0.3;
+    const lucro = valorFinal - custoPecas;
+    const margemLucro = valorFinal > 0 ? (lucro / valorFinal) * 100 : 0;
+    
+    if (valorTotal !== formData.valorTotal || valorFinal !== formData.valorFinal) {
+      setFormData(prev => ({ 
+        ...prev, 
+        valorTotal,
+        valorFinal,
+        lucro,
+        margemLucro
+      }));
     }
-  }, [formData.pecasUtilizadas, formData.valorMaoObra]);
+  }, [formData.pecasUtilizadas, formData.valorMaoObra, formData.desconto, formData.acrescimo]);
 
   const saveOrdens = (novasOrdens: OrdemServico[]) => {
     localStorage.setItem('ordens', JSON.stringify(novasOrdens));
@@ -104,6 +127,28 @@ export const Ordens = () => {
     }
 
     closeModal();
+  };
+
+  const handleFinalizarOS = (ordem: OrdemServico) => {
+    if (confirm('Tem certeza que deseja finalizar esta ordem de serviço? Esta ação não pode ser desfeita.')) {
+      const ordensAtualizadas = ordens.map(o => {
+        if (o.id === ordem.id) {
+          return {
+            ...o,
+            status: 'entregue' as const,
+            finalizada: true,
+            dataConclusao: new Date().toISOString().split('T')[0],
+            statusPagamento: 'pago' as const,
+            dataPagamento: new Date().toISOString().split('T')[0]
+          };
+        }
+        return o;
+      });
+      saveOrdens(ordensAtualizadas);
+      
+      // Atualizar estoque dos produtos (se necessário)
+      // TODO: Implementar controle de estoque automático
+    }
   };
 
   const handleEdit = (ordem: OrdemServico) => {
@@ -165,10 +210,17 @@ export const Ordens = () => {
       pecasUtilizadas: [],
       valorMaoObra: 0,
       valorTotal: 0,
+      desconto: 0,
+      acrescimo: 0,
+      valorFinal: 0,
+      formaPagamento: 'dinheiro',
+      statusPagamento: 'pendente',
       prazoEntrega: '',
       garantia: 90,
       status: 'aguardando_diagnostico',
-      observacoesInternas: ''
+      observacoesInternas: '',
+      observacoesPagamento: '',
+      finalizada: false
     });
     setNovaPeca({ nome: '', quantidade: 1, valorUnitario: 0 });
   };
@@ -219,13 +271,18 @@ export const Ordens = () => {
     cliente: clientes.find(cliente => cliente.id === ordem.clienteId)
   }));
 
-  const ordensFiltradas = ordensComClientes.filter(ordem =>
-    ordem.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ordem.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ordem.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ordem.cliente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    ordem.defeitoRelatado.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const ordensFiltradas = ordensComClientes.filter(ordem => {
+    const matchesSearch = ordem.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ordem.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ordem.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ordem.cliente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ordem.defeitoRelatado.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'todos' || ordem.status === statusFilter;
+    const matchesPagamento = pagamentoFilter === 'todos' || ordem.statusPagamento === pagamentoFilter;
+    
+    return matchesSearch && matchesStatus && matchesPagamento;
+  });
 
   const statusColors = {
     aguardando_diagnostico: 'bg-gray-100 text-gray-800',
@@ -245,6 +302,20 @@ export const Ordens = () => {
     entregue: 'Entregue'
   };
 
+  const pagamentoColors = {
+    pendente: 'bg-red-100 text-red-800',
+    pago: 'bg-green-100 text-green-800',
+    parcial: 'bg-yellow-100 text-yellow-800',
+    cancelado: 'bg-gray-100 text-gray-800'
+  };
+
+  const pagamentoTexts = {
+    pendente: 'Pendente',
+    pago: 'Pago',
+    parcial: 'Parcial',
+    cancelado: 'Cancelado'
+  };
+
   const tipoEquipamentoOptions = [
     { value: 'smartphone', label: 'Smartphone', icon: Smartphone },
     { value: 'notebook', label: 'Notebook', icon: Package },
@@ -252,6 +323,15 @@ export const Ordens = () => {
     { value: 'tablet', label: 'Tablet', icon: Package },
     { value: 'outros', label: 'Outros', icon: Package }
   ];
+
+  // Cálculos para resumo financeiro
+  const resumoFinanceiro = {
+    totalOrdens: ordensFiltradas.length,
+    valorTotal: ordensFiltradas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0),
+    ordensPagas: ordensFiltradas.filter(ordem => ordem.statusPagamento === 'pago').length,
+    ordensPendentes: ordensFiltradas.filter(ordem => ordem.statusPagamento === 'pendente').length,
+    lucroTotal: ordensFiltradas.reduce((acc, ordem) => acc + (ordem.lucro || 0), 0)
+  };
 
   return (
     <div className="space-y-6">
@@ -272,17 +352,90 @@ export const Ordens = () => {
         </button>
       </div>
 
+      {/* Resumo Financeiro */}
+      <div className="grid grid-cols-5 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <FileText className="h-8 w-8 text-blue-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total de Ordens</p>
+              <p className="text-2xl font-bold text-gray-900">{resumoFinanceiro.totalOrdens}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <DollarSign className="h-8 w-8 text-green-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Valor Total</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(resumoFinanceiro.valorTotal)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <Check className="h-8 w-8 text-green-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Pagas</p>
+              <p className="text-2xl font-bold text-green-600">{resumoFinanceiro.ordensPagas}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Pendentes</p>
+              <p className="text-2xl font-bold text-red-600">{resumoFinanceiro.ordensPendentes}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <DollarSign className="h-8 w-8 text-blue-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Lucro Total</p>
+              <p className="text-2xl font-bold text-blue-600">{formatCurrency(resumoFinanceiro.lucroTotal)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Buscar ordens..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Buscar ordens..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="todos">Todos os Status</option>
+                {Object.entries(statusTexts).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+              <select
+                value={pagamentoFilter}
+                onChange={(e) => setPagamentoFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="todos">Todos os Pagamentos</option>
+                {Object.entries(pagamentoTexts).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -293,8 +446,8 @@ export const Ordens = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipamento</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Defeito</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagamento</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -307,6 +460,9 @@ export const Ordens = () => {
                     <div className="text-sm font-medium text-gray-900 flex items-center">
                       <Wrench className="mr-2 text-blue-500" size={16} />
                       #{ordem.numero}
+                      {ordem.finalizada && (
+                        <Check className="ml-2 text-green-500" size={16} title="Finalizada" />
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -318,18 +474,20 @@ export const Ordens = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{ordem.marca} {ordem.modelo}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate">{ordem.defeitoRelatado}</div>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[ordem.status]}`}>
                       {statusTexts[ordem.status]}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${pagamentoColors[ordem.statusPagamento || 'pendente']}`}>
+                      {pagamentoTexts[ordem.statusPagamento || 'pendente']}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 flex items-center">
                       <DollarSign className="mr-1 text-green-500" size={16} />
-                      {formatCurrency(ordem.valorTotal)}
+                      {formatCurrency(ordem.valorFinal || ordem.valorTotal)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -338,6 +496,15 @@ export const Ordens = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {!ordem.finalizada && ordem.status === 'pronto_entrega' && (
+                      <button
+                        onClick={() => handleFinalizarOS(ordem)}
+                        className="text-green-600 hover:text-green-900 mr-2"
+                        title="Finalizar OS"
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
                     <button
                       onClick={() => handlePrint(ordem)}
                       className="text-green-600 hover:text-green-900 mr-2"
@@ -373,7 +540,7 @@ export const Ordens = () => {
         </div>
       </div>
 
-      {/* Modal de Formulário Aprimorado */}
+      {/* Modal de Formulário */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -391,7 +558,7 @@ export const Ordens = () => {
 
             <form onSubmit={handleSubmit}>
               <Tabs defaultValue="equipamento" className="p-6">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="equipamento" className="flex items-center">
                     <Smartphone className="mr-2" size={16} />
                     Equipamento
@@ -402,11 +569,15 @@ export const Ordens = () => {
                   </TabsTrigger>
                   <TabsTrigger value="pecas" className="flex items-center">
                     <Package className="mr-2" size={16} />
-                    Peças & Valores
+                    Peças
+                  </TabsTrigger>
+                  <TabsTrigger value="financeiro" className="flex items-center">
+                    <CreditCard className="mr-2" size={16} />
+                    Financeiro
                   </TabsTrigger>
                   <TabsTrigger value="status" className="flex items-center">
                     <Calendar className="mr-2" size={16} />
-                    Status & Prazos
+                    Status
                   </TabsTrigger>
                 </TabsList>
 
@@ -655,8 +826,145 @@ export const Ordens = () => {
                         />
                       </div>
                       <div className="flex justify-between text-lg font-bold border-t pt-2">
-                        <span>TOTAL:</span>
+                        <span>SUBTOTAL:</span>
                         <span className="text-blue-600">{formatCurrency(formData.valorTotal || 0)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="financeiro" className="space-y-4 mt-6">
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-4 flex items-center">
+                      <CreditCard className="mr-2" size={18} />
+                      Informações Financeiras
+                    </h4>
+                    
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Desconto (R$)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.desconto || 0}
+                          onChange={(e) => setFormData({ ...formData, desconto: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Acréscimo (R$)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.acrescimo || 0}
+                          onChange={(e) => setFormData({ ...formData, acrescimo: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Ex: taxa urgência, juros..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                        <select
+                          value={formData.formaPagamento || 'dinheiro'}
+                          onChange={(e) => setFormData({ ...formData, formaPagamento: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="dinheiro">Dinheiro</option>
+                          <option value="cartao_credito">Cartão de Crédito</option>
+                          <option value="cartao_debito">Cartão de Débito</option>
+                          <option value="pix">PIX</option>
+                          <option value="transferencia">Transferência</option>
+                          <option value="parcelado">Parcelado</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status do Pagamento</label>
+                        <select
+                          value={formData.statusPagamento || 'pendente'}
+                          onChange={(e) => setFormData({ ...formData, statusPagamento: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="pendente">Pendente</option>
+                          <option value="pago">Pago</option>
+                          <option value="parcial">Parcial</option>
+                          <option value="cancelado">Cancelado</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Data de Pagamento</label>
+                        <input
+                          type="date"
+                          value={formData.dataPagamento || ''}
+                          onChange={(e) => setFormData({ ...formData, dataPagamento: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
+                        <input
+                          type="date"
+                          value={formData.dataVencimento || ''}
+                          onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Observações de Pagamento</label>
+                      <textarea
+                        value={formData.observacoesPagamento || ''}
+                        onChange={(e) => setFormData({ ...formData, observacoesPagamento: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        rows={2}
+                        placeholder="Informações adicionais sobre o pagamento..."
+                      />
+                    </div>
+
+                    <div className="bg-white p-4 border-2 border-gray-300 rounded-lg">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Subtotal:</span>
+                          <span>{formatCurrency(formData.valorTotal || 0)}</span>
+                        </div>
+                        {(formData.desconto || 0) > 0 && (
+                          <div className="flex justify-between text-red-600">
+                            <span>Desconto:</span>
+                            <span>-{formatCurrency(formData.desconto || 0)}</span>
+                          </div>
+                        )}
+                        {(formData.acrescimo || 0) > 0 && (
+                          <div className="flex justify-between text-blue-600">
+                            <span>Acréscimo:</span>
+                            <span>+{formatCurrency(formData.acrescimo || 0)}</span>
+                          </div>
+                        )}
+                        <hr className="border-gray-300" />
+                        <div className="flex justify-between text-xl font-bold">
+                          <span>VALOR FINAL:</span>
+                          <span className="text-green-600">{formatCurrency(formData.valorFinal || 0)}</span>
+                        </div>
+                        {(formData.lucro || 0) > 0 && (
+                          <div className="text-sm text-gray-600 mt-2">
+                            <div className="flex justify-between">
+                              <span>Lucro Estimado:</span>
+                              <span className="text-green-600">{formatCurrency(formData.lucro || 0)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Margem:</span>
+                              <span className="text-green-600">{(formData.margemLucro || 0).toFixed(1)}%</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

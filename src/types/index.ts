@@ -32,6 +32,19 @@ export interface OrdemServico {
   produtosUtilizados?: import('./produto').ProdutoUtilizado[];
   valorMaoObra: number;
   valorTotal: number;
+  // Novos campos financeiros
+  desconto?: number;
+  acrescimo?: number;
+  valorFinal?: number;
+  formaPagamento?: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'parcelado';
+  statusPagamento?: 'pendente' | 'pago' | 'parcial' | 'cancelado';
+  dataPagamento?: string;
+  dataVencimento?: string;
+  observacoesPagamento?: string;
+  finalizada?: boolean;
+  lucro?: number;
+  margemLucro?: number;
+  // Campos existentes
   prazoEntrega?: string;
   garantia: number; // em dias
   status: 'aguardando_diagnostico' | 'aguardando_aprovacao' | 'aguardando_pecas' | 'em_reparo' | 'pronto_entrega' | 'entregue';
