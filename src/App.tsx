@@ -13,6 +13,7 @@ import { Clientes } from './pages/Clientes';
 import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
 import { Financeiro } from './pages/Financeiro';
+import { PortalCliente } from './pages/PortalCliente';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/portal/:token" element={<PortalCliente />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>

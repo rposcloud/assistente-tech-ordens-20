@@ -44,6 +44,9 @@ export interface OrdemServico {
   finalizada?: boolean;
   lucro?: number;
   margemLucro?: number;
+  // Portal do cliente
+  linkToken?: string;
+  linkExpiresAt?: string;
   // Campos existentes
   prazoEntrega?: string;
   garantia: number; // em dias
