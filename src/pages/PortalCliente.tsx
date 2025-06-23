@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Printer, Clock, CheckCircle, AlertCircle, Phone, Mail, MapPin } from 'lucide-react';
@@ -17,11 +16,8 @@ export const PortalCliente = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `OS-${ordem?.numero || 'ordem'}`,
-    onBeforeGetContent: () => {
-      return Promise.resolve();
-    },
   });
 
   useEffect(() => {
