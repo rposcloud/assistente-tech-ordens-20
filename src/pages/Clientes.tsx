@@ -148,8 +148,8 @@ export const Clientes = () => {
 
   const clientesFiltrados = clientes.filter(cliente =>
     cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.telefone.includes(searchTerm) ||
+    (cliente.email && cliente.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (cliente.telefone && cliente.telefone.includes(searchTerm)) ||
     cliente.cpfCnpj.includes(searchTerm)
   );
 
@@ -205,14 +205,14 @@ export const Clientes = () => {
                       <User className="text-blue-500 mr-3" size={20} />
                       <div>
                         <div className="text-sm font-medium text-gray-900">{cliente.nome}</div>
-                        <div className="text-sm text-gray-500">{cliente.email}</div>
+                        <div className="text-sm text-gray-500">{cliente.email || 'Email não informado'}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900">
                       <Phone className="text-green-500 mr-2" size={16} />
-                      {cliente.telefone}
+                      {cliente.telefone || 'Não informado'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -222,7 +222,7 @@ export const Clientes = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900">
                       <MapPin className="text-red-500 mr-2" size={16} />
-                      {cliente.cidade}/{cliente.estado}
+                      {cliente.cidade ? `${cliente.cidade}/${cliente.estado}` : 'Não informado'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -307,11 +307,10 @@ export const Clientes = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                         <Mail className="mr-1" size={16} />
-                        E-mail *
+                        E-mail
                       </label>
                       <input
                         type="email"
-                        required
                         value={formData.email || ''}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -324,7 +323,7 @@ export const Clientes = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                         <Phone className="mr-1" size={16} />
-                        Telefone *
+                        Telefone
                       </label>
                       <InputMask
                         value={phoneMask.value}
@@ -333,7 +332,6 @@ export const Clientes = () => {
                           setFormData({ ...formData, telefone: value });
                         }}
                         placeholder="(11) 99999-9999"
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -397,7 +395,7 @@ export const Clientes = () => {
                     
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">CEP *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
                         <InputMask
                           value={cepMask.value}
                           onChange={(value) => {
@@ -405,17 +403,15 @@ export const Clientes = () => {
                             setFormData({ ...formData, cep: value });
                           }}
                           placeholder="00000-000"
-                          required
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                         {cepLoading && <p className="text-xs text-blue-600 mt-1">Buscando endereço...</p>}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Número *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
                         <input
                           type="text"
-                          required
                           value={formData.numero || ''}
                           onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -437,10 +433,9 @@ export const Clientes = () => {
 
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
                         <input
                           type="text"
-                          required
                           value={formData.endereco || ''}
                           onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -449,10 +444,9 @@ export const Clientes = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Bairro *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
                         <input
                           type="text"
-                          required
                           value={formData.bairro || ''}
                           onChange={(e) => setFormData({ ...formData, bairro: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -463,10 +457,9 @@ export const Clientes = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
                         <input
                           type="text"
-                          required
                           value={formData.cidade || ''}
                           onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -475,10 +468,9 @@ export const Clientes = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
                         <input
                           type="text"
-                          required
                           maxLength={2}
                           value={formData.estado || ''}
                           onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
