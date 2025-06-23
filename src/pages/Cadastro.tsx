@@ -14,7 +14,8 @@ export const Cadastro = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const { signUp, isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -23,22 +24,61 @@ export const Cadastro = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     if (password !== confirmPassword) {
       setError('As senhas não coincidem');
+      setLoading(false);
       return;
     }
 
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres');
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    // TODO: Implementar cadastro real com Supabase
-    setError('Cadastro será implementado em breve');
+    try {
+      const { error: signUpError } = await signUp(email, password, name);
+      
+      if (signUpError) {
+        setError(signUpError);
+      } else {
+        setSuccess(true);
+        setError('');
+      }
+    } catch (err) {
+      setError('Erro inesperado. Tente novamente.');
+    }
+    
     setLoading(false);
   };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="text-center">
+              <div className="bg-green-100 p-3 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <UserPlus className="text-green-600" size={24} />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Cadastro Realizado!</h1>
+              <p className="text-gray-600 mb-6">
+                Verifique seu email para confirmar o cadastro e fazer login.
+              </p>
+              <Link 
+                to="/login" 
+                className="inline-flex items-center justify-center w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Ir para Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -85,6 +125,7 @@ export const Cadastro = () => {
                 id="password"
                 type="password"
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"

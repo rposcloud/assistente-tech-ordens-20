@@ -1,72 +1,48 @@
 
-import React, { useState, useEffect } from 'react';
-import { Users, FileText, CheckCircle, Clock } from 'lucide-react';
-
-interface Cliente {
-  id: string;
-  nome: string;
-  email: string;
-  telefone: string;
-  endereco: string;
-}
-
-interface OrdemServico {
-  id: string;
-  clienteId: string;
-  equipamento: string;
-  problema: string;
-  status: 'pendente' | 'em_andamento' | 'concluida';
-  dataAbertura: string;
-  dataConclusao?: string;
-}
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useClientes } from '../hooks/useClientes';
+import { useProdutos } from '../hooks/useProdutos';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Package, FileText, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 
 export const Dashboard = () => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [ordens, setOrdens] = useState<OrdemServico[]>([]);
+  const { profile } = useAuth();
+  const { clientes, loading: loadingClientes } = useClientes();
+  const { produtos, loading: loadingProdutos } = useProdutos();
 
-  useEffect(() => {
-    const clientesSalvos = localStorage.getItem('clientes');
-    const ordensSalvas = localStorage.getItem('ordens');
-    
-    if (clientesSalvos) {
-      setClientes(JSON.parse(clientesSalvos));
-    }
-    if (ordensSalvas) {
-      setOrdens(JSON.parse(ordensSalvas));
-    }
-  }, []);
-
-  const ordensCompletadas = ordens.filter(ordem => ordem.status === 'concluida').length;
-  const ordensPendentes = ordens.filter(ordem => ordem.status === 'pendente').length;
-  const ordensEmAndamento = ordens.filter(ordem => ordem.status === 'em_andamento').length;
+  const totalClientes = clientes?.length || 0;
+  const totalProdutos = produtos?.length || 0;
+  const produtosAtivos = produtos?.filter(p => p.ativo)?.length || 0;
+  const produtosBaixoEstoque = produtos?.filter(p => (p.estoque || 0) < 5)?.length || 0;
 
   const cards = [
     {
       title: 'Total de Clientes',
-      value: clientes.length,
+      value: loadingClientes ? '...' : totalClientes.toString(),
       icon: Users,
-      color: 'bg-gradient-to-r from-blue-500 to-blue-600',
+      color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
-      title: 'Ordens de Serviço',
-      value: ordens.length,
-      icon: FileText,
-      color: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
-      bgColor: 'bg-indigo-50'
-    },
-    {
-      title: 'Ordens Concluídas',
-      value: ordensCompletadas,
-      icon: CheckCircle,
-      color: 'bg-gradient-to-r from-green-500 to-green-600',
+      title: 'Produtos Ativos',
+      value: loadingProdutos ? '...' : `${produtosAtivos}/${totalProdutos}`,
+      icon: Package,
+      color: 'text-green-600',
       bgColor: 'bg-green-50'
     },
     {
-      title: 'Ordens Pendentes',
-      value: ordensPendentes,
-      icon: Clock,
-      color: 'bg-gradient-to-r from-yellow-500 to-yellow-600',
+      title: 'Ordens de Serviço',
+      value: '0', // Será implementado quando criarmos a funcionalidade
+      icon: FileText,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50'
+    },
+    {
+      title: 'Receita do Mês',
+      value: 'R$ 0,00', // Será implementado quando criarmos a funcionalidade
+      icon: DollarSign,
+      color: 'text-yellow-600',
       bgColor: 'bg-yellow-50'
     }
   ];
@@ -74,105 +50,109 @@ export const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Visão geral do sistema</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Bem-vindo, {profile?.nome_completo || 'Usuário'}!
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Aqui está um resumo do seu negócio hoje
+        </p>
       </div>
 
+      {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <div key={index} className={`${card.bgColor} rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  {card.title}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${card.color}`} />
                 </div>
-                <div className={`${card.color} p-3 rounded-lg`}>
-                  <Icon className="text-white" size={24} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">
+                  {card.value}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Ordens Recentes</h3>
-          <div className="space-y-3">
-            {ordens.slice(0, 5).map((ordem) => {
-              const cliente = clientes.find(c => c.id === ordem.clienteId);
-              const statusColors = {
-                pendente: 'bg-yellow-100 text-yellow-800',
-                em_andamento: 'bg-blue-100 text-blue-800',
-                concluida: 'bg-green-100 text-green-800'
-              };
-              const statusTexts = {
-                pendente: 'Pendente',
-                em_andamento: 'Em Andamento',
-                concluida: 'Concluída'
-              };
-              
-              return (
-                <div key={ordem.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{ordem.equipamento}</p>
-                    <p className="text-sm text-gray-600">{cliente?.nome || 'Cliente não encontrado'}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[ordem.status]}`}>
-                    {statusTexts[ordem.status]}
-                  </span>
-                </div>
-              );
-            })}
-            {ordens.length === 0 && (
-              <p className="text-gray-500 text-center py-4">Nenhuma ordem de serviço cadastrada</p>
-            )}
-          </div>
-        </div>
+      {/* Alertas e Notificações */}
+      {produtosBaixoEstoque > 0 && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardHeader>
+            <CardTitle className="flex items-center text-yellow-800">
+              <AlertCircle className="mr-2 h-5 w-5" />
+              Atenção: Produtos com Estoque Baixo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-yellow-700">
+              Você tem {produtosBaixoEstoque} produto(s) com estoque abaixo de 5 unidades.
+              Considere fazer reposição.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Status das Ordens</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Pendentes</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div 
-                    className="bg-yellow-500 h-2 rounded-full" 
-                    style={{ width: `${ordens.length > 0 ? (ordensPendentes / ordens.length) * 100 : 0}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium text-gray-900">{ordensPendentes}</span>
+      {/* Resumo Rápido */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <TrendingUp className="mr-2 h-5 w-5 text-green-600" />
+              Atividade Recente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600">
+                Sistema integrado com sucesso ao banco de dados Supabase
+              </div>
+              <div className="text-sm text-gray-600">
+                {totalClientes > 0 ? `${totalClientes} clientes cadastrados` : 'Nenhum cliente cadastrado ainda'}
+              </div>
+              <div className="text-sm text-gray-600">
+                {totalProdutos > 0 ? `${totalProdutos} produtos no catálogo` : 'Nenhum produto cadastrado ainda'}
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Em Andamento</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full" 
-                    style={{ width: `${ordens.length > 0 ? (ordensEmAndamento / ordens.length) * 100 : 0}%` }}
-                  ></div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Próximos Passos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {totalClientes === 0 && (
+                <div className="flex items-center text-blue-600">
+                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                  Cadastre seus primeiros clientes
                 </div>
-                <span className="text-sm font-medium text-gray-900">{ordensEmAndamento}</span>
+              )}
+              {totalProdutos === 0 && (
+                <div className="flex items-center text-green-600">
+                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                  Adicione produtos e serviços
+                </div>
+              )}
+              <div className="flex items-center text-purple-600">
+                <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
+                Crie ordens de serviço
+              </div>
+              <div className="flex items-center text-yellow-600">
+                <span className="w-2 h-2 bg-yellow-600 rounded-full mr-2"></span>
+                Configure o controle financeiro
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Concluídas</span>
-              <div className="flex items-center">
-                <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full" 
-                    style={{ width: `${ordens.length > 0 ? (ordensCompletadas / ordens.length) * 100 : 0}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium text-gray-900">{ordensCompletadas}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

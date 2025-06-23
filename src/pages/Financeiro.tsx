@@ -1,415 +1,133 @@
 
-import React, { useState, useEffect } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Package } from 'lucide-react';
-import { OrdemServico, Cliente, Produto } from '../types';
-import { formatCurrency } from '../utils/masks';
-import { SortableTable, Column } from '../components/ui/sortable-table';
-import { FinancialEntryModal } from '../components/financial/FinancialEntryModal';
-
-interface FinancialData {
-  receita: number;
-  despesa: number;
-  lucro: number;
-  ordens: number;
-  ticket: number;
-}
-
-interface OrderFinancial extends OrdemServico {
-  cliente: Cliente;
-  lucroCalculado: number;
-  fonte: 'OS';
-}
-
-interface FinancialEntry {
-  id: string;
-  tipo: 'receita' | 'despesa';
-  descricao: string;
-  valor: number;
-  categoria: string;
-  formaPagamento: string;
-  dataVencimento: string;
-  status: 'pendente' | 'pago';
-  observacoes?: string;
-}
-
-interface FinancialEntryWithSource extends FinancialEntry {
-  fonte: 'entrada';
-  cliente?: { nome: string };
-  numero?: string;
-  dataAbertura?: string;
-  lucroCalculado?: number;
-}
-
-type UnifiedFinancialItem = OrderFinancial | FinancialEntryWithSource;
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 
 export const Financeiro = () => {
-  const [ordens, setOrdens] = useState<OrdemServico[]>([]);
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [periodo, setPeriodo] = useState('mes');
-  const [dataInicio, setDataInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
-  const [financialEntries, setFinancialEntries] = useState<FinancialEntry[]>([]);
-
-  useEffect(() => {
-    const ordensSalvas = localStorage.getItem('ordens');
-    const clientesSalvos = localStorage.getItem('clientes');
-    const produtosSalvos = localStorage.getItem('produtos');
-    const entradaFinanceira = localStorage.getItem('financialEntries');
-    
-    if (ordensSalvas) {
-      setOrdens(JSON.parse(ordensSalvas));
-    }
-    if (clientesSalvos) {
-      setClientes(JSON.parse(clientesSalvos));
-    }
-    if (produtosSalvos) {
-      setProdutos(JSON.parse(produtosSalvos));
-    }
-    if (entradaFinanceira) {
-      setFinancialEntries(JSON.parse(entradaFinanceira));
-    }
-
-    // Definir período padrão (mês atual)
-    const hoje = new Date();
-    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-    
-    setDataInicio(inicioMes.toISOString().split('T')[0]);
-    setDataFim(fimMes.toISOString().split('T')[0]);
-  }, []);
-
-  const handleSaveFinancialEntry = (entry: FinancialEntry) => {
-    const updatedEntries = [...financialEntries, entry];
-    setFinancialEntries(updatedEntries);
-    localStorage.setItem('financialEntries', JSON.stringify(updatedEntries));
-  };
-
-  const calcularCustoReal = (ordem: OrdemServico): number => {
-    let custoTotal = 0;
-
-    // Calcular custo das peças utilizadas (sistema antigo)
-    if (ordem.pecasUtilizadas && ordem.pecasUtilizadas.length > 0) {
-      custoTotal += ordem.pecasUtilizadas.reduce((total, peca) => {
-        // Usar 70% do valor unitário como estimativa de custo se não há dados de custo
-        return total + (peca.valorUnitario * peca.quantidade * 0.7);
-      }, 0);
-    }
-
-    // Calcular custo dos produtos utilizados (sistema novo)
-    if (ordem.produtosUtilizados && ordem.produtosUtilizados.length > 0) {
-      custoTotal += ordem.produtosUtilizados.reduce((total, produtoUtilizado) => {
-        const produto = produtos.find(p => p.id === produtoUtilizado.produtoId);
-        if (produto && produto.precoCusto > 0) {
-          // Usar o preço de custo real do produto
-          return total + (produto.precoCusto * produtoUtilizado.quantidade);
-        } else {
-          // Fallback: usar 70% do valor unitário se não há preço de custo definido
-          return total + (produtoUtilizado.valorUnitario * produtoUtilizado.quantidade * 0.7);
-        }
-      }, 0);
-    }
-
-    return custoTotal;
-  };
-
-  // Filtrar ordens pelo período selecionado
-  const ordensFiltradas = ordens.filter(ordem => {
-    if (!dataInicio || !dataFim) return true;
-    
-    const dataOrdem = new Date(ordem.dataAbertura);
-    const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
-    
-    return dataOrdem >= inicio && dataOrdem <= fim;
-  });
-
-  // Filtrar entradas financeiras pelo período selecionado
-  const entradasFiltradas = financialEntries.filter(entrada => {
-    if (!dataInicio || !dataFim) return true;
-    
-    const dataEntrada = new Date(entrada.dataVencimento);
-    const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
-    
-    return dataEntrada >= inicio && dataEntrada <= fim && entrada.status === 'pago';
-  });
-
-  // Apenas ordens finalizadas e pagas
-  const ordensFinalizadas = ordensFiltradas.filter(ordem => ordem.finalizada && ordem.statusPagamento === 'pago');
-
-  // Cálculos corrigidos das receitas e despesas
-  const receitaOrdens = ordensFinalizadas.reduce((acc, ordem) => acc + (ordem.valorFinal || ordem.valorTotal || 0), 0);
-  const receitaEntradas = entradasFiltradas.filter(e => e.tipo === 'receita').reduce((acc, entrada) => acc + entrada.valor, 0);
-  const despesaEntradas = entradasFiltradas.filter(e => e.tipo === 'despesa').reduce((acc, entrada) => acc + entrada.valor, 0);
-  
-  // Calcular custos reais das ordens (custo das peças/produtos utilizados)
-  const custoOrdens = ordensFinalizadas.reduce((acc, ordem) => {
-    return acc + calcularCustoReal(ordem);
-  }, 0);
-
-  // Cálculos financeiros corrigidos
-  const calculosFinanceiros: FinancialData = {
-    receita: receitaOrdens + receitaEntradas,
-    despesa: despesaEntradas + custoOrdens,
-    lucro: (receitaOrdens + receitaEntradas) - (despesaEntradas + custoOrdens),
-    ordens: ordensFinalizadas.length,
-    ticket: ordensFinalizadas.length > 0 ? receitaOrdens / ordensFinalizadas.length : 0
-  };
-
-  const ordensComClientes: OrderFinancial[] = ordensFinalizadas.map(ordem => {
-    const cliente = clientes.find(c => c.id === ordem.clienteId);
-    const custoReal = calcularCustoReal(ordem);
-    const receita = ordem.valorFinal || ordem.valorTotal || 0;
-    const lucroCalculado = receita - custoReal;
-    
-    return {
-      ...ordem,
-      cliente: cliente!,
-      lucroCalculado,
-      fonte: 'OS' as const
-    };
-  });
-
-  const entradasComFonte: FinancialEntryWithSource[] = entradasFiltradas.map(entrada => ({
-    ...entrada,
-    fonte: 'entrada' as const,
-    cliente: { nome: 'N/A' },
-    numero: entrada.tipo === 'receita' ? 'REC' : 'DESP',
-    dataAbertura: entrada.dataVencimento,
-    lucroCalculado: entrada.tipo === 'receita' ? entrada.valor : -entrada.valor
-  }));
-
-  const dadosUnificados: UnifiedFinancialItem[] = [...ordensComClientes, ...entradasComFonte];
-
-  const colunas: Column<UnifiedFinancialItem>[] = [
-    {
-      key: 'fonte',
-      label: 'Tipo',
-      render: (item) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          item.fonte === 'OS' ? 'bg-blue-100 text-blue-800' : 
-          (item as FinancialEntryWithSource).tipo === 'receita' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {item.fonte === 'OS' ? 'OS' : (item as FinancialEntryWithSource).tipo === 'receita' ? 'REC' : 'DESP'}
-        </span>
-      )
-    },
-    {
-      key: 'numero',
-      label: 'Número',
-      render: (item) => item.fonte === 'OS' ? `#${item.numero}` : `${item.numero}-${item.id.slice(-4)}`
-    },
-    {
-      key: 'descricao',
-      label: 'Descrição',
-      render: (item) => item.fonte === 'OS' ? `${item.marca} ${item.modelo}` : (item as FinancialEntryWithSource).descricao
-    },
-    {
-      key: 'cliente.nome',
-      label: 'Cliente',
-      render: (item) => item.cliente?.nome || 'N/A'
-    },
-    {
-      key: 'dataAbertura',
-      label: 'Data',
-      render: (item) => new Date(item.dataAbertura || item.dataVencimento).toLocaleDateString('pt-BR')
-    },
-    {
-      key: 'valor',
-      label: 'Valor',
-      render: (item) => {
-        const valor = item.fonte === 'OS' ? (item.valorFinal || item.valorTotal || 0) : (item as FinancialEntryWithSource).valor;
-        const isNegative = item.fonte === 'entrada' && (item as FinancialEntryWithSource).tipo === 'despesa';
-        return (
-          <span className={isNegative ? 'text-red-600 font-medium' : 'text-green-600 font-medium'}>
-            {isNegative ? '-' : ''}{formatCurrency(valor)}
-          </span>
-        );
-      },
-      className: 'text-right'
-    },
-    {
-      key: 'lucroCalculado',
-      label: 'Lucro',
-      render: (item) => {
-        const lucro = item.lucroCalculado || 0;
-        return (
-          <span className={`font-medium ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {formatCurrency(lucro)}
-          </span>
-        );
-      },
-      className: 'text-right'
-    },
-    {
-      key: 'formaPagamento',
-      label: 'Pagamento',
-      render: (item) => {
-        const formasPagamento = {
-          dinheiro: '💵 Dinheiro',
-          cartao_credito: '💳 Crédito',
-          cartao_debito: '💳 Débito',
-          pix: '📱 PIX',
-          transferencia: '🏦 Transferência',
-          parcelado: '📊 Parcelado',
-          boleto: '📄 Boleto'
-        };
-        return formasPagamento[item.formaPagamento as keyof typeof formasPagamento] || item.formaPagamento;
-      }
-    }
-  ];
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <DollarSign className="mr-3 text-green-600" size={32} />
-            Módulo Financeiro
-          </h1>
-          <p className="text-gray-600">Controle financeiro e relatórios</p>
+          <h1 className="text-3xl font-bold text-gray-900">Controle Financeiro</h1>
+          <p className="text-gray-600 mt-2">
+            Acompanhe receitas, despesas e fluxo de caixa do seu negócio
+          </p>
         </div>
-        <FinancialEntryModal onSave={handleSaveFinancialEntry} />
+        <Button className="flex items-center">
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Entrada
+        </Button>
       </div>
 
-      {/* Filtros de Período */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Calendar className="mr-2 text-blue-600" size={20} />
-          Filtros de Período
-        </h3>
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Período</label>
-            <select
-              value={periodo}
-              onChange={(e) => {
-                setPeriodo(e.target.value);
-                const hoje = new Date();
-                if (e.target.value === 'mes') {
-                  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-                  const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-                  setDataInicio(inicioMes.toISOString().split('T')[0]);
-                  setDataFim(fimMes.toISOString().split('T')[0]);
-                } else if (e.target.value === 'ano') {
-                  const inicioAno = new Date(hoje.getFullYear(), 0, 1);
-                  const fimAno = new Date(hoje.getFullYear(), 11, 31);
-                  setDataInicio(inicioAno.toISOString().split('T')[0]);
-                  setDataFim(fimAno.toISOString().split('T')[0]);
-                }
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="personalizado">Personalizado</option>
-              <option value="mes">Mês Atual</option>
-              <option value="ano">Ano Atual</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
+      {/* Cards de Resumo Financeiro */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Receitas (Mês)
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
+            <p className="text-xs text-gray-500 mt-1">+0% em relação ao mês anterior</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Despesas (Mês)
+            </CardTitle>
+            <TrendingDown className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">R$ 0,00</div>
+            <p className="text-xs text-gray-500 mt-1">+0% em relação ao mês anterior</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Saldo
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">R$ 0,00</div>
+            <p className="text-xs text-gray-500 mt-1">Receitas - Despesas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              A Receber
+            </CardTitle>
+            <Calendar className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">R$ 0,00</div>
+            <p className="text-xs text-gray-500 mt-1">Pendências este mês</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Cards de Resumo */}
-      <div className="grid grid-cols-5 gap-4">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+      {/* Gráfico de Fluxo de Caixa */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Fluxo de Caixa</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
+              <div className="text-center">
+                <DollarSign className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">Gráfico será exibido quando houver dados</p>
+              </div>
             </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-500">Receita Total</p>
-              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.receita)}</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <TrendingDown className="h-5 w-5 text-red-600" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Receitas vs Despesas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
+              <div className="text-center">
+                <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">Comparativo será exibido quando houver dados</p>
+              </div>
             </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-500">Despesa Total</p>
-              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.despesa)}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <DollarSign className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-500">Lucro Líquido</p>
-              <p className={`text-lg font-bold ${calculosFinanceiros.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(calculosFinanceiros.lucro)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <FileText className="h-5 w-5 text-purple-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-500">Ordens Pagas</p>
-              <p className="text-lg font-bold text-gray-900">{calculosFinanceiros.ordens}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-orange-600" />
-            </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-500">Ticket Médio</p>
-              <p className="text-lg font-bold text-gray-900">{formatCurrency(calculosFinanceiros.ticket)}</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Tabela Unificada */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold flex items-center">
-            <FileText className="mr-2 text-blue-600" size={20} />
-            Movimentação Financeira no Período
-          </h3>
-        </div>
-        <div className="p-6">
-          <SortableTable
-            data={dadosUnificados}
-            columns={colunas}
-            keyExtractor={(item) => `${item.fonte}-${item.id}`}
-            emptyMessage="Nenhuma movimentação financeira no período"
-            emptyIcon={<DollarSign size={48} className="text-gray-300" />}
-          />
-        </div>
-      </div>
+      {/* Lista de Movimentações */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Movimentações Recentes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-16">
+            <DollarSign className="h-16 w-16 text-gray-300 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Nenhuma movimentação encontrada
+            </h3>
+            <p className="text-gray-600 text-center mb-6 max-w-md">
+              Comece registrando receitas e despesas para acompanhar o 
+              desempenho financeiro do seu negócio.
+            </p>
+            <Button className="flex items-center">
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Primeira Movimentação
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
