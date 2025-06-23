@@ -1,3 +1,4 @@
+
 import React, { forwardRef } from 'react';
 import { OrdemServico, Cliente } from '../../types';
 import { formatCurrency } from '../../utils/masks';
@@ -9,17 +10,6 @@ interface OrderPrintProps {
 
 export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
   ({ ordem, cliente }, ref) => {
-    // Early return if cliente is not available
-    if (!cliente || !ordem) {
-      return (
-        <div ref={ref} className="print-container bg-white p-4 max-w-4xl mx-auto">
-          <div className="text-center text-gray-500">
-            Carregando informações da ordem de serviço...
-          </div>
-        </div>
-      );
-    }
-
     const statusTexts = {
       aguardando_diagnostico: 'Aguardando Diagnóstico',
       aguardando_aprovacao: 'Aguardando Aprovação',
@@ -46,8 +36,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
       parcelado: 'Parcelado'
     };
 
-    const valorPecas = (ordem.pecasUtilizadas || []).reduce((total, peca) => total + peca.valorTotal, 0);
-    const valorFinalCalculado = ordem.valorFinal || ordem.valorTotal || 0;
+    const valorPecas = (ordem?.pecasUtilizadas || []).reduce((total, peca) => total + peca.valorTotal, 0);
+    const valorFinalCalculado = ordem?.valorFinal || ordem?.valorTotal || 0;
 
     return (
       <div ref={ref} className="print-container bg-white p-4 max-w-4xl mx-auto">
@@ -188,14 +178,14 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             </div>
             <div className="text-right">
               <div className="bg-blue-600 text-white px-4 py-3 rounded-lg inline-block">
-                <div className="text-xl font-bold">OS #{ordem.numero}</div>
+                <div className="text-xl font-bold">OS #{ordem?.numero}</div>
                 <div className="text-xs opacity-90">Ordem de Serviço</div>
               </div>
               <div className="mt-2 text-xs">
-                <div><strong>Data:</strong> {new Date(ordem.dataAbertura).toLocaleDateString('pt-BR')}</div>
+                <div><strong>Data:</strong> {ordem?.dataAbertura ? new Date(ordem.dataAbertura).toLocaleDateString('pt-BR') : 'N/A'}</div>
                 <div className="mt-1">
                   <span className="inline-block px-2 py-1 bg-gray-200 text-xs font-semibold">
-                    {statusTexts[ordem.status]}
+                    {statusTexts[ordem?.status] || 'Status não definido'}
                   </span>
                 </div>
               </div>
@@ -209,17 +199,17 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <h2 className="text-lg font-bold mb-2">👤 Dados do Cliente</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div><strong>Nome:</strong> {cliente.nome}</div>
-                <div><strong>Email:</strong> {cliente.email}</div>
-                <div><strong>Telefone:</strong> {cliente.telefone}</div>
-                <div><strong>CPF/CNPJ:</strong> {cliente.cpfCnpj}</div>
+                <div><strong>Nome:</strong> {cliente?.nome || 'N/A'}</div>
+                <div><strong>Email:</strong> {cliente?.email || 'N/A'}</div>
+                <div><strong>Telefone:</strong> {cliente?.telefone || 'N/A'}</div>
+                <div><strong>CPF/CNPJ:</strong> {cliente?.cpfCnpj || 'N/A'}</div>
               </div>
               <div className="space-y-2">
                 <div><strong>Endereço:</strong></div>
                 <div className="text-sm text-gray-700 mt-1">
-                  {cliente.endereco}, {cliente.numero}<br/>
-                  {cliente.bairro} - {cliente.cidade}/{cliente.estado}<br/>
-                  <strong>CEP:</strong> {cliente.cep}
+                  {cliente?.endereco || 'N/A'}, {cliente?.numero || 'N/A'}<br/>
+                  {cliente?.bairro || 'N/A'} - {cliente?.cidade || 'N/A'}/{cliente?.estado || 'N/A'}<br/>
+                  <strong>CEP:</strong> {cliente?.cep || 'N/A'}
                 </div>
               </div>
             </div>
@@ -232,17 +222,17 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <h2 className="text-lg font-bold mb-2">🔧 Informações do Equipamento</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div><strong>Tipo:</strong> {tipoEquipamentoTexts[ordem.tipoEquipamento]}</div>
-                <div><strong>Marca:</strong> {ordem.marca}</div>
-                <div><strong>Modelo:</strong> {ordem.modelo}</div>
-                {ordem.numeroSerie && (
+                <div><strong>Tipo:</strong> {tipoEquipamentoTexts[ordem?.tipoEquipamento] || 'N/A'}</div>
+                <div><strong>Marca:</strong> {ordem?.marca || 'N/A'}</div>
+                <div><strong>Modelo:</strong> {ordem?.modelo || 'N/A'}</div>
+                {ordem?.numeroSerie && (
                   <div><strong>Número de Série:</strong> {ordem.numeroSerie}</div>
                 )}
               </div>
               <div>
                 <div><strong>Defeito Relatado pelo Cliente:</strong></div>
                 <div className="mt-1 p-2 bg-white border text-sm">
-                  {ordem.defeitoRelatado}
+                  {ordem?.defeitoRelatado || 'N/A'}
                 </div>
               </div>
             </div>
@@ -250,11 +240,11 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Diagnóstico e Solução */}
-        {(ordem.diagnosticoTecnico || ordem.solucaoAplicada) && (
+        {(ordem?.diagnosticoTecnico || ordem?.solucaoAplicada) && (
           <div className="mb-4">
             <div className="bg-green-50 p-3 border-l-4 border-green-500">
               <h2 className="text-lg font-bold mb-2">🔍 Diagnóstico e Solução</h2>
-              {ordem.diagnosticoTecnico && (
+              {ordem?.diagnosticoTecnico && (
                 <div className="mb-2">
                   <div className="font-semibold mb-1">Diagnóstico Técnico:</div>
                   <div className="p-2 bg-white border text-sm">
@@ -262,7 +252,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                   </div>
                 </div>
               )}
-              {ordem.solucaoAplicada && (
+              {ordem?.solucaoAplicada && (
                 <div>
                   <div className="font-semibold mb-1">Solução Aplicada:</div>
                   <div className="p-2 bg-white border text-sm">
@@ -275,7 +265,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         )}
 
         {/* Observações Internas (só para visualização) */}
-        {ordem.observacoesInternas && (
+        {ordem?.observacoesInternas && (
           <div className="mb-4 no-print">
             <div className="bg-yellow-50 p-3 border-l-4 border-yellow-500">
               <h2 className="text-lg font-bold mb-2">📝 Observações Internas</h2>
@@ -292,7 +282,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <h2 className="text-lg font-bold mb-2">💰 Detalhamento Financeiro</h2>
             
             {/* Peças utilizadas */}
-            {ordem.pecasUtilizadas && ordem.pecasUtilizadas.length > 0 && (
+            {ordem?.pecasUtilizadas && ordem.pecasUtilizadas.length > 0 && (
               <div className="mb-3">
                 <h3 className="font-semibold mb-2">Peças e Componentes Utilizados:</h3>
                 <table className="table">
@@ -329,31 +319,31 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                 )}
                 <div className="flex justify-between">
                   <span className="font-medium">Mão de Obra:</span>
-                  <span className="font-semibold">{formatCurrency(ordem.valorMaoObra || 0)}</span>
+                  <span className="font-semibold">{formatCurrency(ordem?.valorMaoObra || 0)}</span>
                 </div>
                 
                 <div className="border-t pt-2">
                   <div className="flex justify-between text-lg">
                     <span className="font-bold">SUBTOTAL:</span>
-                    <span className="font-bold">{formatCurrency(ordem.valorTotal || 0)}</span>
+                    <span className="font-bold">{formatCurrency(ordem?.valorTotal || 0)}</span>
                   </div>
                 </div>
 
-                {ordem.desconto && ordem.desconto > 0 && (
+                {ordem?.desconto && ordem.desconto > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span className="font-medium">Desconto:</span>
                     <span className="font-semibold">-{formatCurrency(ordem.desconto)}</span>
                   </div>
                 )}
 
-                {ordem.acrescimo && ordem.acrescimo > 0 && (
+                {ordem?.acrescimo && ordem.acrescimo > 0 && (
                   <div className="flex justify-between text-blue-600">
                     <span className="font-medium">Acréscimo:</span>
                     <span className="font-semibold">+{formatCurrency(ordem.acrescimo)}</span>
                   </div>
                 )}
 
-                {(ordem.desconto || ordem.acrescimo) && (
+                {(ordem?.desconto || ordem?.acrescimo) && (
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-xl font-bold text-blue-600">
                       <span>VALOR FINAL:</span>
@@ -362,30 +352,30 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                   </div>
                 )}
 
-                {!ordem.desconto && !ordem.acrescimo && (
+                {!ordem?.desconto && !ordem?.acrescimo && (
                   <div className="flex justify-between text-xl font-bold text-blue-600">
                     <span>VALOR TOTAL:</span>
-                    <span>{formatCurrency(ordem.valorTotal || 0)}</span>
+                    <span>{formatCurrency(ordem?.valorTotal || 0)}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Informações de pagamento (se finalizadas) */}
-            {ordem.finalizada && ordem.formaPagamento && (
+            {ordem?.finalizada && ordem?.formaPagamento && (
               <div className="mt-3 bg-green-50 p-2 border">
                 <h4 className="font-semibold mb-1">Informações de Pagamento:</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <strong>Forma de Pagamento:</strong> {formaPagamentoTexts[ordem.formaPagamento]}
                   </div>
-                  {ordem.dataPagamento && (
+                  {ordem?.dataPagamento && (
                     <div>
                       <strong>Data do Pagamento:</strong> {new Date(ordem.dataPagamento).toLocaleDateString('pt-BR')}
                     </div>
                   )}
                 </div>
-                {ordem.observacoesPagamento && (
+                {ordem?.observacoesPagamento && (
                   <div className="mt-1">
                     <strong>Observações:</strong> {ordem.observacoesPagamento}
                   </div>
@@ -402,9 +392,9 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="font-semibold text-gray-600">Data de Abertura</div>
-                <div className="text-lg font-bold">{new Date(ordem.dataAbertura).toLocaleDateString('pt-BR')}</div>
+                <div className="text-lg font-bold">{ordem?.dataAbertura ? new Date(ordem.dataAbertura).toLocaleDateString('pt-BR') : 'N/A'}</div>
               </div>
-              {ordem.prazoEntrega && (
+              {ordem?.prazoEntrega && (
                 <div className="text-center">
                   <div className="font-semibold text-gray-600">Prazo de Entrega</div>
                   <div className="text-lg font-bold">{new Date(ordem.prazoEntrega).toLocaleDateString('pt-BR')}</div>
@@ -412,10 +402,10 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               )}
               <div className="text-center">
                 <div className="font-semibold text-gray-600">Garantia</div>
-                <div className="text-lg font-bold">{ordem.garantia} dias</div>
+                <div className="text-lg font-bold">{ordem?.garantia || 0} dias</div>
               </div>
             </div>
-            {ordem.dataConclusao && (
+            {ordem?.dataConclusao && (
               <div className="mt-3 text-center">
                 <div className="font-semibold text-gray-600">Data de Conclusão</div>
                 <div className="text-lg font-bold text-green-600">{new Date(ordem.dataConclusao).toLocaleDateString('pt-BR')}</div>
@@ -429,7 +419,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
           <div className="bg-gray-100 p-3">
             <h3 className="font-bold mb-2">📋 Termos e Condições de Garantia:</h3>
             <div className="text-sm text-gray-700 space-y-1">
-              <p>• Este serviço possui garantia de <strong>{ordem.garantia} dias</strong> a partir da data de entrega, cobrindo exclusivamente defeitos relacionados ao serviço executado.</p>
+              <p>• Este serviço possui garantia de <strong>{ordem?.garantia || 0} dias</strong> a partir da data de entrega, cobrindo exclusivamente defeitos relacionados ao serviço executado.</p>
               <p>• A garantia NÃO cobre danos causados por: mau uso, quedas, contato com líquidos, exposição a temperaturas extremas, ou desgaste natural dos componentes.</p>
               <p>• Para validar a garantia, é obrigatório apresentar esta ordem de serviço.</p>
               <p>• Equipamentos não retirados em até 90 dias poderão ser descartados sem aviso prévio.</p>
