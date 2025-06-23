@@ -12,10 +12,14 @@ export const Ordens = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showFinalizarModal, setShowFinalizarModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrdemServico | null>(null);
   const [printingOrder, setPrintingOrder] = useState<OrdemServico | null>(null);
+  const [finalizingOrder, setFinalizingOrder] = useState<OrdemServico | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('todos');
   const [pagamentoFilter, setPagamentoFilter] = useState<string>('todos');
+  const [searchProduto, setSearchProduto] = useState('');
+  const [showProdutosList, setShowProdutosList] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   
   const [formData, setFormData] = useState<Partial<OrdemServico>>({
@@ -30,17 +34,18 @@ export const Ordens = () => {
     pecasUtilizadas: [],
     valorMaoObra: 0,
     valorTotal: 0,
-    desconto: 0,
-    acrescimo: 0,
-    valorFinal: 0,
-    formaPagamento: 'dinheiro',
-    statusPagamento: 'pendente',
     prazoEntrega: '',
     garantia: 90,
     status: 'aguardando_diagnostico',
     observacoesInternas: '',
-    observacoesPagamento: '',
     finalizada: false
+  });
+
+  const [finalizarData, setFinalizarData] = useState({
+    formaPagamento: 'dinheiro' as any,
+    desconto: 0,
+    acrescimo: 0,
+    observacoesPagamento: ''
   });
 
   const [novaPeca, setNovaPeca] = useState({
@@ -69,25 +74,14 @@ export const Ordens = () => {
     // Calcular valores automaticamente
     const valorPecas = (formData.pecasUtilizadas || []).reduce((total, peca) => total + peca.valorTotal, 0);
     const valorTotal = (formData.valorMaoObra || 0) + valorPecas;
-    const desconto = formData.desconto || 0;
-    const acrescimo = formData.acrescimo || 0;
-    const valorFinal = valorTotal - desconto + acrescimo;
     
-    // Calcular lucro (assumindo 30% de custo sobre peças)
-    const custoPecas = valorPecas * 0.3;
-    const lucro = valorFinal - custoPecas;
-    const margemLucro = valorFinal > 0 ? (lucro / valorFinal) * 100 : 0;
-    
-    if (valorTotal !== formData.valorTotal || valorFinal !== formData.valorFinal) {
+    if (valorTotal !== formData.valorTotal) {
       setFormData(prev => ({ 
         ...prev, 
-        valorTotal,
-        valorFinal,
-        lucro,
-        margemLucro
+        valorTotal
       }));
     }
-  }, [formData.pecasUtilizadas, formData.valorMaoObra, formData.desconto, formData.acrescimo]);
+  }, [formData.pecasUtilizadas, formData.valorMaoObra]);
 
   const saveOrdens = (novasOrdens: OrdemServico[]) => {
     localStorage.setItem('ordens', JSON.stringify(novasOrdens));
@@ -130,24 +124,40 @@ export const Ordens = () => {
   };
 
   const handleFinalizarOS = (ordem: OrdemServico) => {
-    if (confirm('Tem certeza que deseja finalizar esta ordem de serviço? Esta ação não pode ser desfeita.')) {
+    setFinalizingOrder(ordem);
+    setFinalizarData({
+      formaPagamento: 'dinheiro',
+      desconto: 0,
+      acrescimo: 0,
+      observacoesPagamento: ''
+    });
+    setShowFinalizarModal(true);
+  };
+
+  const confirmFinalizarOS = () => {
+    if (finalizingOrder) {
+      const valorFinal = (finalizingOrder.valorTotal || 0) - finalizarData.desconto + finalizarData.acrescimo;
       const ordensAtualizadas = ordens.map(o => {
-        if (o.id === ordem.id) {
+        if (o.id === finalizingOrder.id) {
           return {
             ...o,
             status: 'entregue' as const,
             finalizada: true,
             dataConclusao: new Date().toISOString().split('T')[0],
             statusPagamento: 'pago' as const,
-            dataPagamento: new Date().toISOString().split('T')[0]
+            dataPagamento: new Date().toISOString().split('T')[0],
+            formaPagamento: finalizarData.formaPagamento,
+            desconto: finalizarData.desconto,
+            acrescimo: finalizarData.acrescimo,
+            valorFinal: valorFinal,
+            observacoesPagamento: finalizarData.observacoesPagamento
           };
         }
         return o;
       });
       saveOrdens(ordensAtualizadas);
-      
-      // Atualizar estoque dos produtos (se necessário)
-      // TODO: Implementar controle de estoque automático
+      setShowFinalizarModal(false);
+      setFinalizingOrder(null);
     }
   };
 
@@ -210,16 +220,10 @@ export const Ordens = () => {
       pecasUtilizadas: [],
       valorMaoObra: 0,
       valorTotal: 0,
-      desconto: 0,
-      acrescimo: 0,
-      valorFinal: 0,
-      formaPagamento: 'dinheiro',
-      statusPagamento: 'pendente',
       prazoEntrega: '',
       garantia: 90,
       status: 'aguardando_diagnostico',
       observacoesInternas: '',
-      observacoesPagamento: '',
       finalizada: false
     });
     setNovaPeca({ nome: '', quantidade: 1, valorUnitario: 0 });
@@ -257,6 +261,8 @@ export const Ordens = () => {
       ...formData,
       pecasUtilizadas: [...(formData.pecasUtilizadas || []), peca]
     });
+    setSearchProduto('');
+    setShowProdutosList(false);
   };
 
   const removerPeca = (id: string) => {
@@ -265,6 +271,12 @@ export const Ordens = () => {
       pecasUtilizadas: (formData.pecasUtilizadas || []).filter(peca => peca.id !== id)
     });
   };
+
+  const produtosFiltrados = produtos.filter(produto => 
+    produto.ativo && 
+    (produto.nome.toLowerCase().includes(searchProduto.toLowerCase()) ||
+     produto.codigo?.toLowerCase().includes(searchProduto.toLowerCase()))
+  );
 
   const ordensComClientes = ordens.map(ordem => ({
     ...ordem,
@@ -536,10 +548,10 @@ export const Ordens = () => {
         </div>
       </div>
 
-      {/* Modal de Formulário */}
+      {/* Modal de Formulário Simplificado */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold flex items-center">
@@ -554,7 +566,7 @@ export const Ordens = () => {
 
             <form onSubmit={handleSubmit}>
               <Tabs defaultValue="equipamento" className="p-6">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="equipamento" className="flex items-center">
                     <Smartphone className="mr-2" size={16} />
                     Equipamento
@@ -565,15 +577,7 @@ export const Ordens = () => {
                   </TabsTrigger>
                   <TabsTrigger value="pecas" className="flex items-center">
                     <Package className="mr-2" size={16} />
-                    Peças
-                  </TabsTrigger>
-                  <TabsTrigger value="financeiro" className="flex items-center">
-                    <CreditCard className="mr-2" size={16} />
-                    Financeiro
-                  </TabsTrigger>
-                  <TabsTrigger value="status" className="flex items-center">
-                    <Calendar className="mr-2" size={16} />
-                    Status
+                    Peças e Valor
                   </TabsTrigger>
                 </TabsList>
 
@@ -629,7 +633,7 @@ export const Ordens = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="grid grid-cols-3 gap-4 mt-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
                         <input
@@ -650,6 +654,42 @@ export const Ordens = () => {
                           onChange={(e) => setFormData({ ...formData, numeroSerie: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Número de série do equipamento"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Garantia (dias)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={formData.garantia || 90}
+                          onChange={(e) => setFormData({ ...formData, garantia: Number(e.target.value) })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select
+                          value={formData.status || 'aguardando_diagnostico'}
+                          onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {Object.entries(statusTexts).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega</label>
+                        <input
+                          type="date"
+                          value={formData.prazoEntrega || ''}
+                          onChange={(e) => setFormData({ ...formData, prazoEntrega: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                     </div>
@@ -694,6 +734,20 @@ export const Ordens = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           rows={3}
                           placeholder="Descreva a solução aplicada..."
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                          <FileText className="mr-1" size={16} />
+                          Observações Internas
+                        </label>
+                        <textarea
+                          value={formData.observacoesInternas || ''}
+                          onChange={(e) => setFormData({ ...formData, observacoesInternas: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          rows={3}
+                          placeholder="Observações para uso interno..."
                         />
                       </div>
                     </div>
@@ -743,27 +797,41 @@ export const Ordens = () => {
                       </div>
                     )}
 
-                    {/* Produtos cadastrados */}
-                    {produtos.filter(p => p.categoria === 'peca' && p.ativo).length > 0 && (
-                      <div className="mb-4">
-                        <h5 className="text-sm font-medium mb-2">Produtos Cadastrados:</h5>
-                        <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
-                          {produtos.filter(p => p.categoria === 'peca' && p.ativo).map(produto => (
-                            <button
-                              key={produto.id}
-                              type="button"
-                              onClick={() => adicionarProdutoCadastrado(produto)}
-                              className="text-left p-2 border border-gray-200 rounded hover:bg-gray-50 text-xs"
-                            >
-                              <div className="font-medium">{produto.nome}</div>
-                              <div className="text-gray-500">{formatCurrency(produto.precoVenda)}</div>
-                            </button>
-                          ))}
-                        </div>
+                    {/* Busca de produtos */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Buscar Produtos/Serviços:</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Digite o nome ou código do produto..."
+                          value={searchProduto}
+                          onChange={(e) => {
+                            setSearchProduto(e.target.value);
+                            setShowProdutosList(e.target.value.length > 0);
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        {showProdutosList && produtosFiltrados.length > 0 && (
+                          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                            {produtosFiltrados.map(produto => (
+                              <div
+                                key={produto.id}
+                                onClick={() => adicionarProdutoCadastrado(produto)}
+                                className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              >
+                                <div className="font-medium text-gray-900">{produto.nome}</div>
+                                <div className="text-sm text-gray-500">
+                                  {produto.codigo && `Código: ${produto.codigo} | `}
+                                  Preço: {formatCurrency(produto.precoVenda)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
-                    {/* Adicionar nova peça */}
+                    {/* Adicionar nova peça manual */}
                     <div className="border border-gray-200 rounded-lg p-4 bg-white">
                       <h5 className="text-sm font-medium mb-3">Adicionar Peça Manual</h5>
                       <div className="grid grid-cols-4 gap-3">
@@ -822,204 +890,9 @@ export const Ordens = () => {
                         />
                       </div>
                       <div className="flex justify-between text-lg font-bold border-t pt-2">
-                        <span>SUBTOTAL:</span>
+                        <span>TOTAL:</span>
                         <span className="text-blue-600">{formatCurrency(formData.valorTotal || 0)}</span>
                       </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="financeiro" className="space-y-4 mt-6">
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-green-900 mb-4 flex items-center">
-                      <CreditCard className="mr-2" size={18} />
-                      Informações Financeiras
-                    </h4>
-                    
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Desconto (R$)</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={formData.desconto || 0}
-                          onChange={(e) => setFormData({ ...formData, desconto: Number(e.target.value) })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Acréscimo (R$)</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={formData.acrescimo || 0}
-                          onChange={(e) => setFormData({ ...formData, acrescimo: Number(e.target.value) })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Ex: taxa urgência, juros..."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
-                        <select
-                          value={formData.formaPagamento || 'dinheiro'}
-                          onChange={(e) => setFormData({ ...formData, formaPagamento: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="dinheiro">Dinheiro</option>
-                          <option value="cartao_credito">Cartão de Crédito</option>
-                          <option value="cartao_debito">Cartão de Débito</option>
-                          <option value="pix">PIX</option>
-                          <option value="transferencia">Transferência</option>
-                          <option value="parcelado">Parcelado</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Status do Pagamento</label>
-                        <select
-                          value={formData.statusPagamento || 'pendente'}
-                          onChange={(e) => setFormData({ ...formData, statusPagamento: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="pendente">Pendente</option>
-                          <option value="pago">Pago</option>
-                          <option value="parcial">Parcial</option>
-                          <option value="cancelado">Cancelado</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Data de Pagamento</label>
-                        <input
-                          type="date"
-                          value={formData.dataPagamento || ''}
-                          onChange={(e) => setFormData({ ...formData, dataPagamento: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
-                        <input
-                          type="date"
-                          value={formData.dataVencimento || ''}
-                          onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Observações de Pagamento</label>
-                      <textarea
-                        value={formData.observacoesPagamento || ''}
-                        onChange={(e) => setFormData({ ...formData, observacoesPagamento: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        rows={2}
-                        placeholder="Informações adicionais sobre o pagamento..."
-                      />
-                    </div>
-
-                    <div className="bg-white p-4 border-2 border-gray-300 rounded-lg">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span>Subtotal:</span>
-                          <span>{formatCurrency(formData.valorTotal || 0)}</span>
-                        </div>
-                        {(formData.desconto || 0) > 0 && (
-                          <div className="flex justify-between text-red-600">
-                            <span>Desconto:</span>
-                            <span>-{formatCurrency(formData.desconto || 0)}</span>
-                          </div>
-                        )}
-                        {(formData.acrescimo || 0) > 0 && (
-                          <div className="flex justify-between text-blue-600">
-                            <span>Acréscimo:</span>
-                            <span>+{formatCurrency(formData.acrescimo || 0)}</span>
-                          </div>
-                        )}
-                        <hr className="border-gray-300" />
-                        <div className="flex justify-between text-xl font-bold">
-                          <span>VALOR FINAL:</span>
-                          <span className="text-green-600">{formatCurrency(formData.valorFinal || 0)}</span>
-                        </div>
-                        {(formData.lucro || 0) > 0 && (
-                          <div className="text-sm text-gray-600 mt-2">
-                            <div className="flex justify-between">
-                              <span>Lucro Estimado:</span>
-                              <span className="text-green-600">{formatCurrency(formData.lucro || 0)}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Margem:</span>
-                              <span className="text-green-600">{(formData.margemLucro || 0).toFixed(1)}%</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="status" className="space-y-4 mt-6">
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-purple-900 mb-4 flex items-center">
-                      <Calendar className="mr-2" size={18} />
-                      Status e Controle
-                    </h4>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select
-                          value={formData.status || 'aguardando_diagnostico'}
-                          onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          {Object.entries(statusTexts).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega</label>
-                        <input
-                          type="date"
-                          value={formData.prazoEntrega || ''}
-                          onChange={(e) => setFormData({ ...formData, prazoEntrega: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Garantia (dias)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={formData.garantia || 90}
-                          onChange={(e) => setFormData({ ...formData, garantia: Number(e.target.value) })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                        <FileText className="mr-1" size={16} />
-                        Observações Internas
-                      </label>
-                      <textarea
-                        value={formData.observacoesInternas || ''}
-                        onChange={(e) => setFormData({ ...formData, observacoesInternas: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        rows={3}
-                        placeholder="Observações para uso interno..."
-                      />
                     </div>
                   </div>
                 </TabsContent>
@@ -1041,6 +914,122 @@ export const Ordens = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Finalizar OS */}
+      {showFinalizarModal && finalizingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-lg w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Check className="mr-2 text-green-600" size={24} />
+                Finalizar Ordem de Serviço
+              </h3>
+
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <div className="text-sm text-gray-600">
+                  <strong>OS #{finalizingOrder.numero}</strong><br/>
+                  Cliente: {clientes.find(c => c.id === finalizingOrder.clienteId)?.nome}<br/>
+                  Equipamento: {finalizingOrder.marca} {finalizingOrder.modelo}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                  <select
+                    value={finalizarData.formaPagamento}
+                    onChange={(e) => setFinalizarData({ ...finalizarData, formaPagamento: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="pix">PIX</option>
+                    <option value="transferencia">Transferência</option>
+                    <option value="parcelado">Parcelado</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Desconto (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={finalizarData.desconto}
+                      onChange={(e) => setFinalizarData({ ...finalizarData, desconto: Number(e.target.value) })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Acréscimo (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={finalizarData.acrescimo}
+                      onChange={(e) => setFinalizarData({ ...finalizarData, acrescimo: Number(e.target.value) })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                  <textarea
+                    value={finalizarData.observacoesPagamento}
+                    onChange={(e) => setFinalizarData({ ...finalizarData, observacoesPagamento: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={2}
+                    placeholder="Observações sobre o pagamento..."
+                  />
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Valor Original:</span>
+                    <span>{formatCurrency(finalizingOrder.valorTotal)}</span>
+                  </div>
+                  {finalizarData.desconto > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Desconto:</span>
+                      <span>-{formatCurrency(finalizarData.desconto)}</span>
+                    </div>
+                  )}
+                  {finalizarData.acrescimo > 0 && (
+                    <div className="flex justify-between text-blue-600">
+                      <span>Acréscimo:</span>
+                      <span>+{formatCurrency(finalizarData.acrescimo)}</span>
+                    </div>
+                  )}
+                  <hr className="my-2" />
+                  <div className="flex justify-between text-xl font-bold text-green-600">
+                    <span>VALOR FINAL:</span>
+                    <span>{formatCurrency((finalizingOrder.valorTotal || 0) - finalizarData.desconto + finalizarData.acrescimo)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowFinalizarModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmFinalizarOS}
+                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                >
+                  Finalizar OS
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
