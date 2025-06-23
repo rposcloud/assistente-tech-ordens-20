@@ -1141,20 +1141,22 @@ export const Ordens = () => {
       {/* Modal Finalizar OS */}
       {showFinalizarModal && finalizingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-lg w-full">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <Check className="mr-2 text-green-600" size={24} />
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] flex flex-col">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Check className="mr-2 text-green-600" size={20} />
                 Finalizar Ordem de Serviço
               </h3>
+            </div>
 
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                 <div className="text-sm">
-                  <div className="font-bold text-blue-900 mb-2">OS #{finalizingOrder.numero}</div>
-                  <div className="text-blue-800">
+                  <div className="font-bold text-blue-900 mb-1">OS #{finalizingOrder.numero}</div>
+                  <div className="text-blue-800 text-xs">
                     <strong>Cliente:</strong> {clientes.find(c => c.id === finalizingOrder.clienteId)?.nome}<br/>
                     <strong>Equipamento:</strong> {finalizingOrder.marca} {finalizingOrder.modelo}<br/>
-                    <strong>Status Atual:</strong> <span className="font-semibold">{statusTexts[finalizingOrder.status]}</span>
+                    <strong>Status:</strong> <span className="font-semibold">{statusTexts[finalizingOrder.status]}</span>
                   </div>
                 </div>
               </div>
@@ -1165,7 +1167,7 @@ export const Ordens = () => {
                   <select
                     value={finalizarData.formaPagamento}
                     onChange={(e) => setFinalizarData({ ...finalizarData, formaPagamento: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     required
                   >
                     <option value="dinheiro">💵 Dinheiro</option>
@@ -1177,7 +1179,7 @@ export const Ordens = () => {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Desconto (R$)</label>
                     <input
@@ -1187,7 +1189,7 @@ export const Ordens = () => {
                       max={finalizingOrder.valorTotal}
                       value={finalizarData.desconto}
                       onChange={(e) => setFinalizarData({ ...finalizarData, desconto: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
                   </div>
 
@@ -1199,25 +1201,25 @@ export const Ordens = () => {
                       min="0"
                       value={finalizarData.acrescimo}
                       onChange={(e) => setFinalizarData({ ...finalizarData, acrescimo: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Observações do Pagamento</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                   <textarea
                     value={finalizarData.observacoesPagamento}
                     onChange={(e) => setFinalizarData({ ...finalizarData, observacoesPagamento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     rows={2}
                     placeholder="Observações sobre o pagamento..."
                   />
                 </div>
 
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h4 className="font-semibold text-green-800 mb-2">Resumo Financeiro</h4>
-                  <div className="space-y-2 text-sm">
+                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2 text-sm">Resumo Financeiro</h4>
+                  <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
                       <span>Valor Original:</span>
                       <span className="font-semibold">{formatCurrency(finalizingOrder.valorTotal)}</span>
@@ -1234,40 +1236,40 @@ export const Ordens = () => {
                         <span>+{formatCurrency(finalizarData.acrescimo)}</span>
                       </div>
                     )}
-                    <hr className="my-2 border-green-300" />
-                    <div className="flex justify-between text-lg font-bold text-green-800">
+                    <hr className="my-1 border-green-300" />
+                    <div className="flex justify-between text-sm font-bold text-green-800">
                       <span>VALOR FINAL:</span>
                       <span>{formatCurrency((finalizingOrder.valorTotal || 0) - finalizarData.desconto + finalizarData.acrescimo)}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <div className="bg-yellow-50 p-2 rounded-lg border border-yellow-200">
                   <div className="flex items-start">
-                    <AlertCircle className="text-yellow-600 mr-2 mt-0.5" size={16} />
-                    <div className="text-sm text-yellow-800">
-                      <strong>Atenção:</strong> Ao finalizar a OS, o status será alterado para "Entregue", 
-                      o pagamento será marcado como "Pago" e não será possível reverter esta ação.
+                    <AlertCircle className="text-yellow-600 mr-2 mt-0.5 flex-shrink-0" size={14} />
+                    <div className="text-xs text-yellow-800">
+                      <strong>Atenção:</strong> Ao finalizar a OS, o status será alterado para "Entregue" 
+                      e o pagamento será marcado como "Pago".
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={() => setShowFinalizarModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={confirmFinalizarOS}
-                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center"
-                >
-                  <Check size={16} className="mr-2" />
-                  Finalizar OS
-                </button>
-              </div>
+            <div className="flex space-x-3 p-4 border-t bg-gray-50">
+              <button
+                onClick={() => setShowFinalizarModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmFinalizarOS}
+                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center justify-center text-sm"
+              >
+                <Check size={14} className="mr-1" />
+                Finalizar OS
+              </button>
             </div>
           </div>
         </div>
