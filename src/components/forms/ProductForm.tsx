@@ -33,7 +33,7 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
 
   const handlePrecoCustoChange = (value: string) => {
     setPrecoCustoFormatado(value);
-    const numericValue = parseCurrency(value);
+    const numericValue = value ? parseCurrency(value) : 0;
     setFormData(prev => ({ ...prev, precoCusto: numericValue }));
   };
 
@@ -43,20 +43,8 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
     setFormData(prev => ({ ...prev, precoVenda: numericValue }));
   };
 
-  const calcularMargem = () => {
-    if (formData.precoCusto > 0) {
-      return (((formData.precoVenda - formData.precoCusto) / formData.precoCusto) * 100).toFixed(1);
-    }
-    return '0.0';
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.precoVenda < formData.precoCusto) {
-      alert('O preço de venda não pode ser menor que o preço de custo!');
-      return;
-    }
 
     const produtoData: Produto = {
       id: produto?.id || Date.now().toString(),
@@ -140,7 +128,7 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <DollarSign className="h-4 w-4 inline mr-1" />
-                  Preço de Custo *
+                  Preço de Custo (Opcional)
                 </label>
                 <input
                   type="text"
@@ -148,7 +136,6 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   onChange={(e) => handlePrecoCustoChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="R$ 0,00"
-                  required
                 />
               </div>
 
@@ -167,18 +154,6 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                 />
               </div>
             </div>
-
-            {/* Margem de Lucro */}
-            {formData.precoCusto > 0 && (
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  <strong>Margem de Lucro:</strong> {calcularMargem()}%
-                  <span className="ml-2">
-                    (Lucro: {formatCurrency(formData.precoVenda - formData.precoCusto)})
-                  </span>
-                </p>
-              </div>
-            )}
 
             {/* Campos específicos por categoria */}
             {formData.categoria === 'peca' && (
