@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUp,
     signIn,
     signOut,
-    updateProfile,
+    updateProfile: updateProfileHook,
     isAuthenticated
   } = useSupabaseAuth();
 
@@ -49,6 +49,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     return await signOut();
+  };
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    const result = await updateProfileHook(updates);
+    return {
+      data: result.data || null,
+      error: result.error || null
+    };
   };
 
   return (

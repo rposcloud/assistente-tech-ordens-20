@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { InputMask } from './InputMask';
+import { useMask } from '../../hooks/useMask';
 import { AddressForm } from './AddressForm';
 import { Cliente } from '../../types';
 
@@ -29,6 +29,10 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
     observacoes: ''
   });
 
+  const telefoneMask = useMask('phone');
+  const cpfMask = useMask('cpf');
+  const cnpjMask = useMask('cnpj');
+
   useEffect(() => {
     if (cliente) {
       setFormData({
@@ -47,6 +51,14 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
         estado: cliente.estado || '',
         observacoes: cliente.observacoes || ''
       });
+      
+      // Configurar máscaras com valores existentes
+      telefoneMask.setValue(cliente.telefone || '');
+      if (cliente.tipoDocumento === 'cpf') {
+        cpfMask.setValue(cliente.cpfCnpj || '');
+      } else {
+        cnpjMask.setValue(cliente.cpfCnpj || '');
+      }
     }
   }, [cliente]);
 
@@ -60,6 +72,31 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleTelefoneChange = (value: string) => {
+    telefoneMask.handleChange(value);
+    updateField('telefone', value);
+  };
+
+  const handleDocumentoChange = (value: string) => {
+    if (formData.tipoDocumento === 'cpf') {
+      cpfMask.handleChange(value);
+    } else {
+      cnpjMask.handleChange(value);
+    }
+    updateField('cpfCnpj', value);
+  };
+
+  const handleTipoDocumentoChange = (tipo: 'cpf' | 'cnpj') => {
+    updateField('tipoDocumento', tipo);
+    updateField('cpfCnpj', '');
+    cpfMask.reset();
+    cnpjMask.reset();
+  };
+
+  const handleAddressChange = (field: string, value: string) => {
+    updateField(field, value);
   };
 
   return (
@@ -111,10 +148,10 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Telefone
                 </label>
-                <InputMask
-                  mask="(99) 99999-9999"
-                  value={formData.telefone}
-                  onChange={(value) => updateField('telefone', value)}
+                <input
+                  type="text"
+                  value={telefoneMask.value}
+                  onChange={(e) => handleTelefoneChange(e.target.value)}
                   placeholder="(11) 99999-9999"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -126,7 +163,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
                 </label>
                 <select
                   value={formData.tipoDocumento}
-                  onChange={(e) => updateField('tipoDocumento', e.target.value)}
+                  onChange={(e) => handleTipoDocumentoChange(e.target.value as 'cpf' | 'cnpj')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="cpf">CPF</option>
@@ -138,13 +175,13 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {formData.tipoDocumento === 'cpf' ? 'CPF' : 'CNPJ'} *
                 </label>
-                <InputMask
-                  mask={formData.tipoDocumento === 'cpf' ? '999.999.999-99' : '99.999.999/9999-99'}
-                  value={formData.cpfCnpj}
-                  onChange={(value) => updateField('cpfCnpj', value)}
+                <input
+                  type="text"
+                  required
+                  value={formData.tipoDocumento === 'cpf' ? cpfMask.value : cnpjMask.value}
+                  onChange={(e) => handleDocumentoChange(e.target.value)}
                   placeholder={formData.tipoDocumento === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
                 />
               </div>
 
@@ -163,10 +200,19 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
           </div>
 
           {/* Endereço */}
-          <AddressForm
-            formData={formData}
-            updateField={updateField}
-          />
+          <div>
+            <h3 className="text-lg font-medium mb-4 text-gray-900">Endereço</h3>
+            <AddressForm
+              cep={formData.cep}
+              endereco={formData.endereco}
+              numero={formData.numero}
+              complemento={formData.complemento}
+              bairro={formData.bairro}
+              cidade={formData.cidade}
+              estado={formData.estado}
+              onAddressChange={handleAddressChange}
+            />
+          </div>
 
           {/* Observações */}
           <div>
