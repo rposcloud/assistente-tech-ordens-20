@@ -1,16 +1,18 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
+import type { User, Session } from '@supabase/supabase-js';
+import type { Profile } from '../hooks/useSupabaseAuth';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  session: Session | null;
+  profile: Profile | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ data: any; error: string | null }>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<{ data: any; error: string | null }>;
+  logout: () => Promise<{ error: string | null }>;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ data: any; error: string | null }>;
   isAuthenticated: boolean;
 }
 
@@ -29,41 +31,38 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const {
+    user,
+    session,
+    profile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
+    isAuthenticated
+  } = useSupabaseAuth();
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulação de login - em produção, usar API real
-    if (email === 'admin@techservice.com' && password === 'admin123') {
-      const userData = {
-        id: '1',
-        name: 'Administrador',
-        email: 'admin@techservice.com'
-      };
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      return true;
-    }
-    return false;
+  const login = async (email: string, password: string) => {
+    return await signIn(email, password);
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('clientes');
-    localStorage.removeItem('ordens');
+  const logout = async () => {
+    return await signOut();
   };
-
-  const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      loading,
+      login,
+      signUp,
+      logout,
+      updateProfile,
+      isAuthenticated
+    }}>
       {children}
     </AuthContext.Provider>
   );

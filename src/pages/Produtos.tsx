@@ -1,36 +1,31 @@
 
-import React, { useState, useEffect } from 'react';
-import { FileText, Package } from 'lucide-react';
-import { Produto } from '../types';
+import React, { useState } from 'react';
+import { FileText, Package, Plus } from 'lucide-react';
+import { useProdutos } from '../hooks/useProdutos';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ProductForm } from '../components/forms/ProductForm';
+import type { Produto } from '../types';
 
 export const Produtos = () => {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const { produtos, loading, createProduto, updateProduto, deleteProduto } = useProdutos();
   const [showModal, setShowModal] = useState(false);
   const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<'todos' | 'peca' | 'servico'>('todos');
 
-  useEffect(() => {
-    const produtosSalvos = localStorage.getItem('produtos');
-    if (produtosSalvos) {
-      setProdutos(JSON.parse(produtosSalvos));
+  const handleSaveProduto = async (produtoData: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      if (editingProduto) {
+        await updateProduto(editingProduto.id, produtoData);
+      } else {
+        await createProduto(produtoData);
+      }
+      setShowModal(false);
+      setEditingProduto(null);
+    } catch (error) {
+      console.error('Erro ao salvar produto:', error);
+      alert('Erro ao salvar produto. Tente novamente.');
     }
-  }, []);
-
-  const handleSaveProduto = (produto: Produto) => {
-    if (editingProduto) {
-      const updatedProdutos = produtos.map(p => p.id === produto.id ? produto : p);
-      setProdutos(updatedProdutos);
-      localStorage.setItem('produtos', JSON.stringify(updatedProdutos));
-    } else {
-      const newProdutos = [...produtos, produto];
-      setProdutos(newProdutos);
-      localStorage.setItem('produtos', JSON.stringify(newProdutos));
-    }
-    setShowModal(false);
-    setEditingProduto(null);
   };
 
   const handleEditProduto = (produto: Produto) => {
@@ -38,15 +33,20 @@ export const Produtos = () => {
     setShowModal(true);
   };
 
-  const handleDeleteProduto = (id: string) => {
-    const updatedProdutos = produtos.filter(produto => produto.id !== id);
-    setProdutos(updatedProdutos);
-    localStorage.setItem('produtos', JSON.stringify(updatedProdutos));
+  const handleDeleteProduto = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+      try {
+        await deleteProduto(id);
+      } catch (error) {
+        console.error('Erro ao deletar produto:', error);
+        alert('Erro ao deletar produto. Tente novamente.');
+      }
+    }
   };
 
   const produtosFiltrados = produtos.filter(produto => {
     const searchRegex = new RegExp(searchTerm, 'i');
-    const matchesSearch = searchRegex.test(produto.nome) || searchRegex.test(produto.descricao) || searchRegex.test(produto.codigo || '');
+    const matchesSearch = searchRegex.test(produto.nome) || searchRegex.test(produto.descricao || '') || searchRegex.test(produto.codigo || '');
     const matchesCategory = filterCategory === 'todos' || produto.categoria === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -85,6 +85,14 @@ export const Produtos = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -97,8 +105,9 @@ export const Produtos = () => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
         >
+          <Plus className="mr-2" size={20} />
           Novo Produto
         </button>
       </div>
@@ -135,6 +144,7 @@ export const Produtos = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold">Lista de Produtos e Serviços</h3>
+          <p className="text-sm text-gray-600">Total: {produtosFiltrados.length} produtos</p>
         </div>
         <div className="p-6">
           <SortableTable

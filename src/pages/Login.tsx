@@ -2,31 +2,51 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, Monitor } from 'lucide-react';
+import { LogIn, Monitor, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, isAuthenticated } = useAuth();
+  const { login, signUp, isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const success = await login(email, password);
+    const { error: loginError } = await login(email, password);
     
-    if (!success) {
-      setError('Email ou senha incorretos');
+    if (loginError) {
+      setError(loginError);
+    }
+    
+    setLoading(false);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const { error: signUpError } = await signUp(email, password, fullName);
+    
+    if (signUpError) {
+      setError(signUpError);
+    } else {
+      setError('');
+      // Mostrar mensagem de sucesso
+      alert('Conta criada com sucesso! Verifique seu email para confirmar o cadastro.');
     }
     
     setLoading(false);
@@ -42,72 +62,126 @@ export const Login = () => {
                 <Monitor className="text-white" size={24} />
               </div>
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Entrar</h1>
-            <p className="text-gray-600">Acesse sua conta do TechService</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">TechService</h1>
+            <p className="text-gray-600">Sistema de Gestão de Assistência Técnica</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-              />
-            </div>
+          <Tabs defaultValue="login" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Entrar</TabsTrigger>
+              <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+            </TabsList>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                  />
+                </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <LogIn size={20} className="mr-2" />
-                  Entrar
-                </>
-              )}
-            </Button>
-          </form>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <LogIn size={20} className="mr-2" />
+                      Entrar
+                    </>
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
 
-          <div className="mt-6">
-            <div className="bg-blue-50 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-700 font-medium mb-2">Dados de teste:</p>
-              <p className="text-sm text-blue-600">Email: admin@techservice.com</p>
-              <p className="text-sm text-blue-600">Senha: admin123</p>
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nome Completo</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Seu nome completo"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Senha</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <User size={20} className="mr-2" />
+                      Criar Conta
+                    </>
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+
+          {error && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-600 text-sm">{error}</p>
             </div>
-            
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Não tem uma conta?{' '}
-                <Link to="/cadastro" className="text-blue-600 hover:text-blue-500 font-medium">
-                  Cadastre-se
-                </Link>
-              </p>
-            </div>
+          )}
+
+          <div className="mt-6 text-center">
+            <Link to="/" className="text-sm text-blue-600 hover:text-blue-500 font-medium">
+              ← Voltar ao início
+            </Link>
           </div>
         </div>
       </div>
