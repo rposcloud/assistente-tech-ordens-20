@@ -461,7 +461,7 @@ export const Ordens = () => {
                       <Wrench className="mr-2 text-blue-500" size={16} />
                       #{ordem.numero}
                       {ordem.finalizada && (
-                        <Check className="ml-2 text-green-500" size={16} title="Finalizada" />
+                        <Check className="ml-2 text-green-500" size={16} />
                       )}
                     </div>
                   </td>
@@ -500,7 +500,6 @@ export const Ordens = () => {
                       <button
                         onClick={() => handleFinalizarOS(ordem)}
                         className="text-green-600 hover:text-green-900 mr-2"
-                        title="Finalizar OS"
                       >
                         <Check size={16} />
                       </button>
@@ -508,21 +507,18 @@ export const Ordens = () => {
                     <button
                       onClick={() => handlePrint(ordem)}
                       className="text-green-600 hover:text-green-900 mr-2"
-                      title="Imprimir"
                     >
                       <Printer size={16} />
                     </button>
                     <button
                       onClick={() => handleEdit(ordem)}
                       className="text-blue-600 hover:text-blue-900 mr-2"
-                      title="Editar"
                     >
                       <Edit size={16} />
                     </button>
                     <button
                       onClick={() => handleDelete(ordem.id)}
                       className="text-red-600 hover:text-red-900"
-                      title="Excluir"
                     >
                       <X size={16} />
                     </button>
