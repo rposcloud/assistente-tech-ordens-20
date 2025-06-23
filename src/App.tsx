@@ -12,6 +12,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
 import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
+import { Financeiro } from './pages/Financeiro';
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Ordens />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/financeiro" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Financeiro />
                 </Layout>
               </ProtectedRoute>
             } />
