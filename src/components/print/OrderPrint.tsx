@@ -40,7 +40,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
     const valorFinalCalculado = ordem.valorFinal || ordem.valorTotal || 0;
 
     return (
-      <div ref={ref} className="print-container bg-white p-8 max-w-4xl mx-auto">
+      <div ref={ref} className="print-container bg-white p-4 max-w-4xl mx-auto">
         <style>{`
           @media print {
             * {
@@ -53,8 +53,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               margin: 0;
               padding: 0;
               font-family: Arial, sans-serif;
-              font-size: 12px;
-              line-height: 1.4;
+              font-size: 11px;
+              line-height: 1.3;
               color: #000;
             }
             
@@ -62,7 +62,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               width: 210mm;
               min-height: 297mm;
               margin: 0;
-              padding: 15mm;
+              padding: 10mm;
               background: white;
               page-break-after: always;
             }
@@ -87,27 +87,27 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             .grid { display: grid; }
             .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .gap-4 { gap: 1rem; }
-            .gap-6 { gap: 1.5rem; }
+            .gap-4 { gap: 0.75rem; }
+            .gap-6 { gap: 1rem; }
             
             .space-y-2 > * + * { margin-top: 0.5rem; }
-            .space-y-4 > * + * { margin-top: 1rem; }
-            .space-y-6 > * + * { margin-top: 1.5rem; }
+            .space-y-4 > * + * { margin-top: 0.75rem; }
+            .space-y-6 > * + * { margin-top: 1rem; }
             
             .mb-2 { margin-bottom: 0.5rem; }
-            .mb-3 { margin-bottom: 0.75rem; }
-            .mb-4 { margin-bottom: 1rem; }
-            .mb-6 { margin-bottom: 1.5rem; }
-            .mb-8 { margin-bottom: 2rem; }
+            .mb-3 { margin-bottom: 0.6rem; }
+            .mb-4 { margin-bottom: 0.75rem; }
+            .mb-6 { margin-bottom: 1rem; }
+            .mb-8 { margin-bottom: 1.25rem; }
             .mt-2 { margin-top: 0.5rem; }
-            .mt-4 { margin-top: 1rem; }
-            .mt-6 { margin-top: 1.5rem; }
+            .mt-4 { margin-top: 0.75rem; }
+            .mt-6 { margin-top: 1rem; }
             
-            .p-3 { padding: 0.75rem; }
-            .p-4 { padding: 1rem; }
-            .p-6 { padding: 1.5rem; }
-            .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-            .px-4 { padding-left: 1rem; padding-right: 1rem; }
+            .p-3 { padding: 0.5rem; }
+            .p-4 { padding: 0.75rem; }
+            .p-6 { padding: 1rem; }
+            .px-3 { padding-left: 0.5rem; padding-right: 0.5rem; }
+            .px-4 { padding-left: 0.75rem; padding-right: 0.75rem; }
             .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
             .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
             
@@ -116,12 +116,12 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             .border-l-4 { border-left-width: 4px; }
             .border-t { border-top-width: 1px; }
             
-            .text-xs { font-size: 0.75rem; }
-            .text-sm { font-size: 0.875rem; }
-            .text-lg { font-size: 1.125rem; }
-            .text-xl { font-size: 1.25rem; }
-            .text-2xl { font-size: 1.5rem; }
-            .text-3xl { font-size: 1.875rem; }
+            .text-xs { font-size: 0.7rem; }
+            .text-sm { font-size: 0.8rem; }
+            .text-lg { font-size: 1rem; }
+            .text-xl { font-size: 1.1rem; }
+            .text-2xl { font-size: 1.3rem; }
+            .text-3xl { font-size: 1.5rem; }
             
             .font-medium { font-weight: 500; }
             .font-semibold { font-weight: 600; }
@@ -141,8 +141,9 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             .table { display: table; width: 100%; border-collapse: collapse; }
             .table th, .table td { 
               border: 1px solid #d1d5db; 
-              padding: 8px; 
+              padding: 6px; 
               text-align: left; 
+              font-size: 0.8rem;
             }
             .table th { 
               background-color: #f3f4f6; 
@@ -151,39 +152,39 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             
             .signature-line {
               border-top: 2px solid #000;
-              margin-top: 40px;
-              padding-top: 8px;
+              margin-top: 30px;
+              padding-top: 6px;
               text-align: center;
             }
           }
           
           @page {
             size: A4;
-            margin: 0;
+            margin: 10mm;
           }
         `}</style>
         
         {/* Cabeçalho da Empresa */}
-        <div className="border-b-2 border-blue-600 mb-6 pb-4">
+        <div className="border-b-2 border-blue-600 mb-4 pb-3">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-blue-600 mb-2">TechService</h1>
-              <p className="text-lg text-gray-600 font-medium">Sistema de Gerenciamento Técnico</p>
-              <div className="mt-3 text-sm text-gray-600 space-y-1">
+              <h1 className="text-2xl font-bold text-blue-600 mb-2">TechService</h1>
+              <p className="text-sm text-gray-600 font-medium">Sistema de Gerenciamento Técnico</p>
+              <div className="mt-2 text-xs text-gray-600 space-y-1">
                 <p>📍 Rua da Tecnologia, 123 - Centro - São Paulo/SP - CEP: 01234-567</p>
                 <p>📞 (11) 9999-9999 | ✉️ contato@techservice.com</p>
                 <p>🌐 www.techservice.com | CNPJ: 12.345.678/0001-90</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="bg-blue-600 text-white px-6 py-4 rounded-lg inline-block">
-                <div className="text-2xl font-bold">OS #{ordem.numero}</div>
-                <div className="text-sm opacity-90">Ordem de Serviço</div>
+              <div className="bg-blue-600 text-white px-4 py-3 rounded-lg inline-block">
+                <div className="text-xl font-bold">OS #{ordem.numero}</div>
+                <div className="text-xs opacity-90">Ordem de Serviço</div>
               </div>
-              <div className="mt-3 text-sm">
+              <div className="mt-2 text-xs">
                 <div><strong>Data:</strong> {new Date(ordem.dataAbertura).toLocaleDateString('pt-BR')}</div>
-                <div className="mt-2">
-                  <span className="inline-block px-3 py-1 bg-gray-200 text-xs font-semibold">
+                <div className="mt-1">
+                  <span className="inline-block px-2 py-1 bg-gray-200 text-xs font-semibold">
                     {statusTexts[ordem.status]}
                   </span>
                 </div>
@@ -193,9 +194,9 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Dados do Cliente */}
-        <div className="mb-6">
-          <div className="bg-gray-50 p-4 border-l-4 border-blue-500">
-            <h2 className="text-lg font-bold mb-3">👤 Dados do Cliente</h2>
+        <div className="mb-4">
+          <div className="bg-gray-50 p-3 border-l-4 border-blue-500">
+            <h2 className="text-lg font-bold mb-2">👤 Dados do Cliente</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div><strong>Nome:</strong> {cliente.nome}</div>
@@ -205,7 +206,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               </div>
               <div className="space-y-2">
                 <div><strong>Endereço:</strong></div>
-                <div className="text-sm text-gray-700 mt-2">
+                <div className="text-sm text-gray-700 mt-1">
                   {cliente.endereco}, {cliente.numero}<br/>
                   {cliente.bairro} - {cliente.cidade}/{cliente.estado}<br/>
                   <strong>CEP:</strong> {cliente.cep}
@@ -216,9 +217,9 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Informações do Equipamento */}
-        <div className="mb-6">
-          <div className="bg-blue-50 p-4 border-l-4 border-blue-600">
-            <h2 className="text-lg font-bold mb-3">🔧 Informações do Equipamento</h2>
+        <div className="mb-4">
+          <div className="bg-blue-50 p-3 border-l-4 border-blue-600">
+            <h2 className="text-lg font-bold mb-2">🔧 Informações do Equipamento</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div><strong>Tipo:</strong> {tipoEquipamentoTexts[ordem.tipoEquipamento]}</div>
@@ -230,7 +231,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               </div>
               <div>
                 <div><strong>Defeito Relatado pelo Cliente:</strong></div>
-                <div className="mt-2 p-3 bg-white border text-sm">
+                <div className="mt-1 p-2 bg-white border text-sm">
                   {ordem.defeitoRelatado}
                 </div>
               </div>
@@ -240,21 +241,21 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
 
         {/* Diagnóstico e Solução */}
         {(ordem.diagnosticoTecnico || ordem.solucaoAplicada) && (
-          <div className="mb-6">
-            <div className="bg-green-50 p-4 border-l-4 border-green-500">
-              <h2 className="text-lg font-bold mb-3">🔍 Diagnóstico e Solução</h2>
+          <div className="mb-4">
+            <div className="bg-green-50 p-3 border-l-4 border-green-500">
+              <h2 className="text-lg font-bold mb-2">🔍 Diagnóstico e Solução</h2>
               {ordem.diagnosticoTecnico && (
-                <div className="mb-3">
-                  <div className="font-semibold mb-2">Diagnóstico Técnico:</div>
-                  <div className="p-3 bg-white border text-sm">
+                <div className="mb-2">
+                  <div className="font-semibold mb-1">Diagnóstico Técnico:</div>
+                  <div className="p-2 bg-white border text-sm">
                     {ordem.diagnosticoTecnico}
                   </div>
                 </div>
               )}
               {ordem.solucaoAplicada && (
                 <div>
-                  <div className="font-semibold mb-2">Solução Aplicada:</div>
-                  <div className="p-3 bg-white border text-sm">
+                  <div className="font-semibold mb-1">Solução Aplicada:</div>
+                  <div className="p-2 bg-white border text-sm">
                     {ordem.solucaoAplicada}
                   </div>
                 </div>
@@ -265,10 +266,10 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
 
         {/* Observações Internas (só para visualização) */}
         {ordem.observacoesInternas && (
-          <div className="mb-6 no-print">
-            <div className="bg-yellow-50 p-4 border-l-4 border-yellow-500">
-              <h2 className="text-lg font-bold mb-3">📝 Observações Internas</h2>
-              <div className="p-3 bg-white border text-sm">
+          <div className="mb-4 no-print">
+            <div className="bg-yellow-50 p-3 border-l-4 border-yellow-500">
+              <h2 className="text-lg font-bold mb-2">📝 Observações Internas</h2>
+              <div className="p-2 bg-white border text-sm">
                 {ordem.observacoesInternas}
               </div>
             </div>
@@ -276,21 +277,21 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         )}
 
         {/* Detalhamento Financeiro */}
-        <div className="mb-6">
-          <div className="bg-yellow-50 p-4 border-l-4 border-yellow-500">
-            <h2 className="text-lg font-bold mb-3">💰 Detalhamento Financeiro</h2>
+        <div className="mb-4">
+          <div className="bg-yellow-50 p-3 border-l-4 border-yellow-500">
+            <h2 className="text-lg font-bold mb-2">💰 Detalhamento Financeiro</h2>
             
             {/* Peças utilizadas */}
             {ordem.pecasUtilizadas && ordem.pecasUtilizadas.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-3">Peças e Componentes Utilizados:</h3>
+              <div className="mb-3">
+                <h3 className="font-semibold mb-2">Peças e Componentes Utilizados:</h3>
                 <table className="table">
                   <thead>
                     <tr>
                       <th>Descrição</th>
-                      <th className="text-center" style={{width: '80px'}}>Qtd</th>
-                      <th className="text-right" style={{width: '100px'}}>Valor Unit.</th>
-                      <th className="text-right" style={{width: '100px'}}>Total</th>
+                      <th className="text-center" style={{width: '60px'}}>Qtd</th>
+                      <th className="text-right" style={{width: '80px'}}>Valor Unit.</th>
+                      <th className="text-right" style={{width: '80px'}}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -308,8 +309,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             )}
 
             {/* Resumo financeiro */}
-            <div className="bg-white p-4 border-2">
-              <div className="space-y-3">
+            <div className="bg-white p-3 border-2">
+              <div className="space-y-2">
                 {valorPecas > 0 && (
                   <div className="flex justify-between">
                     <span className="font-medium">Peças e Componentes:</span>
@@ -362,8 +363,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
 
             {/* Informações de pagamento (se finalizadas) */}
             {ordem.finalizada && ordem.formaPagamento && (
-              <div className="mt-4 bg-green-50 p-3 border">
-                <h4 className="font-semibold mb-2">Informações de Pagamento:</h4>
+              <div className="mt-3 bg-green-50 p-2 border">
+                <h4 className="font-semibold mb-1">Informações de Pagamento:</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <strong>Forma de Pagamento:</strong> {formaPagamentoTexts[ordem.formaPagamento]}
@@ -375,7 +376,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                   )}
                 </div>
                 {ordem.observacoesPagamento && (
-                  <div className="mt-2">
+                  <div className="mt-1">
                     <strong>Observações:</strong> {ordem.observacoesPagamento}
                   </div>
                 )}
@@ -385,9 +386,9 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Prazos e Garantia */}
-        <div className="mb-8">
-          <div className="bg-gray-50 p-4 border-l-4 border-gray-500">
-            <h2 className="text-lg font-bold mb-3">📅 Prazos e Garantia</h2>
+        <div className="mb-6">
+          <div className="bg-gray-50 p-3 border-l-4 border-gray-500">
+            <h2 className="text-lg font-bold mb-2">📅 Prazos e Garantia</h2>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="font-semibold text-gray-600">Data de Abertura</div>
@@ -405,7 +406,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               </div>
             </div>
             {ordem.dataConclusao && (
-              <div className="mt-4 text-center">
+              <div className="mt-3 text-center">
                 <div className="font-semibold text-gray-600">Data de Conclusão</div>
                 <div className="text-lg font-bold text-green-600">{new Date(ordem.dataConclusao).toLocaleDateString('pt-BR')}</div>
               </div>
@@ -414,10 +415,10 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Termos e Condições */}
-        <div className="mb-16">
-          <div className="bg-gray-100 p-4">
-            <h3 className="font-bold mb-3">📋 Termos e Condições de Garantia:</h3>
-            <div className="text-sm text-gray-700 space-y-2">
+        <div className="mb-12">
+          <div className="bg-gray-100 p-3">
+            <h3 className="font-bold mb-2">📋 Termos e Condições de Garantia:</h3>
+            <div className="text-sm text-gray-700 space-y-1">
               <p>• Este serviço possui garantia de <strong>{ordem.garantia} dias</strong> a partir da data de entrega, cobrindo exclusivamente defeitos relacionados ao serviço executado.</p>
               <p>• A garantia NÃO cobre danos causados por: mau uso, quedas, contato com líquidos, exposição a temperaturas extremas, ou desgaste natural dos componentes.</p>
               <p>• Para validar a garantia, é obrigatório apresentar esta ordem de serviço.</p>
@@ -428,8 +429,8 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         </div>
 
         {/* Assinaturas */}
-        <div className="mt-12">
-          <div className="grid grid-cols-2 gap-12">
+        <div className="mt-8">
+          <div className="grid grid-cols-2 gap-8">
             <div className="text-center">
               <div className="signature-line">
                 <p className="font-semibold">Assinatura do Cliente</p>
@@ -446,7 +447,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             </div>
           </div>
           
-          <div className="text-center mt-6 text-xs text-gray-500">
+          <div className="text-center mt-4 text-xs text-gray-500">
             <p>Documento gerado em {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR')}</p>
             <p>TechService - Sistema de Gerenciamento Técnico | www.techservice.com</p>
           </div>

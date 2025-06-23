@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Calendar, FileText, Users, Package } from 'lucide-react';
 import { OrdemServico, Cliente } from '../types';
 import { formatCurrency } from '../utils/masks';
 import { SortableTable, Column } from '../components/ui/sortable-table';
+import { Button } from '../components/ui/button';
 
 interface FinancialData {
   receita: number;
@@ -137,6 +137,24 @@ export const Financeiro = () => {
             Módulo Financeiro
           </h1>
           <p className="text-gray-600">Controle financeiro e relatórios</p>
+        </div>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => alert('Funcionalidade em desenvolvimento')}
+          >
+            <TrendingDown size={18} className="text-red-600" />
+            Contas a Pagar
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => alert('Funcionalidade em desenvolvimento')}
+          >
+            <TrendingUp size={18} className="text-green-600" />
+            Contas a Receber
+          </Button>
         </div>
       </div>
 

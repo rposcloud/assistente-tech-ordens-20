@@ -19,13 +19,13 @@ export const Sidebar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200">
+    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full">
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-blue-600">TechService</h1>
         <p className="text-sm text-gray-500">Sistema de Gestão</p>
       </div>
       
-      <nav className="mt-6">
+      <nav className="mt-6 flex-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -43,7 +43,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      <div className="absolute bottom-6 left-6 right-6">
+      <div className="p-6 mt-auto">
         <button
           onClick={logout}
           className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg"
