@@ -6,15 +6,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Calendar, CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Trash2 } from 'lucide-react';
 import { useClientes } from '@/hooks/useClientes';
+import { useProdutos } from '@/hooks/useProdutos';
 import { OrdemServico } from '@/hooks/useOrdens';
+
+interface ProdutoSelecionado {
+  id: string;
+  nome: string;
+  quantidade: number;
+  valorUnitario: number;
+  valorTotal: number;
+}
 
 interface OrdemServicoFormProps {
   onSubmit: (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => void;
@@ -30,6 +34,9 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   loading = false
 }) => {
   const { clientes } = useClientes();
+  const { produtos } = useProdutos();
+  const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
+
   const [formData, setFormData] = useState<Partial<OrdemServico>>({
     cliente_id: '',
     tipo_equipamento: 'smartphone',
@@ -38,41 +45,36 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     numero_serie: '',
     senha_equipamento: '',
     acessorios: '',
-    condicoes_equipamento: '',
     defeito_relatado: '',
     diagnostico_tecnico: '',
     solucao_aplicada: '',
     tecnico_responsavel: '',
-    prioridade: 'normal',
     valor_mao_obra: 0,
-    valor_orcamento: 0,
     valor_total: 0,
     desconto: 0,
     acrescimo: 0,
     valor_final: 0,
-    forma_pagamento: 'dinheiro',
-    status_pagamento: 'pendente',
-    data_vencimento: '',
-    data_previsao_entrega: '',
-    prazo_entrega: '',
     garantia: 90,
     status: 'aguardando_diagnostico',
-    aprovado_cliente: false,
     observacoes_internas: '',
-    observacoes_pagamento: '',
-    finalizada: false,
     ...initialData
   });
 
   // Calcular valor final automaticamente
   useEffect(() => {
-    const valorBase = (formData.valor_total || 0);
+    const valorProdutos = produtosSelecionados.reduce((total, produto) => total + produto.valorTotal, 0);
+    const valorBase = (formData.valor_mao_obra || 0) + valorProdutos;
     const desconto = (formData.desconto || 0);
     const acrescimo = (formData.acrescimo || 0);
-    const valorFinal = valorBase - desconto + acrescimo;
+    const valorTotal = valorBase;
+    const valorFinal = valorTotal - desconto + acrescimo;
     
-    setFormData(prev => ({ ...prev, valor_final: valorFinal }));
-  }, [formData.valor_total, formData.desconto, formData.acrescimo]);
+    setFormData(prev => ({ 
+      ...prev, 
+      valor_total: valorTotal,
+      valor_final: valorFinal 
+    }));
+  }, [formData.valor_mao_obra, formData.desconto, formData.acrescimo, produtosSelecionados]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,11 +85,41 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const adicionarProduto = (produtoId: string) => {
+    const produto = produtos.find(p => p.id === produtoId);
+    if (!produto) return;
+
+    const novoProduto: ProdutoSelecionado = {
+      id: produto.id,
+      nome: produto.nome,
+      quantidade: 1,
+      valorUnitario: produto.precoVenda,
+      valorTotal: produto.precoVenda
+    };
+
+    setProdutosSelecionados(prev => [...prev, novoProduto]);
+  };
+
+  const removerProduto = (index: number) => {
+    setProdutosSelecionados(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const atualizarQuantidadeProduto = (index: number, quantidade: number) => {
+    setProdutosSelecionados(prev => 
+      prev.map((produto, i) => 
+        i === index 
+          ? { ...produto, quantidade, valorTotal: quantidade * produto.valorUnitario }
+          : produto
+      )
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Dados Básicos */}
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Cliente e Equipamento</CardTitle>
+          <CardTitle>Dados Básicos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -100,7 +132,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
                 <SelectContent>
                   {clientes.map((cliente) => (
                     <SelectItem key={cliente.id} value={cliente.id}>
-                      {cliente.nome} - {cliente.telefone}
+                      {cliente.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -124,24 +156,22 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="marca">Marca *</Label>
+              <Label htmlFor="marca">Marca</Label>
               <Input
                 id="marca"
                 value={formData.marca}
                 onChange={(e) => updateField('marca', e.target.value)}
                 placeholder="Ex: Apple, Samsung, Dell"
-                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="modelo">Modelo *</Label>
+              <Label htmlFor="modelo">Modelo</Label>
               <Input
                 id="modelo"
                 value={formData.modelo}
                 onChange={(e) => updateField('modelo', e.target.value)}
                 placeholder="Ex: iPhone 13, Galaxy S21"
-                required
               />
             </div>
 
@@ -151,12 +181,12 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
                 id="numero_serie"
                 value={formData.numero_serie}
                 onChange={(e) => updateField('numero_serie', e.target.value)}
-                placeholder="Número de série do equipamento"
+                placeholder="Número de série"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="senha_equipamento">Senha/PIN do Equipamento</Label>
+              <Label htmlFor="senha_equipamento">Senha/PIN</Label>
               <Input
                 id="senha_equipamento"
                 value={formData.senha_equipamento}
@@ -166,72 +196,58 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="acessorios">Acessórios Entregues</Label>
-            <Textarea
-              id="acessorios"
-              value={formData.acessorios}
-              onChange={(e) => updateField('acessorios', e.target.value)}
-              placeholder="Ex: Carregador, fone de ouvido, capa..."
-              rows={2}
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="acessorios">Acessórios</Label>
+              <Textarea
+                id="acessorios"
+                value={formData.acessorios}
+                onChange={(e) => updateField('acessorios', e.target.value)}
+                placeholder="Carregador, fone, capa..."
+                rows={2}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="condicoes_equipamento">Condições do Equipamento</Label>
-            <Textarea
-              id="condicoes_equipamento"
-              value={formData.condicoes_equipamento}
-              onChange={(e) => updateField('condicoes_equipamento', e.target.value)}
-              placeholder="Estado físico, arranhões, marcas de uso..."
-              rows={2}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Problema e Diagnóstico</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="defeito_relatado">Defeito Relatado pelo Cliente *</Label>
-            <Textarea
-              id="defeito_relatado"
-              value={formData.defeito_relatado}
-              onChange={(e) => updateField('defeito_relatado', e.target.value)}
-              placeholder="Descreva o problema relatado pelo cliente"
-              rows={3}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="diagnostico_tecnico">Diagnóstico Técnico</Label>
-            <Textarea
-              id="diagnostico_tecnico"
-              value={formData.diagnostico_tecnico}
-              onChange={(e) => updateField('diagnostico_tecnico', e.target.value)}
-              placeholder="Diagnóstico técnico detalhado"
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="solucao_aplicada">Solução Aplicada</Label>
-            <Textarea
-              id="solucao_aplicada"
-              value={formData.solucao_aplicada}
-              onChange={(e) => updateField('solucao_aplicada', e.target.value)}
-              placeholder="Descreva o reparo realizado"
-              rows={3}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="defeito_relatado">Defeito Relatado *</Label>
+              <Textarea
+                id="defeito_relatado"
+                value={formData.defeito_relatado}
+                onChange={(e) => updateField('defeito_relatado', e.target.value)}
+                placeholder="Problema relatado pelo cliente"
+                rows={2}
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tecnico_responsavel">Técnico Responsável</Label>
+              <Label htmlFor="diagnostico_tecnico">Diagnóstico Técnico</Label>
+              <Textarea
+                id="diagnostico_tecnico"
+                value={formData.diagnostico_tecnico}
+                onChange={(e) => updateField('diagnostico_tecnico', e.target.value)}
+                placeholder="Diagnóstico do técnico"
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="solucao_aplicada">Solução Aplicada</Label>
+              <Textarea
+                id="solucao_aplicada"
+                value={formData.solucao_aplicada}
+                onChange={(e) => updateField('solucao_aplicada', e.target.value)}
+                placeholder="Reparo realizado"
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tecnico_responsavel">Técnico</Label>
               <Input
                 id="tecnico_responsavel"
                 value={formData.tecnico_responsavel}
@@ -241,59 +257,112 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="prioridade">Prioridade</Label>
-              <Select value={formData.prioridade} onValueChange={(value) => updateField('prioridade', value)}>
+              <Label htmlFor="status">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => updateField('status', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="baixa">Baixa</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="urgente">Urgente</SelectItem>
+                  <SelectItem value="aguardando_diagnostico">Aguardando Diagnóstico</SelectItem>
+                  <SelectItem value="aguardando_aprovacao">Aguardando Aprovação</SelectItem>
+                  <SelectItem value="aguardando_pecas">Aguardando Peças</SelectItem>
+                  <SelectItem value="em_reparo">Em Reparo</SelectItem>
+                  <SelectItem value="pronto_entrega">Pronto p/ Entrega</SelectItem>
+                  <SelectItem value="entregue">Entregue</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="garantia">Garantia (dias)</Label>
+              <Input
+                id="garantia"
+                type="number"
+                value={formData.garantia}
+                onChange={(e) => updateField('garantia', parseInt(e.target.value) || 90)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="observacoes_internas">Observações Internas</Label>
+            <Textarea
+              id="observacoes_internas"
+              value={formData.observacoes_internas}
+              onChange={(e) => updateField('observacoes_internas', e.target.value)}
+              placeholder="Observações para uso interno"
+              rows={2}
+            />
           </div>
         </CardContent>
       </Card>
 
+      {/* Produtos e Serviços */}
       <Card>
         <CardHeader>
-          <CardTitle>Valores e Pagamento</CardTitle>
+          <CardTitle>Produtos e Serviços</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label>Adicionar Produto/Serviço</Label>
+            <Select onValueChange={adicionarProduto}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um produto ou serviço" />
+              </SelectTrigger>
+              <SelectContent>
+                {produtos.map((produto) => (
+                  <SelectItem key={produto.id} value={produto.id}>
+                    {produto.nome} - R$ {produto.precoVenda.toFixed(2)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {produtosSelecionados.length > 0 && (
             <div className="space-y-2">
-              <Label htmlFor="valor_mao_obra">Valor Mão de Obra (R$)</Label>
+              <Label>Produtos/Serviços Selecionados</Label>
+              <div className="space-y-2">
+                {produtosSelecionados.map((produto, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <p className="font-medium">{produto.nome}</p>
+                      <p className="text-sm text-gray-600">
+                        R$ {produto.valorUnitario.toFixed(2)} x {produto.quantidade} = R$ {produto.valorTotal.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={produto.quantidade}
+                        onChange={(e) => atualizarQuantidadeProduto(index, parseInt(e.target.value) || 1)}
+                        className="w-20"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removerProduto(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="valor_mao_obra">Mão de Obra (R$)</Label>
               <Input
                 id="valor_mao_obra"
                 type="number"
                 step="0.01"
                 value={formData.valor_mao_obra}
                 onChange={(e) => updateField('valor_mao_obra', parseFloat(e.target.value) || 0)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valor_orcamento">Valor Orçamento (R$)</Label>
-              <Input
-                id="valor_orcamento"
-                type="number"
-                step="0.01"
-                value={formData.valor_orcamento}
-                onChange={(e) => updateField('valor_orcamento', parseFloat(e.target.value) || 0)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="valor_total">Valor Total (R$)</Label>
-              <Input
-                id="valor_total"
-                type="number"
-                step="0.01"
-                value={formData.valor_total}
-                onChange={(e) => updateField('valor_total', parseFloat(e.target.value) || 0)}
               />
             </div>
 
@@ -327,108 +396,9 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
                 step="0.01"
                 value={formData.valor_final}
                 readOnly
-                className="bg-gray-100"
+                className="bg-gray-100 font-medium"
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
-              <Select value={formData.forma_pagamento} onValueChange={(value) => updateField('forma_pagamento', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                  <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                  <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
-                  <SelectItem value="pix">PIX</SelectItem>
-                  <SelectItem value="transferencia">Transferência</SelectItem>
-                  <SelectItem value="parcelado">Parcelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status_pagamento">Status do Pagamento</Label>
-              <Select value={formData.status_pagamento} onValueChange={(value) => updateField('status_pagamento', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="pago">Pago</SelectItem>
-                  <SelectItem value="parcial">Parcial</SelectItem>
-                  <SelectItem value="cancelado">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Prazos e Status</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Data de Vencimento</Label>
-              <Input
-                type="date"
-                value={formData.data_vencimento}
-                onChange={(e) => updateField('data_vencimento', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Previsão de Entrega</Label>
-              <Input
-                type="date"
-                value={formData.data_previsao_entrega}
-                onChange={(e) => updateField('data_previsao_entrega', e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="garantia">Garantia (dias)</Label>
-              <Input
-                id="garantia"
-                type="number"
-                value={formData.garantia}
-                onChange={(e) => updateField('garantia', parseInt(e.target.value) || 90)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status">Status da Ordem</Label>
-            <Select value={formData.status} onValueChange={(value) => updateField('status', value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="aguardando_diagnostico">Aguardando Diagnóstico</SelectItem>
-                <SelectItem value="aguardando_aprovacao">Aguardando Aprovação</SelectItem>
-                <SelectItem value="aguardando_pecas">Aguardando Peças</SelectItem>
-                <SelectItem value="em_reparo">Em Reparo</SelectItem>
-                <SelectItem value="pronto_entrega">Pronto para Entrega</SelectItem>
-                <SelectItem value="entregue">Entregue</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="observacoes_internas">Observações Internas</Label>
-            <Textarea
-              id="observacoes_internas"
-              value={formData.observacoes_internas}
-              onChange={(e) => updateField('observacoes_internas', e.target.value)}
-              placeholder="Observações para uso interno"
-              rows={3}
-            />
           </div>
         </CardContent>
       </Card>
