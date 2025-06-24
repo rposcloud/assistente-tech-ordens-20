@@ -40,11 +40,17 @@ export interface OrdemServico {
   finalizada?: boolean;
   lucro?: number;
   margem_lucro?: number;
-  historico_status?: any[];
+  historico_status?: any;
   data_abertura?: string;
   data_conclusao?: string;
   created_at?: string;
   updated_at?: string;
+  // Para dados relacionados
+  clientes?: {
+    nome: string;
+    telefone: string;
+    email: string;
+  };
 }
 
 export const useOrdens = () => {
@@ -71,7 +77,14 @@ export const useOrdens = () => {
         .order('data_abertura', { ascending: false });
 
       if (error) throw error;
-      setOrdens(data || []);
+      
+      // Converter os dados para o tipo esperado
+      const ordensFormatadas = (data || []).map(ordem => ({
+        ...ordem,
+        historico_status: ordem.historico_status || []
+      })) as OrdemServico[];
+      
+      setOrdens(ordensFormatadas);
     } catch (error) {
       console.error('Erro ao buscar ordens:', error);
     } finally {
@@ -95,10 +108,13 @@ export const useOrdens = () => {
 
       const numeroOrdem = `OS-${String((count || 0) + 1).padStart(4, '0')}`;
 
+      // Remover dados aninhados antes de inserir
+      const { clientes, ...dadosParaInserir } = ordemData as any;
+
       const { data, error } = await supabase
         .from('ordens_servico')
         .insert({
-          ...ordemData,
+          ...dadosParaInserir,
           user_id: user.id,
           numero: numeroOrdem,
           data_abertura: new Date().toISOString()
@@ -120,9 +136,12 @@ export const useOrdens = () => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
+      // Remover dados aninhados antes de atualizar
+      const { clientes, ...dadosParaAtualizar } = ordemData as any;
+
       const { data, error } = await supabase
         .from('ordens_servico')
-        .update(ordemData)
+        .update(dadosParaAtualizar)
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
