@@ -6,8 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useClientes } from '@/hooks/useClientes';
 import { useProdutos } from '@/hooks/useProdutos';
 import { OrdemServico } from '@/hooks/useOrdens';
@@ -36,27 +35,28 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   const { clientes } = useClientes();
   const { produtos } = useProdutos();
   const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState<string>('');
 
-  const [formData, setFormData] = useState<Partial<OrdemServico>>({
+  const [formData, setFormData] = useState({
     cliente_id: '',
-    tipo_equipamento: 'smartphone',
+    tipo_equipamento: 'smartphone' as const,
     marca: '',
     modelo: '',
     numero_serie: '',
-    senha_equipamento: '',
-    acessorios: '',
     defeito_relatado: '',
     diagnostico_tecnico: '',
     solucao_aplicada: '',
     tecnico_responsavel: '',
     valor_mao_obra: 0,
     valor_total: 0,
+    valor_final: 0,
+    status: 'aguardando_diagnostico' as const,
+    garantia: 90,
+    observacoes_internas: '',
+    senha_equipamento: '',
+    acessorios: '',
     desconto: 0,
     acrescimo: 0,
-    valor_final: 0,
-    garantia: 90,
-    status: 'aguardando_diagnostico',
-    observacoes_internas: '',
     ...initialData
   });
 
@@ -78,7 +78,34 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData as Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>);
+    
+    // Criar dados completos da ordem com todos os campos necessários
+    const dadosCompletos = {
+      ...formData,
+      numero: '', // Será gerado no backend
+      user_id: '', // Será definido no backend
+      data_abertura: new Date().toISOString(),
+      finalizada: false,
+      aprovado_cliente: false,
+      historico_status: [],
+      // Garantir que todos os campos numéricos tenham valores válidos
+      valor_mao_obra: Number(formData.valor_mao_obra) || 0,
+      valor_total: Number(formData.valor_total) || 0,
+      valor_final: Number(formData.valor_final) || 0,
+      desconto: Number(formData.desconto) || 0,
+      acrescimo: Number(formData.acrescimo) || 0,
+      garantia: Number(formData.garantia) || 90,
+      // Campos opcionais com valores padrão
+      valor_orcamento: 0,
+      lucro: 0,
+      margem_lucro: 0,
+      prioridade: 'normal'
+    };
+
+    console.log('Dados da ordem a serem salvos:', dadosCompletos);
+    console.log('Produtos selecionados:', produtosSelecionados);
+    
+    onSubmit(dadosCompletos);
   };
 
   const updateField = (field: string, value: any) => {
@@ -86,18 +113,34 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   };
 
   const adicionarProduto = (produtoId: string) => {
+    if (!produtoId) return;
+    
     const produto = produtos.find(p => p.id === produtoId);
     if (!produto) return;
 
-    const novoProduto: ProdutoSelecionado = {
-      id: produto.id,
-      nome: produto.nome,
-      quantidade: 1,
-      valorUnitario: produto.precoVenda,
-      valorTotal: produto.precoVenda
-    };
+    // Verificar se o produto já foi adicionado
+    const produtoJaAdicionado = produtosSelecionados.find(p => p.id === produtoId);
+    if (produtoJaAdicionado) {
+      // Se já foi adicionado, aumentar a quantidade
+      atualizarQuantidadeProduto(
+        produtosSelecionados.findIndex(p => p.id === produtoId),
+        produtoJaAdicionado.quantidade + 1
+      );
+    } else {
+      // Se não foi adicionado, criar novo item
+      const novoProduto: ProdutoSelecionado = {
+        id: produto.id,
+        nome: produto.nome,
+        quantidade: 1,
+        valorUnitario: produto.precoVenda,
+        valorTotal: produto.precoVenda
+      };
 
-    setProdutosSelecionados(prev => [...prev, novoProduto]);
+      setProdutosSelecionados(prev => [...prev, novoProduto]);
+    }
+
+    // Resetar o select
+    setProdutoSelecionado('');
   };
 
   const removerProduto = (index: number) => {
@@ -105,6 +148,11 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   };
 
   const atualizarQuantidadeProduto = (index: number, quantidade: number) => {
+    if (quantidade <= 0) {
+      removerProduto(index);
+      return;
+    }
+
     setProdutosSelecionados(prev => 
       prev.map((produto, i) => 
         i === index 
@@ -125,7 +173,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cliente_id">Cliente *</Label>
-              <Select value={formData.cliente_id} onValueChange={(value) => updateField('cliente_id', value)}>
+              <Select value={formData.cliente_id} onValueChange={(value) => updateField('cliente_id', value)} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
@@ -141,7 +189,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="tipo_equipamento">Tipo de Equipamento *</Label>
-              <Select value={formData.tipo_equipamento} onValueChange={(value) => updateField('tipo_equipamento', value)}>
+              <Select value={formData.tipo_equipamento} onValueChange={(value) => updateField('tipo_equipamento', value)} required>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -198,17 +246,6 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="acessorios">Acessórios</Label>
-              <Textarea
-                id="acessorios"
-                value={formData.acessorios}
-                onChange={(e) => updateField('acessorios', e.target.value)}
-                placeholder="Carregador, fone, capa..."
-                rows={2}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="defeito_relatado">Defeito Relatado *</Label>
               <Textarea
                 id="defeito_relatado"
@@ -219,27 +256,14 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
                 required
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="diagnostico_tecnico">Diagnóstico Técnico</Label>
-              <Textarea
-                id="diagnostico_tecnico"
-                value={formData.diagnostico_tecnico}
-                onChange={(e) => updateField('diagnostico_tecnico', e.target.value)}
-                placeholder="Diagnóstico do técnico"
-                rows={2}
-              />
-            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="solucao_aplicada">Solução Aplicada</Label>
+              <Label htmlFor="acessorios">Acessórios</Label>
               <Textarea
-                id="solucao_aplicada"
-                value={formData.solucao_aplicada}
-                onChange={(e) => updateField('solucao_aplicada', e.target.value)}
-                placeholder="Reparo realizado"
+                id="acessorios"
+                value={formData.acessorios}
+                onChange={(e) => updateField('acessorios', e.target.value)}
+                placeholder="Carregador, fone, capa..."
                 rows={2}
               />
             </div>
@@ -283,17 +307,6 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
               />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="observacoes_internas">Observações Internas</Label>
-            <Textarea
-              id="observacoes_internas"
-              value={formData.observacoes_internas}
-              onChange={(e) => updateField('observacoes_internas', e.target.value)}
-              placeholder="Observações para uso interno"
-              rows={2}
-            />
-          </div>
         </CardContent>
       </Card>
 
@@ -305,7 +318,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Adicionar Produto/Serviço</Label>
-            <Select onValueChange={adicionarProduto}>
+            <Select value={produtoSelecionado} onValueChange={adicionarProduto}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um produto ou serviço" />
               </SelectTrigger>
@@ -324,7 +337,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
               <Label>Produtos/Serviços Selecionados</Label>
               <div className="space-y-2">
                 {produtosSelecionados.map((produto, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={`${produto.id}-${index}`} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium">{produto.nome}</p>
                       <p className="text-sm text-gray-600">
