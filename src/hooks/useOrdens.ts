@@ -7,7 +7,7 @@ export interface OrdemServico {
   id?: string;
   numero: string;
   cliente_id: string;
-  tipo_equipamento: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros';
+  tipo_equipamento: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
   marca: string;
   modelo: string;
   numero_serie?: string;
