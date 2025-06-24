@@ -1,10 +1,165 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar, Edit } from 'lucide-react';
+import { useFinanceiro, EntradaFinanceira } from '@/hooks/useFinanceiro';
+import { EntradaFinanceiraModal } from '@/components/modals/EntradaFinanceiraModal';
+import { SortableTable, Column } from '@/components/ui/sortable-table';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+
+const statusColors = {
+  pendente: 'bg-yellow-100 text-yellow-800',
+  pago: 'bg-green-100 text-green-800',
+  parcial: 'bg-blue-100 text-blue-800',
+  cancelado: 'bg-red-100 text-red-800'
+};
+
+const statusLabels = {
+  pendente: 'Pendente',
+  pago: 'Pago',
+  parcial: 'Parcial',
+  cancelado: 'Cancelado'
+};
 
 export const Financeiro = () => {
+  const { entradas, categorias, loading, createEntrada, updateEntrada } = useFinanceiro();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedEntrada, setSelectedEntrada] = useState<EntradaFinanceira | undefined>();
+  const [modalLoading, setModalLoading] = useState(false);
+
+  // Calcular estatísticas do mês atual
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  const entradasMesAtual = entradas.filter(entrada => {
+    const dataVencimento = new Date(entrada.data_vencimento);
+    return dataVencimento.getMonth() === currentMonth && dataVencimento.getFullYear() === currentYear;
+  });
+
+  const receitas = entradasMesAtual
+    .filter(entrada => entrada.tipo === 'receita' && entrada.status === 'pago')
+    .reduce((sum, entrada) => sum + entrada.valor, 0);
+
+  const despesas = entradasMesAtual
+    .filter(entrada => entrada.tipo === 'despesa' && entrada.status === 'pago')
+    .reduce((sum, entrada) => sum + entrada.valor, 0);
+
+  const saldo = receitas - despesas;
+
+  const aReceber = entradas
+    .filter(entrada => entrada.tipo === 'receita' && entrada.status === 'pendente')
+    .reduce((sum, entrada) => sum + entrada.valor, 0);
+
+  const handleSubmit = async (data: Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      setModalLoading(true);
+      if (selectedEntrada) {
+        await updateEntrada(selectedEntrada.id!, data);
+        toast.success('Entrada atualizada com sucesso!');
+      } else {
+        await createEntrada(data);
+        toast.success('Entrada criada com sucesso!');
+      }
+      setModalOpen(false);
+      setSelectedEntrada(undefined);
+    } catch (error) {
+      toast.error('Erro ao salvar entrada');
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleEdit = (entrada: EntradaFinanceira) => {
+    setSelectedEntrada(entrada);
+    setModalOpen(true);
+  };
+
+  const handleNewEntrada = () => {
+    setSelectedEntrada(undefined);
+    setModalOpen(true);
+  };
+
+  const columns: Column<EntradaFinanceira>[] = [
+    {
+      key: 'tipo',
+      label: 'Tipo',
+      sortable: true,
+      render: (entrada) => (
+        <Badge className={entrada.tipo === 'receita' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+          {entrada.tipo === 'receita' ? 'Receita' : 'Despesa'}
+        </Badge>
+      )
+    },
+    {
+      key: 'descricao',
+      label: 'Descrição',
+      sortable: true
+    },
+    {
+      key: 'categoria',
+      label: 'Categoria',
+      sortable: true
+    },
+    {
+      key: 'valor',
+      label: 'Valor',
+      sortable: true,
+      render: (entrada) => `R$ ${entrada.valor.toFixed(2)}`
+    },
+    {
+      key: 'forma_pagamento',
+      label: 'Forma Pagamento',
+      sortable: true,
+      render: (entrada) => {
+        const formas = {
+          dinheiro: 'Dinheiro',
+          cartao_credito: 'Cartão Crédito',
+          cartao_debito: 'Cartão Débito',
+          pix: 'PIX',
+          transferencia: 'Transferência',
+          parcelado: 'Parcelado'
+        };
+        return formas[entrada.forma_pagamento] || entrada.forma_pagamento;
+      }
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      render: (entrada) => (
+        <Badge className={statusColors[entrada.status]}>
+          {statusLabels[entrada.status]}
+        </Badge>
+      )
+    },
+    {
+      key: 'data_vencimento',
+      label: 'Vencimento',
+      sortable: true,
+      render: (entrada) => new Date(entrada.data_vencimento).toLocaleDateString('pt-BR')
+    },
+    {
+      key: 'actions',
+      label: 'Ações',
+      sortable: false,
+      render: (entrada) => (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEdit(entrada);
+          }}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -14,7 +169,7 @@ export const Financeiro = () => {
             Acompanhe receitas, despesas e fluxo de caixa do seu negócio
           </p>
         </div>
-        <Button className="flex items-center">
+        <Button onClick={handleNewEntrada} className="flex items-center">
           <Plus className="mr-2 h-4 w-4" />
           Nova Entrada
         </Button>
@@ -30,8 +185,8 @@ export const Financeiro = () => {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">R$ 0,00</div>
-            <p className="text-xs text-gray-500 mt-1">+0% em relação ao mês anterior</p>
+            <div className="text-2xl font-bold text-green-600">R$ {receitas.toFixed(2)}</div>
+            <p className="text-xs text-gray-500 mt-1">Valores recebidos</p>
           </CardContent>
         </Card>
 
@@ -43,8 +198,8 @@ export const Financeiro = () => {
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">R$ 0,00</div>
-            <p className="text-xs text-gray-500 mt-1">+0% em relação ao mês anterior</p>
+            <div className="text-2xl font-bold text-red-600">R$ {despesas.toFixed(2)}</div>
+            <p className="text-xs text-gray-500 mt-1">Valores pagos</p>
           </CardContent>
         </Card>
 
@@ -56,7 +211,9 @@ export const Financeiro = () => {
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">R$ 0,00</div>
+            <div className={`text-2xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {saldo.toFixed(2)}
+            </div>
             <p className="text-xs text-gray-500 mt-1">Receitas - Despesas</p>
           </CardContent>
         </Card>
@@ -69,39 +226,8 @@ export const Financeiro = () => {
             <Calendar className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">R$ 0,00</div>
-            <p className="text-xs text-gray-500 mt-1">Pendências este mês</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Gráfico de Fluxo de Caixa */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Fluxo de Caixa</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-              <div className="text-center">
-                <DollarSign className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">Gráfico será exibido quando houver dados</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Receitas vs Despesas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-lg">
-              <div className="text-center">
-                <TrendingUp className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">Comparativo será exibido quando houver dados</p>
-              </div>
-            </div>
+            <div className="text-2xl font-bold text-yellow-600">R$ {aReceber.toFixed(2)}</div>
+            <p className="text-xs text-gray-500 mt-1">Pendências</p>
           </CardContent>
         </Card>
       </div>
@@ -109,25 +235,34 @@ export const Financeiro = () => {
       {/* Lista de Movimentações */}
       <Card>
         <CardHeader>
-          <CardTitle>Movimentações Recentes</CardTitle>
+          <CardTitle>Movimentações</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-16">
-            <DollarSign className="h-16 w-16 text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Nenhuma movimentação encontrada
-            </h3>
-            <p className="text-gray-600 text-center mb-6 max-w-md">
-              Comece registrando receitas e despesas para acompanhar o 
-              desempenho financeiro do seu negócio.
-            </p>
-            <Button className="flex items-center">
-              <Plus className="mr-2 h-4 w-4" />
-              Registrar Primeira Movimentação
-            </Button>
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-8">Carregando...</div>
+          ) : (
+            <SortableTable
+              data={entradas}
+              columns={columns}
+              keyExtractor={(entrada) => entrada.id!}
+              emptyMessage="Nenhuma movimentação encontrada"
+              emptyIcon={<DollarSign className="h-16 w-16 text-gray-300 mb-4" />}
+            />
+          )}
         </CardContent>
       </Card>
+
+      <EntradaFinanceiraModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedEntrada(undefined);
+        }}
+        onSubmit={handleSubmit}
+        categorias={categorias}
+        initialData={selectedEntrada}
+        loading={modalLoading}
+      />
     </div>
   );
 };

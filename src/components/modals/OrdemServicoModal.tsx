@@ -1,0 +1,39 @@
+
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { OrdemServicoForm } from '@/components/forms/OrdemServicoForm';
+import { OrdemServico } from '@/hooks/useOrdens';
+
+interface OrdemServicoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => void;
+  initialData?: OrdemServico;
+  loading?: boolean;
+}
+
+export const OrdemServicoModal: React.FC<OrdemServicoModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  loading = false
+}) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {initialData ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço'}
+          </DialogTitle>
+        </DialogHeader>
+        <OrdemServicoForm
+          onSubmit={onSubmit}
+          onCancel={onClose}
+          initialData={initialData}
+          loading={loading}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};
