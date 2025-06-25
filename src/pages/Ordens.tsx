@@ -33,7 +33,7 @@ export const Ordens = () => {
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Calcular estatísticas
+  // Calculate statistics
   const stats = {
     aguardando_diagnostico: ordens.filter(o => o.status === 'aguardando_diagnostico').length,
     em_reparo: ordens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
@@ -64,6 +64,16 @@ export const Ordens = () => {
   const handleEdit = (ordem: OrdemServico) => {
     setSelectedOrdem(ordem);
     setModalOpen(true);
+  };
+
+  const handleView = (ordem: OrdemServico) => {
+    console.log('Viewing order:', ordem);
+    // TODO: Implement view functionality
+  };
+
+  const handleDelete = (ordem: OrdemServico) => {
+    console.log('Delete order:', ordem);
+    // TODO: Implement delete functionality
   };
 
   const handleNewOrdem = () => {
@@ -122,10 +132,33 @@ export const Ordens = () => {
             variant="outline"
             onClick={(e) => {
               e.stopPropagation();
+              handleView(ordem);
+            }}
+            title="Visualizar"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
               handleEdit(ordem);
             }}
+            title="Editar"
           >
             <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(ordem);
+            }}
+            title="Excluir"
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -147,7 +180,7 @@ export const Ordens = () => {
         </Button>
       </div>
 
-      {/* Cards de Status */}
+      {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -198,7 +231,7 @@ export const Ordens = () => {
         </Card>
       </div>
 
-      {/* Tabela de Ordens */}
+      {/* Orders Table */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Ordens</CardTitle>

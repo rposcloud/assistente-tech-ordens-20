@@ -5,21 +5,22 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export interface EntradaFinanceira {
   id?: string;
+  user_id?: string;
   tipo: 'receita' | 'despesa';
+  categoria: string;
   descricao: string;
   valor: number;
-  categoria: string;
   forma_pagamento: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'parcelado';
   data_vencimento: string;
   status: 'pendente' | 'pago' | 'parcial' | 'cancelado';
+  observacoes?: string;
   parcelas?: number;
   parcela_atual?: number;
   valor_parcela?: number;
+  pessoa_responsavel?: string;
+  numero_documento?: string;
   centro_custo?: string;
   conta_bancaria?: string;
-  numero_documento?: string;
-  pessoa_responsavel?: string;
-  observacoes?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -29,6 +30,8 @@ export interface CategoriaFinanceira {
   nome: string;
   tipo: 'receita' | 'despesa';
   ativo: boolean;
+  user_id: string;
+  created_at: string;
 }
 
 export const useFinanceiro = () => {
@@ -51,7 +54,7 @@ export const useFinanceiro = () => {
       if (error) throw error;
       setEntradas(data || []);
     } catch (error) {
-      console.error('Erro ao buscar entradas:', error);
+      console.error('Erro ao buscar entradas financeiras:', error);
     } finally {
       setLoading(false);
     }
@@ -69,9 +72,11 @@ export const useFinanceiro = () => {
         .order('nome');
 
       if (error) throw error;
+      
+      console.log('Categorias financeiras carregadas:', data);
       setCategorias(data || []);
     } catch (error) {
-      console.error('Erro ao buscar categorias:', error);
+      console.error('Erro ao buscar categorias financeiras:', error);
     }
   };
 
@@ -100,7 +105,7 @@ export const useFinanceiro = () => {
       await fetchEntradas();
       return data;
     } catch (error) {
-      console.error('Erro ao criar entrada:', error);
+      console.error('Erro ao criar entrada financeira:', error);
       throw error;
     }
   };
@@ -122,9 +127,33 @@ export const useFinanceiro = () => {
       await fetchEntradas();
       return data;
     } catch (error) {
-      console.error('Erro ao atualizar entrada:', error);
+      console.error('Erro ao atualizar entrada financeira:', error);
       throw error;
     }
+  };
+
+  const deleteEntrada = async (id: string) => {
+    if (!user) throw new Error('Usuário não autenticado');
+
+    try {
+      const { error } = await supabase
+        .from('entradas_financeiras')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      await fetchEntradas();
+    } catch (error) {
+      console.error('Erro ao deletar entrada financeira:', error);
+      throw error;
+    }
+  };
+
+  // Helper functions for categorias
+  const getCategoriasByTipo = (tipo: 'receita' | 'despesa') => {
+    return categorias.filter(cat => cat.tipo === tipo);
   };
 
   return {
@@ -133,6 +162,9 @@ export const useFinanceiro = () => {
     loading,
     createEntrada,
     updateEntrada,
-    refetch: fetchEntradas
+    deleteEntrada,
+    getCategoriasByTipo,
+    refetch: fetchEntradas,
+    refetchCategorias: fetchCategorias
   };
 };

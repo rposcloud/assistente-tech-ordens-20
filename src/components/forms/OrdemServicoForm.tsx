@@ -37,30 +37,30 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState<string>('');
 
+  // Initialize form data with proper defaults and handle editing
   const [formData, setFormData] = useState({
-    cliente_id: '',
-    tipo_equipamento: 'smartphone' as const,
-    marca: '',
-    modelo: '',
-    numero_serie: '',
-    defeito_relatado: '',
-    diagnostico_tecnico: '',
-    solucao_aplicada: '',
-    tecnico_responsavel: '',
-    valor_mao_obra: 0,
-    valor_total: 0,
-    valor_final: 0,
-    status: 'aguardando_diagnostico' as const,
-    garantia: 90,
-    observacoes_internas: '',
-    senha_equipamento: '',
-    acessorios: '',
-    desconto: 0,
-    acrescimo: 0,
-    ...initialData
+    cliente_id: initialData?.cliente_id || '',
+    tipo_equipamento: (initialData?.tipo_equipamento || 'smartphone') as const,
+    marca: initialData?.marca || '',
+    modelo: initialData?.modelo || '',
+    numero_serie: initialData?.numero_serie || '',
+    defeito_relatado: initialData?.defeito_relatado || '',
+    diagnostico_tecnico: initialData?.diagnostico_tecnico || '',
+    solucao_aplicada: initialData?.solucao_aplicada || '',
+    tecnico_responsavel: initialData?.tecnico_responsavel || '',
+    valor_mao_obra: initialData?.valor_mao_obra || 0,
+    valor_total: initialData?.valor_total || 0,
+    valor_final: initialData?.valor_final || 0,
+    status: (initialData?.status || 'aguardando_diagnostico') as const,
+    garantia: initialData?.garantia || 90,
+    observacoes_internas: initialData?.observacoes_internas || '',
+    senha_equipamento: initialData?.senha_equipamento || '',
+    acessorios: initialData?.acessorios || '',
+    desconto: initialData?.desconto || 0,
+    acrescimo: initialData?.acrescimo || 0
   });
 
-  // Calcular valor final automaticamente
+  // Calculate final value automatically
   useEffect(() => {
     const valorProdutos = produtosSelecionados.reduce((total, produto) => total + produto.valorTotal, 0);
     const valorBase = (formData.valor_mao_obra || 0) + valorProdutos;
@@ -79,32 +79,53 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Criar dados completos da ordem com todos os campos necessários
+    // Validate required fields
+    if (!formData.cliente_id) {
+      alert('Por favor, selecione um cliente');
+      return;
+    }
+    
+    if (!formData.defeito_relatado) {
+      alert('Por favor, informe o defeito relatado');
+      return;
+    }
+
+    // Prepare complete data for submission
     const dadosCompletos = {
-      ...formData,
-      numero: '', // Será gerado no backend
-      user_id: '', // Será definido no backend
-      data_abertura: new Date().toISOString(),
-      finalizada: false,
-      aprovado_cliente: false,
-      historico_status: [],
-      // Garantir que todos os campos numéricos tenham valores válidos
+      cliente_id: formData.cliente_id,
+      tipo_equipamento: formData.tipo_equipamento,
+      marca: formData.marca,
+      modelo: formData.modelo,
+      numero_serie: formData.numero_serie || null,
+      defeito_relatado: formData.defeito_relatado,
+      diagnostico_tecnico: formData.diagnostico_tecnico || null,
+      solucao_aplicada: formData.solucao_aplicada || null,
+      tecnico_responsavel: formData.tecnico_responsavel || null,
       valor_mao_obra: Number(formData.valor_mao_obra) || 0,
       valor_total: Number(formData.valor_total) || 0,
       valor_final: Number(formData.valor_final) || 0,
       desconto: Number(formData.desconto) || 0,
       acrescimo: Number(formData.acrescimo) || 0,
       garantia: Number(formData.garantia) || 90,
-      // Campos opcionais com valores padrão
+      status: formData.status,
+      observacoes_internas: formData.observacoes_internas || null,
+      senha_equipamento: formData.senha_equipamento || null,
+      acessorios: formData.acessorios || null,
+      // Fields that will be set by the backend
+      numero: '',
+      user_id: '',
+      data_abertura: new Date().toISOString(),
+      finalizada: false,
+      aprovado_cliente: false,
+      historico_status: [],
+      // Optional fields with defaults
       valor_orcamento: 0,
       lucro: 0,
       margem_lucro: 0,
       prioridade: 'normal'
     };
 
-    console.log('Dados da ordem a serem salvos:', dadosCompletos);
-    console.log('Produtos selecionados:', produtosSelecionados);
-    
+    console.log('Submitting order data:', dadosCompletos);
     onSubmit(dadosCompletos);
   };
 
@@ -118,16 +139,14 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     const produto = produtos.find(p => p.id === produtoId);
     if (!produto) return;
 
-    // Verificar se o produto já foi adicionado
-    const produtoJaAdicionado = produtosSelecionados.find(p => p.id === produtoId);
-    if (produtoJaAdicionado) {
-      // Se já foi adicionado, aumentar a quantidade
-      atualizarQuantidadeProduto(
-        produtosSelecionados.findIndex(p => p.id === produtoId),
-        produtoJaAdicionado.quantidade + 1
-      );
+    // Check if product is already added
+    const produtoExistente = produtosSelecionados.find(p => p.id === produtoId);
+    if (produtoExistente) {
+      // Increase quantity if already exists
+      const index = produtosSelecionados.findIndex(p => p.id === produtoId);
+      atualizarQuantidadeProduto(index, produtoExistente.quantidade + 1);
     } else {
-      // Se não foi adicionado, criar novo item
+      // Add new product
       const novoProduto: ProdutoSelecionado = {
         id: produto.id,
         nome: produto.nome,
@@ -139,7 +158,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       setProdutosSelecionados(prev => [...prev, novoProduto]);
     }
 
-    // Resetar o select
+    // Reset selector
     setProdutoSelecionado('');
   };
 
@@ -164,7 +183,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Dados Básicos */}
+      {/* Basic Data */}
       <Card>
         <CardHeader>
           <CardTitle>Dados Básicos</CardTitle>
@@ -310,7 +329,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Produtos e Serviços */}
+      {/* Products and Services */}
       <Card>
         <CardHeader>
           <CardTitle>Produtos e Serviços</CardTitle>

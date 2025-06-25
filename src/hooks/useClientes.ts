@@ -2,7 +2,45 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Cliente } from '@/types';
+
+export interface Cliente {
+  id: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  cpf_cnpj: string;
+  tipo_documento: 'cpf' | 'cnpj';
+  data_nascimento?: string;
+  cep: string;
+  endereco: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  observacoes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Brazilian phone mask function
+const formatPhoneBrazilian = (phone: string) => {
+  if (!phone) return '';
+  
+  // Remove all non-digits
+  const digits = phone.replace(/\D/g, '');
+  
+  // Apply Brazilian phone format
+  if (digits.length === 11) {
+    // Mobile: (XX) XXXXX-XXXX
+    return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  } else if (digits.length === 10) {
+    // Landline: (XX) XXXX-XXXX
+    return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+  }
+  
+  return phone;
+};
 
 export const useClientes = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -22,16 +60,13 @@ export const useClientes = () => {
 
       if (error) throw error;
 
-      const clientesFormatted = data.map(cliente => ({
+      // Format phone numbers for display
+      const clientesFormatados = (data || []).map(cliente => ({
         ...cliente,
-        tipoDocumento: cliente.tipo_documento,
-        dataNascimento: cliente.data_nascimento,
-        cpfCnpj: cliente.cpf_cnpj,
-        createdAt: cliente.created_at,
-        updatedAt: cliente.updated_at
+        telefone: formatPhoneBrazilian(cliente.telefone)
       }));
 
-      setClientes(clientesFormatted);
+      setClientes(clientesFormatados);
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
     } finally {
@@ -43,35 +78,22 @@ export const useClientes = () => {
     fetchClientes();
   }, [user]);
 
-  const createCliente = async (clienteData: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createCliente = async (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
       const { data, error } = await supabase
         .from('clientes')
         .insert({
-          user_id: user.id,
-          nome: clienteData.nome,
-          email: clienteData.email,
-          telefone: clienteData.telefone,
-          cpf_cnpj: clienteData.cpfCnpj,
-          tipo_documento: clienteData.tipoDocumento,
-          data_nascimento: clienteData.dataNascimento,
-          cep: clienteData.cep,
-          endereco: clienteData.endereco,
-          numero: clienteData.numero,
-          complemento: clienteData.complemento,
-          bairro: clienteData.bairro,
-          cidade: clienteData.cidade,
-          estado: clienteData.estado,
-          observacoes: clienteData.observacoes
+          ...clienteData,
+          user_id: user.id
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      await fetchClientes(); // Recarregar lista
+      await fetchClientes(); // Refresh list
       return data;
     } catch (error) {
       console.error('Erro ao criar cliente:', error);
@@ -85,22 +107,7 @@ export const useClientes = () => {
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .update({
-          nome: clienteData.nome,
-          email: clienteData.email,
-          telefone: clienteData.telefone,
-          cpf_cnpj: clienteData.cpfCnpj,
-          tipo_documento: clienteData.tipoDocumento,
-          data_nascimento: clienteData.dataNascimento,
-          cep: clienteData.cep,
-          endereco: clienteData.endereco,
-          numero: clienteData.numero,
-          complemento: clienteData.complemento,
-          bairro: clienteData.bairro,
-          cidade: clienteData.cidade,
-          estado: clienteData.estado,
-          observacoes: clienteData.observacoes
-        })
+        .update(clienteData)
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
@@ -108,7 +115,7 @@ export const useClientes = () => {
 
       if (error) throw error;
 
-      await fetchClientes(); // Recarregar lista
+      await fetchClientes(); // Refresh list
       return data;
     } catch (error) {
       console.error('Erro ao atualizar cliente:', error);
@@ -128,7 +135,7 @@ export const useClientes = () => {
 
       if (error) throw error;
 
-      await fetchClientes(); // Recarregar lista
+      await fetchClientes(); // Refresh list
     } catch (error) {
       console.error('Erro ao deletar cliente:', error);
       throw error;
