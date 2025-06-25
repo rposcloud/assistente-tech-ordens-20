@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
 import { Users, UserPlus, Search, FileText } from 'lucide-react';
-import { useClientes } from '../hooks/useClientes';
+import { useClientes, Cliente } from '../hooks/useClientes';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ClienteForm } from '../components/forms/ClienteForm';
-import type { Cliente } from '../types';
 
 export const Clientes = () => {
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes();
@@ -12,7 +11,7 @@ export const Clientes = () => {
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleSaveCliente = async (clienteData: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveCliente = async (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       if (editingCliente) {
         await updateCliente(editingCliente.id, clienteData);
@@ -48,14 +47,14 @@ export const Clientes = () => {
     return searchRegex.test(cliente.nome) || 
            searchRegex.test(cliente.email || '') || 
            searchRegex.test(cliente.telefone || '') ||
-           searchRegex.test(cliente.cpfCnpj);
+           searchRegex.test(cliente.cpf_cnpj);
   });
 
   const colunas: Column<Cliente>[] = [
     { key: 'nome', label: 'Nome' },
     { key: 'email', label: 'Email' },
     { key: 'telefone', label: 'Telefone' },
-    { key: 'cpfCnpj', label: 'CPF/CNPJ' },
+    { key: 'cpf_cnpj', label: 'CPF/CNPJ' },
     {
       key: 'endereco',
       label: 'Cidade',

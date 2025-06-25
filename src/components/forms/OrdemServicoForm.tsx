@@ -40,7 +40,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   // Initialize form data with proper defaults and handle editing
   const [formData, setFormData] = useState({
     cliente_id: initialData?.cliente_id || '',
-    tipo_equipamento: (initialData?.tipo_equipamento || 'smartphone') as const,
+    tipo_equipamento: initialData?.tipo_equipamento || 'smartphone',
     marca: initialData?.marca || '',
     modelo: initialData?.modelo || '',
     numero_serie: initialData?.numero_serie || '',
@@ -51,7 +51,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     valor_mao_obra: initialData?.valor_mao_obra || 0,
     valor_total: initialData?.valor_total || 0,
     valor_final: initialData?.valor_final || 0,
-    status: (initialData?.status || 'aguardando_diagnostico') as const,
+    status: initialData?.status || 'aguardando_diagnostico',
     garantia: initialData?.garantia || 90,
     observacoes_internas: initialData?.observacoes_internas || '',
     senha_equipamento: initialData?.senha_equipamento || '',
@@ -85,8 +85,18 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       return;
     }
     
-    if (!formData.defeito_relatado) {
+    if (!formData.defeito_relatado.trim()) {
       alert('Por favor, informe o defeito relatado');
+      return;
+    }
+
+    if (!formData.marca.trim()) {
+      alert('Por favor, informe a marca do equipamento');
+      return;
+    }
+
+    if (!formData.modelo.trim()) {
+      alert('Por favor, informe o modelo do equipamento');
       return;
     }
 
@@ -94,13 +104,13 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     const dadosCompletos = {
       cliente_id: formData.cliente_id,
       tipo_equipamento: formData.tipo_equipamento,
-      marca: formData.marca,
-      modelo: formData.modelo,
-      numero_serie: formData.numero_serie || null,
-      defeito_relatado: formData.defeito_relatado,
-      diagnostico_tecnico: formData.diagnostico_tecnico || null,
-      solucao_aplicada: formData.solucao_aplicada || null,
-      tecnico_responsavel: formData.tecnico_responsavel || null,
+      marca: formData.marca.trim(),
+      modelo: formData.modelo.trim(),
+      numero_serie: formData.numero_serie?.trim() || null,
+      defeito_relatado: formData.defeito_relatado.trim(),
+      diagnostico_tecnico: formData.diagnostico_tecnico?.trim() || null,
+      solucao_aplicada: formData.solucao_aplicada?.trim() || null,
+      tecnico_responsavel: formData.tecnico_responsavel?.trim() || null,
       valor_mao_obra: Number(formData.valor_mao_obra) || 0,
       valor_total: Number(formData.valor_total) || 0,
       valor_final: Number(formData.valor_final) || 0,
@@ -108,9 +118,9 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       acrescimo: Number(formData.acrescimo) || 0,
       garantia: Number(formData.garantia) || 90,
       status: formData.status,
-      observacoes_internas: formData.observacoes_internas || null,
-      senha_equipamento: formData.senha_equipamento || null,
-      acessorios: formData.acessorios || null,
+      observacoes_internas: formData.observacoes_internas?.trim() || null,
+      senha_equipamento: formData.senha_equipamento?.trim() || null,
+      acessorios: formData.acessorios?.trim() || null,
       // Fields that will be set by the backend
       numero: '',
       user_id: '',
@@ -223,22 +233,24 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="marca">Marca</Label>
+              <Label htmlFor="marca">Marca *</Label>
               <Input
                 id="marca"
                 value={formData.marca}
                 onChange={(e) => updateField('marca', e.target.value)}
                 placeholder="Ex: Apple, Samsung, Dell"
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="modelo">Modelo</Label>
+              <Label htmlFor="modelo">Modelo *</Label>
               <Input
                 id="modelo"
                 value={formData.modelo}
                 onChange={(e) => updateField('modelo', e.target.value)}
                 placeholder="Ex: iPhone 13, Galaxy S21"
+                required
               />
             </div>
 
