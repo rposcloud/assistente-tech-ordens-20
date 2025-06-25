@@ -7,7 +7,7 @@ import { Cliente } from '../../types';
 
 interface ClienteFormProps {
   cliente?: Cliente | null;
-  onSave: (cliente: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (cliente: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
 }
 
@@ -16,9 +16,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
     nome: '',
     email: '',
     telefone: '',
-    cpfCnpj: '',
-    tipoDocumento: 'cpf' as 'cpf' | 'cnpj',
-    dataNascimento: '',
+    cpf_cnpj: '',
+    tipo_documento: 'cpf' as 'cpf' | 'cnpj',
+    data_nascimento: '',
     cep: '',
     endereco: '',
     numero: '',
@@ -39,9 +39,9 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
         nome: cliente.nome || '',
         email: cliente.email || '',
         telefone: cliente.telefone || '',
-        cpfCnpj: cliente.cpfCnpj || '',
-        tipoDocumento: cliente.tipoDocumento || 'cpf',
-        dataNascimento: cliente.dataNascimento || '',
+        cpf_cnpj: cliente.cpf_cnpj || '',
+        tipo_documento: cliente.tipo_documento || 'cpf',
+        data_nascimento: cliente.data_nascimento || '',
         cep: cliente.cep || '',
         endereco: cliente.endereco || '',
         numero: cliente.numero || '',
@@ -54,10 +54,10 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
       
       // Configurar máscaras com valores existentes
       telefoneMask.setValue(cliente.telefone || '');
-      if (cliente.tipoDocumento === 'cpf') {
-        cpfMask.setValue(cliente.cpfCnpj || '');
+      if (cliente.tipo_documento === 'cpf') {
+        cpfMask.setValue(cliente.cpf_cnpj || '');
       } else {
-        cnpjMask.setValue(cliente.cpfCnpj || '');
+        cnpjMask.setValue(cliente.cpf_cnpj || '');
       }
     }
   }, [cliente]);
@@ -80,17 +80,17 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
   };
 
   const handleDocumentoChange = (value: string) => {
-    if (formData.tipoDocumento === 'cpf') {
+    if (formData.tipo_documento === 'cpf') {
       cpfMask.handleChange(value);
     } else {
       cnpjMask.handleChange(value);
     }
-    updateField('cpfCnpj', value);
+    updateField('cpf_cnpj', value);
   };
 
   const handleTipoDocumentoChange = (tipo: 'cpf' | 'cnpj') => {
-    updateField('tipoDocumento', tipo);
-    updateField('cpfCnpj', '');
+    updateField('tipo_documento', tipo);
+    updateField('cpf_cnpj', '');
     cpfMask.reset();
     cnpjMask.reset();
   };
@@ -162,7 +162,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
                   Tipo de Documento
                 </label>
                 <select
-                  value={formData.tipoDocumento}
+                  value={formData.tipo_documento}
                   onChange={(e) => handleTipoDocumentoChange(e.target.value as 'cpf' | 'cnpj')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -173,14 +173,14 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {formData.tipoDocumento === 'cpf' ? 'CPF' : 'CNPJ'} *
+                  {formData.tipo_documento === 'cpf' ? 'CPF' : 'CNPJ'} *
                 </label>
                 <input
                   type="text"
                   required
-                  value={formData.tipoDocumento === 'cpf' ? cpfMask.value : cnpjMask.value}
+                  value={formData.tipo_documento === 'cpf' ? cpfMask.value : cnpjMask.value}
                   onChange={(e) => handleDocumentoChange(e.target.value)}
-                  placeholder={formData.tipoDocumento === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
+                  placeholder={formData.tipo_documento === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -191,8 +191,8 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
                 </label>
                 <input
                   type="date"
-                  value={formData.dataNascimento}
-                  onChange={(e) => updateField('dataNascimento', e.target.value)}
+                  value={formData.data_nascimento}
+                  onChange={(e) => updateField('data_nascimento', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

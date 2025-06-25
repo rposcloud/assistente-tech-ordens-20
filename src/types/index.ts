@@ -1,12 +1,11 @@
-
 export interface Cliente {
   id: string;
   nome: string;
   email: string;
   telefone: string;
-  cpfCnpj: string;
-  tipoDocumento: 'cpf' | 'cnpj';
-  dataNascimento?: string;
+  cpf_cnpj: string;
+  tipo_documento: 'cpf' | 'cnpj';
+  data_nascimento?: string;
   cep: string;
   endereco: string;
   numero: string;
