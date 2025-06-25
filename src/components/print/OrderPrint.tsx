@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { OrdemServico, Cliente } from '../../types';
 import { formatCurrency } from '../../utils/masks';
@@ -202,7 +201,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                 <div><strong>Nome:</strong> {cliente?.nome || 'N/A'}</div>
                 <div><strong>Email:</strong> {cliente?.email || 'N/A'}</div>
                 <div><strong>Telefone:</strong> {cliente?.telefone || 'N/A'}</div>
-                <div><strong>CPF/CNPJ:</strong> {cliente?.cpfCnpj || 'N/A'}</div>
+                <div><strong>CPF/CNPJ:</strong> {cliente?.cpf_cnpj || 'N/A'}</div>
               </div>
               <div className="space-y-2">
                 <div><strong>Endereço:</strong></div>
@@ -435,7 +434,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
               <div className="signature-line">
                 <p className="font-semibold">Assinatura do Cliente</p>
                 <p className="text-sm text-gray-600 mt-1">{cliente?.nome || 'Cliente'}</p>
-                <p className="text-xs text-gray-500">CPF/CNPJ: {cliente?.cpfCnpj || 'N/A'}</p>
+                <p className="text-xs text-gray-500">CPF/CNPJ: {cliente?.cpf_cnpj || 'N/A'}</p>
               </div>
             </div>
             <div className="text-center">
