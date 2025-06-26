@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -85,13 +84,11 @@ export const useOrdens = () => {
 
       if (error) {
         console.error('Error fetching ordens:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
         throw error;
       }
       
       console.log('Successfully fetched ordens:', data?.length || 0);
       
-      // Converter os dados para o tipo esperado
       const ordensFormatadas = (data || []).map(ordem => ({
         ...ordem,
         historico_status: ordem.historico_status || []
@@ -110,11 +107,31 @@ export const useOrdens = () => {
     fetchOrdens();
   }, [user]);
 
+  const generateOrderNumber = async (): Promise<string> => {
+    if (!user) throw new Error('Usuário não autenticado');
+
+    try {
+      console.log('Gerando número da ordem...');
+      
+      // Usar timestamp para gerar número único
+      const timestamp = Date.now();
+      const randomSuffix = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+      const numeroOrdem = `OS-${timestamp}-${randomSuffix}`;
+      
+      console.log('Número da ordem gerado:', numeroOrdem);
+      return numeroOrdem;
+    } catch (error) {
+      console.error('Erro ao gerar número da ordem:', error);
+      // Fallback para número baseado apenas em timestamp
+      const fallbackNumber = `OS-${Date.now()}`;
+      console.log('Usando número fallback:', fallbackNumber);
+      return fallbackNumber;
+    }
+  };
+
   const createOrdem = async (ordemData: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
     if (!user) {
-      const errorMsg = 'Usuário não autenticado';
-      console.error(errorMsg);
-      throw new Error(errorMsg);
+      throw new Error('Usuário não autenticado');
     }
 
     try {
@@ -123,58 +140,20 @@ export const useOrdens = () => {
       console.log('Dados recebidos:', JSON.stringify(ordemData, null, 2));
 
       // Validar dados obrigatórios
-      const validationErrors = [];
-      if (!ordemData.cliente_id) validationErrors.push('Cliente é obrigatório');
-      if (!ordemData.marca?.trim()) validationErrors.push('Marca é obrigatória');
-      if (!ordemData.modelo?.trim()) validationErrors.push('Modelo é obrigatório');
-      if (!ordemData.defeito_relatado?.trim()) validationErrors.push('Defeito relatado é obrigatório');
+      if (!ordemData.cliente_id) throw new Error('Cliente é obrigatório');
+      if (!ordemData.marca?.trim()) throw new Error('Marca é obrigatória');
+      if (!ordemData.modelo?.trim()) throw new Error('Modelo é obrigatória');
+      if (!ordemData.defeito_relatado?.trim()) throw new Error('Defeito relatado é obrigatório');
 
-      if (validationErrors.length > 0) {
-        const errorMsg = `Erro de validação: ${validationErrors.join(', ')}`;
-        console.error(errorMsg);
-        throw new Error(errorMsg);
-      }
-
-      // Gerar número sequencial com retry em caso de erro
-      let numeroOrdem = '';
-      let retryCount = 0;
-      const maxRetries = 3;
-
-      while (retryCount < maxRetries) {
-        try {
-          console.log(`Tentativa ${retryCount + 1} de gerar número da ordem`);
-          
-          const { count, error: countError } = await supabase
-            .from('ordens_servico')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id);
-
-          if (countError) {
-            console.error('Erro ao contar ordens:', countError);
-            console.error('Count error details:', JSON.stringify(countError, null, 2));
-            throw countError;
-          }
-
-          numeroOrdem = `OS-${String((count || 0) + 1).padStart(4, '0')}`;
-          console.log('Número da ordem gerado:', numeroOrdem);
-          break;
-        } catch (error) {
-          retryCount++;
-          console.error(`Erro na tentativa ${retryCount}:`, error);
-          if (retryCount >= maxRetries) {
-            throw new Error(`Falha ao gerar número da ordem após ${maxRetries} tentativas: ${error}`);
-          }
-          // Aguardar 1 segundo antes de tentar novamente
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
+      // Gerar número da ordem
+      const numeroOrdem = await generateOrderNumber();
 
       // Remover dados aninhados e preparar para inserção
       const { clientes, ...dadosLimpos } = ordemData as any;
 
-      // Preparar dados para inserção com validação rigorosa
+      // Preparar dados para inserção
       const dadosInsercao = {
-        user_id: user.id, // Campo obrigatório para RLS
+        user_id: user.id,
         numero: numeroOrdem,
         cliente_id: ordemData.cliente_id,
         tipo_equipamento: ordemData.tipo_equipamento || 'smartphone',
@@ -217,53 +196,29 @@ export const useOrdens = () => {
 
       console.log('Dados preparados para inserção:', JSON.stringify(dadosInsercao, null, 2));
 
-      // Inserir no banco de dados com retry
-      let insertResult = null;
-      retryCount = 0;
+      // Inserir no banco de dados
+      const { data, error } = await supabase
+        .from('ordens_servico')
+        .insert(dadosInsercao)
+        .select()
+        .single();
 
-      while (retryCount < maxRetries) {
-        try {
-          console.log(`Tentativa ${retryCount + 1} de inserção no banco`);
-          
-          const { data, error } = await supabase
-            .from('ordens_servico')
-            .insert(dadosInsercao)
-            .select()
-            .single();
-
-          if (error) {
-            console.error('Erro na inserção:', error);
-            console.error('Insert error details:', JSON.stringify(error, null, 2));
-            throw error;
-          }
-
-          insertResult = data;
-          console.log('Ordem inserida com sucesso:', data);
-          break;
-        } catch (error) {
-          retryCount++;
-          console.error(`Erro na tentativa de inserção ${retryCount}:`, error);
-          if (retryCount >= maxRetries) {
-            throw new Error(`Falha ao inserir ordem após ${maxRetries} tentativas: ${error}`);
-          }
-          // Aguardar 1 segundo antes de tentar novamente
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+      if (error) {
+        console.error('Erro na inserção:', error);
+        throw new Error(`Erro ao salvar no banco: ${error.message}`);
       }
 
+      console.log('Ordem inserida com sucesso:', data);
       console.log('=== ORDEM CRIADA COM SUCESSO ===');
       
       // Recarregar as ordens
       await fetchOrdens();
       
-      return insertResult;
+      return data;
     } catch (error: any) {
       console.error('=== ERRO CRÍTICO NA CRIAÇÃO DE ORDEM ===');
       console.error('Erro completo:', error);
-      console.error('Stack trace:', error.stack);
-      console.error('Detalhes do erro:', JSON.stringify(error, null, 2));
       
-      // Melhorar a mensagem de erro para o usuário
       let userFriendlyMessage = 'Erro desconhecido ao criar ordem';
       
       if (error.message) {
