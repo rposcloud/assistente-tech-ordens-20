@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,20 +55,33 @@ export const Ordens = () => {
   const handleSubmit = async (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setModalLoading(true);
-      console.log('Submitting ordem data:', data);
+      console.log('=== INICIANDO SALVAMENTO DE ORDEM ===');
+      console.log('Dados recebidos do formulário:', JSON.stringify(data, null, 2));
       
       if (selectedOrdem) {
+        console.log('Atualizando ordem existente:', selectedOrdem.id);
         await updateOrdem(selectedOrdem.id!, data);
         toast.success('Ordem atualizada com sucesso!');
       } else {
+        console.log('Criando nova ordem');
         await createOrdem(data);
         toast.success('Ordem criada com sucesso!');
       }
+      
       setModalOpen(false);
       setSelectedOrdem(undefined);
+      console.log('=== SALVAMENTO CONCLUÍDO COM SUCESSO ===');
     } catch (error: any) {
-      console.error('Error saving ordem:', error);
-      toast.error(`Erro ao salvar ordem: ${error.message || 'Erro desconhecido'}`);
+      console.error('=== ERRO NO SALVAMENTO ===');
+      console.error('Erro completo:', error);
+      console.error('Stack trace:', error.stack);
+      
+      // Exibir erro mais específico para o usuário
+      const errorMessage = error.message || 'Erro desconhecido ao salvar ordem';
+      toast.error(`Erro ao salvar ordem: ${errorMessage}`);
+      
+      // Log adicional para debugging
+      console.error('Dados que causaram erro:', JSON.stringify(data, null, 2));
     } finally {
       setModalLoading(false);
     }
