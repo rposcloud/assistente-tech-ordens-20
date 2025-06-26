@@ -8,6 +8,16 @@ import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const statusColors = {
   aguardando_diagnostico: 'bg-yellow-100 text-yellow-800',
@@ -28,10 +38,12 @@ const statusLabels = {
 };
 
 export const Ordens = () => {
-  const { ordens, loading, createOrdem, updateOrdem } = useOrdens();
+  const { ordens, loading, createOrdem, updateOrdem, deleteOrdem } = useOrdens();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
 
   // Calculate statistics
   const stats = {
@@ -44,6 +56,8 @@ export const Ordens = () => {
   const handleSubmit = async (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setModalLoading(true);
+      console.log('Submitting ordem data:', data);
+      
       if (selectedOrdem) {
         await updateOrdem(selectedOrdem.id!, data);
         toast.success('Ordem atualizada com sucesso!');
@@ -53,15 +67,16 @@ export const Ordens = () => {
       }
       setModalOpen(false);
       setSelectedOrdem(undefined);
-    } catch (error) {
-      toast.error('Erro ao salvar ordem');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Error saving ordem:', error);
+      toast.error(`Erro ao salvar ordem: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setModalLoading(false);
     }
   };
 
   const handleEdit = (ordem: OrdemServico) => {
+    console.log('Editing order:', ordem);
     setSelectedOrdem(ordem);
     setModalOpen(true);
   };
@@ -69,14 +84,32 @@ export const Ordens = () => {
   const handleView = (ordem: OrdemServico) => {
     console.log('Viewing order:', ordem);
     // TODO: Implement view functionality
+    toast.info('Funcionalidade de visualização será implementada em breve');
   };
 
-  const handleDelete = (ordem: OrdemServico) => {
-    console.log('Delete order:', ordem);
-    // TODO: Implement delete functionality
+  const handleDeleteClick = (ordem: OrdemServico) => {
+    console.log('Delete order clicked:', ordem);
+    setOrdemToDelete(ordem);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!ordemToDelete) return;
+    
+    try {
+      console.log('Confirming delete for ordem:', ordemToDelete.id);
+      await deleteOrdem(ordemToDelete.id!);
+      toast.success('Ordem excluída com sucesso!');
+      setDeleteDialogOpen(false);
+      setOrdemToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting ordem:', error);
+      toast.error(`Erro ao excluir ordem: ${error.message || 'Erro desconhecido'}`);
+    }
   };
 
   const handleNewOrdem = () => {
+    console.log('Creating new ordem');
     setSelectedOrdem(undefined);
     setModalOpen(true);
   };
@@ -154,7 +187,7 @@ export const Ordens = () => {
             variant="outline"
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete(ordem);
+              handleDeleteClick(ordem);
             }}
             title="Excluir"
           >
@@ -261,6 +294,26 @@ export const Ordens = () => {
         initialData={selectedOrdem}
         loading={modalLoading}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir a ordem de serviço {ordemToDelete?.numero}?
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOrdemToDelete(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

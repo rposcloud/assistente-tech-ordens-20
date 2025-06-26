@@ -45,6 +45,7 @@ export interface OrdemServico {
   data_conclusao?: string;
   created_at?: string;
   updated_at?: string;
+  user_id?: string;
   // Para dados relacionados
   clientes?: {
     nome: string;
@@ -59,10 +60,15 @@ export const useOrdens = () => {
   const { user } = useAuth();
 
   const fetchOrdens = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log('Fetching ordens for user:', user.id);
+      
       const { data, error } = await supabase
         .from('ordens_servico')
         .select(`
@@ -76,7 +82,12 @@ export const useOrdens = () => {
         .eq('user_id', user.id)
         .order('data_abertura', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching ordens:', error);
+        throw error;
+      }
+      
+      console.log('Fetched ordens:', data?.length || 0);
       
       // Converter os dados para o tipo esperado
       const ordensFormatadas = (data || []).map(ordem => ({
@@ -87,6 +98,7 @@ export const useOrdens = () => {
       setOrdens(ordensFormatadas);
     } catch (error) {
       console.error('Erro ao buscar ordens:', error);
+      setOrdens([]);
     } finally {
       setLoading(false);
     }
@@ -97,33 +109,60 @@ export const useOrdens = () => {
   }, [user]);
 
   const createOrdem = async (ordemData: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!user) throw new Error('Usuário não autenticado');
+    if (!user) {
+      console.error('User not authenticated');
+      throw new Error('Usuário não autenticado');
+    }
 
     try {
+      console.log('Creating ordem for user:', user.id);
+      console.log('Ordem data:', ordemData);
+
       // Gerar número sequencial
-      const { count } = await supabase
+      const { count, error: countError } = await supabase
         .from('ordens_servico')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
+      if (countError) {
+        console.error('Error counting ordens:', countError);
+        throw countError;
+      }
+
       const numeroOrdem = `OS-${String((count || 0) + 1).padStart(4, '0')}`;
+      console.log('Generated order number:', numeroOrdem);
 
       // Remover dados aninhados antes de inserir
       const { clientes, ...dadosParaInserir } = ordemData as any;
 
+      // Preparar dados para inserção com user_id obrigatório
+      const dadosInsercao = {
+        ...dadosParaInserir,
+        user_id: user.id, // Campo obrigatório para RLS
+        numero: numeroOrdem,
+        data_abertura: new Date().toISOString(),
+        // Garantir que campos numéricos tenham valores válidos
+        valor_mao_obra: dadosParaInserir.valor_mao_obra || 0,
+        valor_total: dadosParaInserir.valor_total || 0,
+        garantia: dadosParaInserir.garantia || 90,
+        finalizada: false,
+        status: dadosParaInserir.status || 'aguardando_diagnostico'
+      };
+
+      console.log('Data to insert:', dadosInsercao);
+
       const { data, error } = await supabase
         .from('ordens_servico')
-        .insert({
-          ...dadosParaInserir,
-          user_id: user.id,
-          numero: numeroOrdem,
-          data_abertura: new Date().toISOString()
-        })
+        .insert(dadosInsercao)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating ordem:', error);
+        throw error;
+      }
 
+      console.log('Ordem created successfully:', data);
       await fetchOrdens();
       return data;
     } catch (error) {
@@ -133,9 +172,15 @@ export const useOrdens = () => {
   };
 
   const updateOrdem = async (id: string, ordemData: Partial<OrdemServico>) => {
-    if (!user) throw new Error('Usuário não autenticado');
+    if (!user) {
+      console.error('User not authenticated');
+      throw new Error('Usuário não autenticado');
+    }
 
     try {
+      console.log('Updating ordem:', id, 'for user:', user.id);
+      console.log('Update data:', ordemData);
+
       // Remover dados aninhados antes de atualizar
       const { clientes, ...dadosParaAtualizar } = ordemData as any;
 
@@ -147,12 +192,44 @@ export const useOrdens = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating ordem:', error);
+        throw error;
+      }
 
+      console.log('Ordem updated successfully:', data);
       await fetchOrdens();
       return data;
     } catch (error) {
       console.error('Erro ao atualizar ordem:', error);
+      throw error;
+    }
+  };
+
+  const deleteOrdem = async (id: string) => {
+    if (!user) {
+      console.error('User not authenticated');
+      throw new Error('Usuário não autenticado');
+    }
+
+    try {
+      console.log('Deleting ordem:', id, 'for user:', user.id);
+
+      const { error } = await supabase
+        .from('ordens_servico')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting ordem:', error);
+        throw error;
+      }
+
+      console.log('Ordem deleted successfully');
+      await fetchOrdens();
+    } catch (error) {
+      console.error('Erro ao deletar ordem:', error);
       throw error;
     }
   };
@@ -162,6 +239,7 @@ export const useOrdens = () => {
     loading,
     createOrdem,
     updateOrdem,
+    deleteOrdem,
     refetch: fetchOrdens
   };
 };
