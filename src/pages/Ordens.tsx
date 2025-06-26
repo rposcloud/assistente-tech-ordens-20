@@ -44,7 +44,6 @@ export const Ordens = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
 
-  // Calculate statistics
   const stats = {
     aguardando_diagnostico: ordens.filter(o => o.status === 'aguardando_diagnostico').length,
     em_reparo: ordens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
@@ -55,52 +54,35 @@ export const Ordens = () => {
   const handleSubmit = async (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setModalLoading(true);
-      console.log('=== INICIANDO SALVAMENTO DE ORDEM ===');
-      console.log('Dados recebidos do formulário:', JSON.stringify(data, null, 2));
       
       if (selectedOrdem) {
-        console.log('Atualizando ordem existente:', selectedOrdem.id);
         await updateOrdem(selectedOrdem.id!, data);
         toast.success('Ordem atualizada com sucesso!');
       } else {
-        console.log('Criando nova ordem');
         await createOrdem(data);
         toast.success('Ordem criada com sucesso!');
       }
       
       setModalOpen(false);
       setSelectedOrdem(undefined);
-      console.log('=== SALVAMENTO CONCLUÍDO COM SUCESSO ===');
     } catch (error: any) {
-      console.error('=== ERRO NO SALVAMENTO ===');
-      console.error('Erro completo:', error);
-      console.error('Stack trace:', error.stack);
-      
-      // Exibir erro mais específico para o usuário
-      const errorMessage = error.message || 'Erro desconhecido ao salvar ordem';
-      toast.error(`Erro ao salvar ordem: ${errorMessage}`);
-      
-      // Log adicional para debugging
-      console.error('Dados que causaram erro:', JSON.stringify(data, null, 2));
+      console.error('Erro ao salvar ordem:', error);
+      toast.error(`Erro ao salvar ordem: ${error.message || 'Erro desconhecido'}`);
     } finally {
       setModalLoading(false);
     }
   };
 
   const handleEdit = (ordem: OrdemServico) => {
-    console.log('Editing order:', ordem);
     setSelectedOrdem(ordem);
     setModalOpen(true);
   };
 
   const handleView = (ordem: OrdemServico) => {
-    console.log('Viewing order:', ordem);
-    // TODO: Implement view functionality
     toast.info('Funcionalidade de visualização será implementada em breve');
   };
 
   const handleDeleteClick = (ordem: OrdemServico) => {
-    console.log('Delete order clicked:', ordem);
     setOrdemToDelete(ordem);
     setDeleteDialogOpen(true);
   };
@@ -109,7 +91,6 @@ export const Ordens = () => {
     if (!ordemToDelete) return;
     
     try {
-      console.log('Confirming delete for ordem:', ordemToDelete.id);
       await deleteOrdem(ordemToDelete.id!);
       toast.success('Ordem excluída com sucesso!');
       setDeleteDialogOpen(false);
@@ -121,7 +102,6 @@ export const Ordens = () => {
   };
 
   const handleNewOrdem = () => {
-    console.log('Creating new ordem');
     setSelectedOrdem(undefined);
     setModalOpen(true);
   };
@@ -225,7 +205,6 @@ export const Ordens = () => {
         </Button>
       </div>
 
-      {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -276,7 +255,6 @@ export const Ordens = () => {
         </Card>
       </div>
 
-      {/* Orders Table */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Ordens</CardTitle>
