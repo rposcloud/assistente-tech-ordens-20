@@ -20,13 +20,13 @@ export const GenerateLinkModal = ({ ordem, onClose, onSave }: GenerateLinkModalP
     setLoading(true);
     
     // Gera novo token se não existir
-    const token = ordem.linkToken || generateToken();
+    const token = ordem.link_token || generateToken();
     const expiresAt = generateExpirationDate(expirationDays);
     
     const ordemAtualizada = {
       ...ordem,
-      linkToken: token,
-      linkExpiresAt: expiresAt
+      link_token: token,
+      link_expires_at: expiresAt
     };
 
     // Gera a URL do portal

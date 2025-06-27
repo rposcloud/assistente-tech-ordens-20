@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Printer, Clock, CheckCircle, AlertCircle, Phone, Mail, MapPin } from 'lucide-react';
@@ -42,7 +43,7 @@ export const PortalCliente = () => {
         const clientes: Cliente[] = JSON.parse(clientesSalvos);
 
         // Buscar ordem pelo token
-        const ordemEncontrada = ordens.find(o => o.linkToken === token);
+        const ordemEncontrada = ordens.find(o => o.link_token === token);
 
         if (!ordemEncontrada) {
           setError('Ordem de serviço não encontrada ou link inválido');
@@ -51,14 +52,14 @@ export const PortalCliente = () => {
         }
 
         // Verificar se o token não expirou
-        if (!isTokenValid(ordemEncontrada.linkExpiresAt)) {
+        if (!isTokenValid(ordemEncontrada.link_expires_at)) {
           setError('Link expirado. Entre em contato conosco para obter um novo link.');
           setLoading(false);
           return;
         }
 
         // Buscar cliente
-        const clienteEncontrado = clientes.find(c => c.id === ordemEncontrada.clienteId);
+        const clienteEncontrado = clientes.find(c => c.id === ordemEncontrada.cliente_id);
 
         if (!clienteEncontrado) {
           setError('Dados do cliente não encontrados');
@@ -177,12 +178,12 @@ export const PortalCliente = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Data de Abertura:</span>
-              <p className="font-medium">{new Date(ordem.dataAbertura).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{new Date(ordem.data_abertura).toLocaleDateString('pt-BR')}</p>
             </div>
-            {ordem.prazoEntrega && (
+            {ordem.prazo_entrega && (
               <div>
                 <span className="text-gray-500">Prazo de Entrega:</span>
-                <p className="font-medium">{new Date(ordem.prazoEntrega).toLocaleDateString('pt-BR')}</p>
+                <p className="font-medium">{new Date(ordem.prazo_entrega).toLocaleDateString('pt-BR')}</p>
               </div>
             )}
             <div>
@@ -201,36 +202,36 @@ export const PortalCliente = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <span className="text-gray-500 text-sm">Tipo:</span>
-              <p className="font-medium capitalize">{ordem.tipoEquipamento}</p>
+              <p className="font-medium capitalize">{ordem.tipo_equipamento}</p>
             </div>
             <div>
               <span className="text-gray-500 text-sm">Marca/Modelo:</span>
               <p className="font-medium">{ordem.marca} {ordem.modelo}</p>
             </div>
-            {ordem.numeroSerie && (
+            {ordem.numero_serie && (
               <div className="md:col-span-2">
                 <span className="text-gray-500 text-sm">Número de Série:</span>
-                <p className="font-medium">{ordem.numeroSerie}</p>
+                <p className="font-medium">{ordem.numero_serie}</p>
               </div>
             )}
           </div>
           
           <div className="mt-4">
             <span className="text-gray-500 text-sm">Defeito Relatado:</span>
-            <p className="mt-1 p-3 bg-gray-50 rounded-lg">{ordem.defeitoRelatado}</p>
+            <p className="mt-1 p-3 bg-gray-50 rounded-lg">{ordem.defeito_relatado}</p>
           </div>
 
-          {ordem.diagnosticoTecnico && (
+          {ordem.diagnostico_tecnico && (
             <div className="mt-4">
               <span className="text-gray-500 text-sm">Diagnóstico Técnico:</span>
-              <p className="mt-1 p-3 bg-blue-50 rounded-lg">{ordem.diagnosticoTecnico}</p>
+              <p className="mt-1 p-3 bg-blue-50 rounded-lg">{ordem.diagnostico_tecnico}</p>
             </div>
           )}
 
-          {ordem.solucaoAplicada && (
+          {ordem.solucao_aplicada && (
             <div className="mt-4">
               <span className="text-gray-500 text-sm">Solução Aplicada:</span>
-              <p className="mt-1 p-3 bg-green-50 rounded-lg">{ordem.solucaoAplicada}</p>
+              <p className="mt-1 p-3 bg-green-50 rounded-lg">{ordem.solucao_aplicada}</p>
             </div>
           )}
         </div>
@@ -246,13 +247,13 @@ export const PortalCliente = () => {
               <div>
                 <span className="text-gray-500 text-sm">Valor Total:</span>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(ordem.valorFinal || ordem.valorTotal)}
+                  {formatCurrency(ordem.valor_final || ordem.valor_total)}
                 </p>
               </div>
-              {ordem.formaPagamento && (
+              {ordem.forma_pagamento && (
                 <div>
                   <span className="text-gray-500 text-sm">Forma de Pagamento:</span>
-                  <p className="font-medium capitalize">{ordem.formaPagamento.replace('_', ' ')}</p>
+                  <p className="font-medium capitalize">{ordem.forma_pagamento.replace('_', ' ')}</p>
                 </div>
               )}
             </div>
