@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
 import { useClientes } from '@/hooks/useClientes';
 import { useProdutos } from '@/hooks/useProdutos';
-import { OrdemServico } from '@/hooks/useOrdens';
+import { OrdemServico } from '@/types';
 
 interface ProdutoSelecionado {
   id: string;
@@ -37,10 +37,10 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState<string>('');
 
-  // Initialize form data with proper defaults and handle editing
+  // Initialize form data using snake_case to match database
   const [formData, setFormData] = useState({
     cliente_id: initialData?.cliente_id || '',
-    tipo_equipamento: initialData?.tipo_equipamento || 'smartphone',
+    tipo_equipamento: initialData?.tipo_equipamento || 'smartphone' as const,
     marca: initialData?.marca || '',
     modelo: initialData?.modelo || '',
     numero_serie: initialData?.numero_serie || '',
@@ -51,7 +51,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     valor_mao_obra: initialData?.valor_mao_obra || 0,
     valor_total: initialData?.valor_total || 0,
     valor_final: initialData?.valor_final || 0,
-    status: initialData?.status || 'aguardando_diagnostico',
+    status: initialData?.status || 'aguardando_diagnostico' as const,
     garantia: initialData?.garantia || 90,
     observacoes_internas: initialData?.observacoes_internas || '',
     senha_equipamento: initialData?.senha_equipamento || '',
@@ -100,17 +100,17 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       return;
     }
 
-    // Prepare complete data for submission
-    const dadosCompletos = {
+    // Prepare complete data for submission using snake_case
+    const dadosCompletos: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'> = {
       cliente_id: formData.cliente_id,
       tipo_equipamento: formData.tipo_equipamento,
       marca: formData.marca.trim(),
       modelo: formData.modelo.trim(),
-      numero_serie: formData.numero_serie?.trim() || null,
+      numero_serie: formData.numero_serie?.trim() || undefined,
       defeito_relatado: formData.defeito_relatado.trim(),
-      diagnostico_tecnico: formData.diagnostico_tecnico?.trim() || null,
-      solucao_aplicada: formData.solucao_aplicada?.trim() || null,
-      tecnico_responsavel: formData.tecnico_responsavel?.trim() || null,
+      diagnostico_tecnico: formData.diagnostico_tecnico?.trim() || undefined,
+      solucao_aplicada: formData.solucao_aplicada?.trim() || undefined,
+      tecnico_responsavel: formData.tecnico_responsavel?.trim() || undefined,
       valor_mao_obra: Number(formData.valor_mao_obra) || 0,
       valor_total: Number(formData.valor_total) || 0,
       valor_final: Number(formData.valor_final) || 0,
@@ -118,9 +118,9 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       acrescimo: Number(formData.acrescimo) || 0,
       garantia: Number(formData.garantia) || 90,
       status: formData.status,
-      observacoes_internas: formData.observacoes_internas?.trim() || null,
-      senha_equipamento: formData.senha_equipamento?.trim() || null,
-      acessorios: formData.acessorios?.trim() || null,
+      observacoes_internas: formData.observacoes_internas?.trim() || undefined,
+      senha_equipamento: formData.senha_equipamento?.trim() || undefined,
+      acessorios: formData.acessorios?.trim() || undefined,
       // Fields that will be set by the backend
       numero: '',
       user_id: '',

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { OrdemServicoForm } from '@/components/forms/OrdemServicoForm';
-import { OrdemServico } from '@/hooks/useOrdens';
+import { OrdemServico } from '@/types';
 
 interface OrdemServicoModalProps {
   isOpen: boolean;

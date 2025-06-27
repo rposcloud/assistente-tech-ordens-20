@@ -1,3 +1,4 @@
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -16,43 +17,59 @@ export interface Cliente {
   observacoes?: string;
 }
 
+// Interface unificada OrdemServico - compatível com banco de dados
 export interface OrdemServico {
-  id: string;
+  id?: string;
   numero: string;
-  clienteId: string;
-  tipoEquipamento: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
+  cliente_id: string;
+  tipo_equipamento: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
   marca: string;
   modelo: string;
-  numeroSerie?: string;
-  defeitoRelatado: string;
-  diagnosticoTecnico?: string;
-  solucaoAplicada?: string;
-  pecasUtilizadas?: PecaUtilizada[];
-  produtosUtilizados?: import('./produto').ProdutoUtilizado[];
-  valorMaoObra: number;
-  valorTotal: number;
-  // Novos campos financeiros
+  numero_serie?: string;
+  senha_equipamento?: string;
+  acessorios?: string;
+  condicoes_equipamento?: string;
+  defeito_relatado: string;
+  diagnostico_tecnico?: string;
+  solucao_aplicada?: string;
+  tecnico_responsavel?: string;
+  prioridade?: string;
+  valor_mao_obra: number;
+  valor_orcamento?: number;
+  valor_total: number;
   desconto?: number;
   acrescimo?: number;
-  valorFinal?: number;
-  formaPagamento?: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'parcelado';
-  statusPagamento?: 'pendente' | 'pago' | 'parcial' | 'cancelado';
-  dataPagamento?: string;
-  dataVencimento?: string;
-  observacoesPagamento?: string;
+  valor_final?: number;
+  forma_pagamento?: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'parcelado';
+  status_pagamento?: 'pendente' | 'pago' | 'parcial' | 'cancelado';
+  data_pagamento?: string;
+  data_vencimento?: string;
+  data_previsao_entrega?: string;
+  prazo_entrega?: string;
+  garantia: number;
+  status: 'aguardando_diagnostico' | 'aguardando_aprovacao' | 'aguardando_pecas' | 'em_reparo' | 'pronto_entrega' | 'entregue';
+  aprovado_cliente?: boolean;
+  data_aprovacao?: string;
+  observacoes_internas?: string;
+  observacoes_pagamento?: string;
   finalizada?: boolean;
   lucro?: number;
-  margemLucro?: number;
+  margem_lucro?: number;
+  historico_status?: any;
+  data_abertura?: string;
+  data_conclusao?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+  // Relacionamento com cliente
+  clientes?: {
+    nome: string;
+    telefone: string;
+    email: string;
+  };
   // Portal do cliente
-  linkToken?: string;
-  linkExpiresAt?: string;
-  // Campos existentes
-  prazoEntrega?: string;
-  garantia: number; // em dias
-  status: 'aguardando_diagnostico' | 'aguardando_aprovacao' | 'aguardando_pecas' | 'em_reparo' | 'pronto_entrega' | 'entregue';
-  dataAbertura: string;
-  dataConclusao?: string;
-  observacoesInternas?: string;
+  link_token?: string;
+  link_expires_at?: string;
 }
 
 export interface PecaUtilizada {

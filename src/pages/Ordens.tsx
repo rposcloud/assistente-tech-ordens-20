@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText, Clock, CheckCircle, AlertCircle, Eye, Edit, Trash2 } from 'lucide-react';
-import { useOrdens, OrdemServico } from '@/hooks/useOrdens';
+import { useOrdens } from '@/hooks/useOrdens';
+import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +46,9 @@ export const Ordens = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
 
+  console.log('Ordens disponíveis:', ordens.length);
+  console.log('Loading:', loading);
+
   const stats = {
     aguardando_diagnostico: ordens.filter(o => o.status === 'aguardando_diagnostico').length,
     em_reparo: ordens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
@@ -54,6 +59,8 @@ export const Ordens = () => {
   const handleSubmit = async (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       setModalLoading(true);
+      
+      console.log('Submetendo dados:', data);
       
       if (selectedOrdem) {
         await updateOrdem(selectedOrdem.id!, data);
@@ -74,11 +81,13 @@ export const Ordens = () => {
   };
 
   const handleEdit = (ordem: OrdemServico) => {
+    console.log('Editando ordem:', ordem);
     setSelectedOrdem(ordem);
     setModalOpen(true);
   };
 
   const handleView = (ordem: OrdemServico) => {
+    console.log('Visualizando ordem:', ordem);
     toast.info('Funcionalidade de visualização será implementada em breve');
   };
 
@@ -144,7 +153,7 @@ export const Ordens = () => {
       key: 'data_abertura',
       label: 'Data Abertura',
       sortable: true,
-      render: (ordem) => new Date(ordem.data_abertura).toLocaleDateString('pt-BR')
+      render: (ordem) => ordem.data_abertura ? new Date(ordem.data_abertura).toLocaleDateString('pt-BR') : 'N/A'
     },
     {
       key: 'actions',
@@ -257,11 +266,20 @@ export const Ordens = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Ordens</CardTitle>
+          <CardTitle>Lista de Ordens ({ordens.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center py-8">Carregando...</div>
+            <div className="flex justify-center py-8">Carregando ordens...</div>
+          ) : ordens.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Nenhuma ordem de serviço encontrada</p>
+              <Button onClick={handleNewOrdem} className="mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Criar primeira ordem
+              </Button>
+            </div>
           ) : (
             <SortableTable
               data={ordens}
