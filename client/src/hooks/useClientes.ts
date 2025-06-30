@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface Cliente {
@@ -52,16 +52,10 @@ export const useClientes = () => {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('clientes')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('nome');
-
-      if (error) throw error;
+      const data = await api.clientes.list();
 
       // Format phone numbers for display
-      const clientesFormatados = (data || []).map(cliente => ({
+      const clientesFormatados = (data || []).map((cliente: Cliente) => ({
         ...cliente,
         telefone: formatPhoneBrazilian(cliente.telefone)
       }));
@@ -82,17 +76,7 @@ export const useClientes = () => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .insert({
-          ...clienteData,
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await api.clientes.create(clienteData);
       await fetchClientes(); // Refresh list
       return data;
     } catch (error) {
@@ -105,16 +89,7 @@ export const useClientes = () => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .update(clienteData)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      const data = await api.clientes.update(id, clienteData);
       await fetchClientes(); // Refresh list
       return data;
     } catch (error) {
@@ -127,14 +102,7 @@ export const useClientes = () => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
-      const { error } = await supabase
-        .from('clientes')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
+      await api.clientes.delete(id);
       await fetchClientes(); // Refresh list
     } catch (error) {
       console.error('Erro ao deletar cliente:', error);

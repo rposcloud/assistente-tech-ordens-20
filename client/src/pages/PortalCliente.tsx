@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Printer, Clock, CheckCircle, AlertCircle, Phone, Mail, MapPin } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { OrdemServico, Cliente } from '../types';
 import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency } from '../utils/masks';
@@ -35,18 +35,10 @@ export const PortalCliente = () => {
 
         console.log('Buscando ordem com token:', token);
 
-        // Buscar ordem pelo token no Supabase
-        const { data: ordemData, error: ordemError } = await supabase
-          .from('ordens_servico')
-          .select(`
-            *,
-            clientes (*)
-          `)
-          .eq('link_token', token)
-          .single();
+        // Buscar ordem pelo token usando nossa API
+        const ordemData = await api.portal.getByToken(token);
 
-        if (ordemError || !ordemData) {
-          console.error('Erro ao buscar ordem:', ordemError);
+        if (!ordemData) {
           setError('Ordem de serviço não encontrada ou link inválido');
           setLoading(false);
           return;
@@ -61,20 +53,11 @@ export const PortalCliente = () => {
           return;
         }
 
-        // Buscar perfil da empresa do usuário que criou a ordem
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', ordemData.user_id)
-          .single();
-
-        if (profileError) {
-          console.error('Erro ao buscar perfil da empresa:', profileError);
-        }
+        // Nota: O perfil da empresa será implementado quando necessário
 
         setOrdem(ordemData);
-        setCliente(ordemData.clientes);
-        setCompanyProfile(profileData);
+        setCliente(ordemData.cliente || null);
+        setCompanyProfile(null); // Será implementado quando necessário
         
       } catch (err) {
         console.error('Erro geral:', err);
@@ -188,7 +171,7 @@ export const PortalCliente = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Data de Abertura:</span>
-              <p className="font-medium">{new Date(ordem.data_abertura).toLocaleDateString('pt-BR')}</p>
+              <p className="font-medium">{ordem.data_entrada ? new Date(ordem.data_entrada).toLocaleDateString('pt-BR') : 'N/A'}</p>
             </div>
             {ordem.prazo_entrega && (
               <div>

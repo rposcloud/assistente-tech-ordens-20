@@ -1,0 +1,269 @@
+import { 
+  users, clientes, produtos, ordensServico, entradasFinanceiras, 
+  categoriasFinanceiras, tiposDefeito, profiles,
+  type User, type InsertUser, type Cliente, type InsertCliente,
+  type Produto, type InsertProduto, type OrdemServico, type InsertOrdemServico,
+  type EntradaFinanceira, type InsertEntradaFinanceira,
+  type CategoriaFinanceira, type InsertCategoriaFinanceira,
+  type TipoDefeito, type InsertTipoDefeito,
+  type Profile, type InsertProfile
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+
+export interface IStorage {
+  // Users
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  verifyPassword(password: string, hash: string): Promise<boolean>;
+  hashPassword(password: string): Promise<string>;
+  
+  // Profiles
+  getProfile(userId: string): Promise<Profile | undefined>;
+  createProfile(profile: InsertProfile): Promise<Profile>;
+  updateProfile(userId: string, profile: Partial<InsertProfile>): Promise<Profile>;
+  
+  // Clientes
+  getClientes(userId: string): Promise<Cliente[]>;
+  getCliente(id: string, userId: string): Promise<Cliente | undefined>;
+  createCliente(cliente: InsertCliente): Promise<Cliente>;
+  updateCliente(id: string, userId: string, cliente: Partial<InsertCliente>): Promise<Cliente>;
+  deleteCliente(id: string, userId: string): Promise<void>;
+  
+  // Produtos
+  getProdutos(userId: string): Promise<Produto[]>;
+  getProduto(id: string, userId: string): Promise<Produto | undefined>;
+  createProduto(produto: InsertProduto): Promise<Produto>;
+  updateProduto(id: string, userId: string, produto: Partial<InsertProduto>): Promise<Produto>;
+  deleteProduto(id: string, userId: string): Promise<void>;
+  
+  // Ordens de Serviço
+  getOrdensServico(userId: string): Promise<OrdemServico[]>;
+  getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined>;
+  getOrdemServicoByToken(token: string): Promise<OrdemServico | undefined>;
+  createOrdemServico(ordem: InsertOrdemServico): Promise<OrdemServico>;
+  updateOrdemServico(id: string, userId: string, ordem: Partial<InsertOrdemServico>): Promise<OrdemServico>;
+  deleteOrdemServico(id: string, userId: string): Promise<void>;
+  
+  // Entradas Financeiras
+  getEntradasFinanceiras(userId: string): Promise<EntradaFinanceira[]>;
+  getEntradaFinanceira(id: string, userId: string): Promise<EntradaFinanceira | undefined>;
+  createEntradaFinanceira(entrada: InsertEntradaFinanceira): Promise<EntradaFinanceira>;
+  updateEntradaFinanceira(id: string, userId: string, entrada: Partial<InsertEntradaFinanceira>): Promise<EntradaFinanceira>;
+  deleteEntradaFinanceira(id: string, userId: string): Promise<void>;
+  
+  // Categorias Financeiras
+  getCategoriasFinanceiras(userId: string): Promise<CategoriaFinanceira[]>;
+  createCategoriaFinanceira(categoria: InsertCategoriaFinanceira): Promise<CategoriaFinanceira>;
+  
+  // Tipos de Defeito
+  getTiposDefeito(userId: string): Promise<TipoDefeito[]>;
+  createTipoDefeito(tipo: InsertTipoDefeito): Promise<TipoDefeito>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // Users
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(user).returning();
+    return result[0];
+  }
+
+  async verifyPassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 12);
+  }
+
+  // Profiles
+  async getProfile(userId: string): Promise<Profile | undefined> {
+    const result = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
+    return result[0];
+  }
+
+  async createProfile(profile: InsertProfile): Promise<Profile> {
+    const result = await db.insert(profiles).values(profile).returning();
+    return result[0];
+  }
+
+  async updateProfile(userId: string, profile: Partial<InsertProfile>): Promise<Profile> {
+    const result = await db
+      .update(profiles)
+      .set({ ...profile, updated_at: new Date() })
+      .where(eq(profiles.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  // Clientes
+  async getClientes(userId: string): Promise<Cliente[]> {
+    return db.select().from(clientes).where(eq(clientes.user_id, userId)).orderBy(desc(clientes.created_at));
+  }
+
+  async getCliente(id: string, userId: string): Promise<Cliente | undefined> {
+    const result = await db
+      .select()
+      .from(clientes)
+      .where(and(eq(clientes.id, id), eq(clientes.user_id, userId)))
+      .limit(1);
+    return result[0];
+  }
+
+  async createCliente(cliente: InsertCliente): Promise<Cliente> {
+    const result = await db.insert(clientes).values(cliente).returning();
+    return result[0];
+  }
+
+  async updateCliente(id: string, userId: string, cliente: Partial<InsertCliente>): Promise<Cliente> {
+    const result = await db
+      .update(clientes)
+      .set({ ...cliente, updated_at: new Date() })
+      .where(and(eq(clientes.id, id), eq(clientes.user_id, userId)))
+      .returning();
+    return result[0];
+  }
+
+  async deleteCliente(id: string, userId: string): Promise<void> {
+    await db.delete(clientes).where(and(eq(clientes.id, id), eq(clientes.user_id, userId)));
+  }
+
+  // Produtos
+  async getProdutos(userId: string): Promise<Produto[]> {
+    return db.select().from(produtos).where(eq(produtos.user_id, userId)).orderBy(desc(produtos.created_at));
+  }
+
+  async getProduto(id: string, userId: string): Promise<Produto | undefined> {
+    const result = await db
+      .select()
+      .from(produtos)
+      .where(and(eq(produtos.id, id), eq(produtos.user_id, userId)))
+      .limit(1);
+    return result[0];
+  }
+
+  async createProduto(produto: InsertProduto): Promise<Produto> {
+    const result = await db.insert(produtos).values(produto).returning();
+    return result[0];
+  }
+
+  async updateProduto(id: string, userId: string, produto: Partial<InsertProduto>): Promise<Produto> {
+    const result = await db
+      .update(produtos)
+      .set({ ...produto, updated_at: new Date() })
+      .where(and(eq(produtos.id, id), eq(produtos.user_id, userId)))
+      .returning();
+    return result[0];
+  }
+
+  async deleteProduto(id: string, userId: string): Promise<void> {
+    await db.delete(produtos).where(and(eq(produtos.id, id), eq(produtos.user_id, userId)));
+  }
+
+  // Ordens de Serviço
+  async getOrdensServico(userId: string): Promise<OrdemServico[]> {
+    return db.select().from(ordensServico).where(eq(ordensServico.user_id, userId)).orderBy(desc(ordensServico.created_at));
+  }
+
+  async getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined> {
+    const result = await db
+      .select()
+      .from(ordensServico)
+      .where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getOrdemServicoByToken(token: string): Promise<OrdemServico | undefined> {
+    const result = await db
+      .select()
+      .from(ordensServico)
+      .where(eq(ordensServico.link_token, token))
+      .limit(1);
+    return result[0];
+  }
+
+  async createOrdemServico(ordem: InsertOrdemServico): Promise<OrdemServico> {
+    const result = await db.insert(ordensServico).values(ordem).returning();
+    return result[0];
+  }
+
+  async updateOrdemServico(id: string, userId: string, ordem: Partial<InsertOrdemServico>): Promise<OrdemServico> {
+    const result = await db
+      .update(ordensServico)
+      .set({ ...ordem, updated_at: new Date() })
+      .where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)))
+      .returning();
+    return result[0];
+  }
+
+  async deleteOrdemServico(id: string, userId: string): Promise<void> {
+    await db.delete(ordensServico).where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)));
+  }
+
+  // Entradas Financeiras
+  async getEntradasFinanceiras(userId: string): Promise<EntradaFinanceira[]> {
+    return db.select().from(entradasFinanceiras).where(eq(entradasFinanceiras.user_id, userId)).orderBy(desc(entradasFinanceiras.created_at));
+  }
+
+  async getEntradaFinanceira(id: string, userId: string): Promise<EntradaFinanceira | undefined> {
+    const result = await db
+      .select()
+      .from(entradasFinanceiras)
+      .where(and(eq(entradasFinanceiras.id, id), eq(entradasFinanceiras.user_id, userId)))
+      .limit(1);
+    return result[0];
+  }
+
+  async createEntradaFinanceira(entrada: InsertEntradaFinanceira): Promise<EntradaFinanceira> {
+    const result = await db.insert(entradasFinanceiras).values(entrada).returning();
+    return result[0];
+  }
+
+  async updateEntradaFinanceira(id: string, userId: string, entrada: Partial<InsertEntradaFinanceira>): Promise<EntradaFinanceira> {
+    const result = await db
+      .update(entradasFinanceiras)
+      .set({ ...entrada, updated_at: new Date() })
+      .where(and(eq(entradasFinanceiras.id, id), eq(entradasFinanceiras.user_id, userId)))
+      .returning();
+    return result[0];
+  }
+
+  async deleteEntradaFinanceira(id: string, userId: string): Promise<void> {
+    await db.delete(entradasFinanceiras).where(and(eq(entradasFinanceiras.id, id), eq(entradasFinanceiras.user_id, userId)));
+  }
+
+  // Categorias Financeiras
+  async getCategoriasFinanceiras(userId: string): Promise<CategoriaFinanceira[]> {
+    return db.select().from(categoriasFinanceiras).where(eq(categoriasFinanceiras.user_id, userId));
+  }
+
+  async createCategoriaFinanceira(categoria: InsertCategoriaFinanceira): Promise<CategoriaFinanceira> {
+    const result = await db.insert(categoriasFinanceiras).values(categoria).returning();
+    return result[0];
+  }
+
+  // Tipos de Defeito
+  async getTiposDefeito(userId: string): Promise<TipoDefeito[]> {
+    return db.select().from(tiposDefeito).where(eq(tiposDefeito.user_id, userId));
+  }
+
+  async createTipoDefeito(tipo: InsertTipoDefeito): Promise<TipoDefeito> {
+    const result = await db.insert(tiposDefeito).values(tipo).returning();
+    return result[0];
+  }
+}
+
+export const storage = new DatabaseStorage();
