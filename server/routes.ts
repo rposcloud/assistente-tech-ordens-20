@@ -342,15 +342,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/financeiro', authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log('Dados recebidos para entrada financeira:', req.body);
+      
       const entradaData = insertEntradaFinanceiraSchema.parse({
         ...req.body,
         user_id: req.userId!
       });
+      
+      console.log('Dados validados:', entradaData);
+      
       const entrada = await storage.createEntradaFinanceira(entradaData);
       res.json(entrada);
     } catch (error) {
       console.error('Create entrada financeira error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   });
 

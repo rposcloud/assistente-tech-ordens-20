@@ -164,7 +164,7 @@ export const Ordens = () => {
       key: 'valor_final',
       label: 'Valor',
       sortable: true,
-      render: (ordem) => `R$ ${(ordem.valor_final || 0).toFixed(2)}`
+      render: (ordem) => `R$ ${(parseFloat(ordem.valor_final as string) || 0).toFixed(2)}`
     },
     {
       key: 'data_abertura',

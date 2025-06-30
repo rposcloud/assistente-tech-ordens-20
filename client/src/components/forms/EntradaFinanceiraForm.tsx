@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EntradaFinanceira, CategoriaFinanceira } from '@/hooks/useFinanceiro';
 
 interface EntradaFinanceiraFormProps {
-  onSubmit: (data: Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>) => void;
+  onSubmit: (data: any) => void;
   onCancel: () => void;
   categorias: CategoriaFinanceira[];
   initialData?: EntradaFinanceira;
@@ -44,7 +44,17 @@ export const EntradaFinanceiraForm: React.FC<EntradaFinanceiraFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData as Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>);
+    
+    // Preparar dados no formato correto
+    const dadosFormatados = {
+      ...formData,
+      valor: String(formData.valor || 0),
+      parcelas: Number(formData.parcelas || 1),
+      parcela_atual: Number(formData.parcela_atual || 1),
+      valor_parcela: String(formData.valor_parcela || 0)
+    };
+    
+    onSubmit(dadosFormatados);
   };
 
   const updateField = (field: string, value: any) => {

@@ -331,10 +331,14 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({
   id: true,
+  user_id: true,
   created_at: true,
   updated_at: true,
 }).extend({
   valor: z.union([z.string(), z.number()]).transform(val => String(val)),
+  parcelas: z.union([z.string(), z.number()]).transform(val => Number(val)).optional(),
+  parcela_atual: z.union([z.string(), z.number()]).transform(val => Number(val)).optional(),
+  valor_parcela: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
 });
 
 export const insertCategoriaFinanceiraSchema = createInsertSchema(categoriasFinanceiras).omit({
