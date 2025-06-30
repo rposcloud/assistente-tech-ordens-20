@@ -303,18 +303,30 @@ export const insertProdutoSchema = createInsertSchema(produtos).omit({
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  preco_custo: z.union([z.string(), z.number()]).transform(val => String(val)),
+  preco_venda: z.union([z.string(), z.number()]).transform(val => String(val)),
 });
 
 export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  valor_mao_obra: z.union([z.string(), z.number()]).transform(val => String(val)),
+  valor_orcamento: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  valor_total: z.union([z.string(), z.number()]).transform(val => String(val)),
+  desconto: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  acrescimo: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  valor_final: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
 });
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({
   id: true,
   created_at: true,
   updated_at: true,
+}).extend({
+  valor: z.union([z.string(), z.number()]).transform(val => String(val)),
 });
 
 export const insertCategoriaFinanceiraSchema = createInsertSchema(categoriasFinanceiras).omit({
