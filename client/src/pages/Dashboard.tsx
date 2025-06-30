@@ -14,6 +14,10 @@ export const Dashboard = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
   const { ordens, loading: loadingOrdens } = useOrdens();
   const { entradas, loading: loadingFinanceiro } = useFinanceiro();
+  
+  // Debug: verificar dados financeiros
+  console.log('Dados financeiros recebidos:', entradas);
+  console.log('Loading financeiro:', loadingFinanceiro);
 
   const totalClientes = clientes?.length || 0;
   const totalProdutos = produtos?.length || 0;
@@ -55,14 +59,14 @@ export const Dashboard = () => {
   const lucroMes = totalReceitaMes - totalDespesaMes;
   
   // Receitas pagas (status pago)
-  const receitasPagas = receitasDoMes.filter(e => e.status_pagamento === 'pago');
+  const receitasPagas = receitasDoMes.filter(e => e.status === 'pago');
   const totalReceitaPaga = receitasPagas.reduce((acc, entrada) => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
   }, 0);
   
   // Receitas pendentes
-  const receitasPendentes = receitasDoMes.filter(e => e.status_pagamento === 'pendente');
+  const receitasPendentes = receitasDoMes.filter(e => e.status === 'pendente');
   const totalReceitaPendente = receitasPendentes.reduce((acc, entrada) => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
