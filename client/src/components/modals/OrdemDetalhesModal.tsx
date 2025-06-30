@@ -8,6 +8,7 @@ import { OrdemServico } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Printer } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface OrdemDetalhesModalProps {
   isOpen: boolean;
@@ -48,7 +49,19 @@ const prioridadeColors = {
 };
 
 export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModalProps) => {
+  const { data: ordemCompleta, isLoading } = useQuery({
+    queryKey: ['/api/ordens', ordem?.id, 'print'],
+    queryFn: async () => {
+      const response = await fetch(`/api/ordens/${ordem?.id}/print`);
+      if (!response.ok) throw new Error('Erro ao buscar detalhes da ordem');
+      return response.json();
+    },
+    enabled: !!ordem?.id && isOpen,
+  });
+  
   if (!ordem) return null;
+  
+  const dadosOrdem = ordemCompleta || ordem;
 
   const formatDate = (date: string | null) => {
     if (!date) return 'Não informado';
@@ -421,19 +434,19 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-600">Nome</label>
-                  <p className="mt-1">{ordem.clientes?.nome || 'N/A'}</p>
+                  <p className="mt-1">{dadosOrdem.clientes?.nome || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Email</label>
-                  <p className="mt-1">{ordem.clientes?.email || 'N/A'}</p>
+                  <p className="mt-1">{dadosOrdem.clientes?.email || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Telefone</label>
-                  <p className="mt-1">{ordem.clientes?.telefone || 'N/A'}</p>
+                  <p className="mt-1">{dadosOrdem.clientes?.telefone || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">CPF/CNPJ</label>
-                  <p className="mt-1">{ordem.clientes?.cpf_cnpj || 'N/A'}</p>
+                  <p className="mt-1">{dadosOrdem.clientes?.cpf_cnpj || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>

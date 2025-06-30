@@ -332,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Endpoint para impressão com dados da empresa
+  // Endpoint para impressão com dados completos
   app.get('/api/ordens/:id/print', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
@@ -340,13 +340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!ordem) {
         return res.status(404).json({ error: 'Ordem not found' });
       }
-
-      const empresa = await storage.getProfile(req.userId!);
       
-      res.json({
-        ordem,
-        empresa
-      });
+      res.json(ordem);
     } catch (error) {
       console.error('Get ordem for print error:', error);
       res.status(500).json({ error: 'Internal server error' });

@@ -1,6 +1,6 @@
 import { 
   users, clientes, produtos, ordensServico, entradasFinanceiras, 
-  categoriasFinanceiras, tiposDefeito, profiles,
+  categoriasFinanceiras, tiposDefeito, profiles, pecasUtilizadas, produtosUtilizados,
   type User, type InsertUser, type Cliente, type InsertCliente,
   type Produto, type InsertProduto, type OrdemServico, type InsertOrdemServico,
   type EntradaFinanceira, type InsertEntradaFinanceira,
@@ -207,14 +207,53 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     if (result[0]) {
-      // Buscar dados do cliente separadamente
+      // Buscar dados do cliente
       const cliente = await db
         .select()
         .from(clientes)
         .where(eq(clientes.id, result[0].cliente_id))
         .limit(1);
+      
+      // Buscar produtos utilizados com detalhes do produto
+      const produtosUtilizadosData = await db
+        .select({
+          id: produtosUtilizados.id,
+          quantidade: produtosUtilizados.quantidade,
+          valor_unitario: produtosUtilizados.valor_unitario,
+          valor_total: produtosUtilizados.valor_total,
+          produto: {
+            id: produtos.id,
+            nome: produtos.nome,
+            categoria: produtos.categoria,
+            descricao: produtos.descricao,
+            preco_custo: produtos.preco_custo,
+            preco_venda: produtos.preco_venda
+          }
+        })
+        .from(produtosUtilizados)
+        .leftJoin(produtos, eq(produtosUtilizados.produto_id, produtos.id))
+        .where(eq(produtosUtilizados.ordem_servico_id, result[0].id));
+      
+      // Buscar peças utilizadas
+      const pecasUtilizadasData = await db
+        .select()
+        .from(pecasUtilizadas)
+        .where(eq(pecasUtilizadas.ordem_servico_id, result[0].id));
+      
+      // Buscar dados da empresa (perfil do usuário)
+      const empresa = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, userId))
+        .limit(1);
         
-      return { ...result[0], clientes: cliente[0] } as any;
+      return { 
+        ...result[0], 
+        clientes: cliente[0],
+        produtos_utilizados: produtosUtilizadosData,
+        pecas_utilizadas: pecasUtilizadasData,
+        empresa: empresa[0]
+      } as any;
     }
     return undefined;
   }
