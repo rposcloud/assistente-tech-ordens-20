@@ -493,26 +493,71 @@ export type Database = {
       }
       profiles: {
         Row: {
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          complemento: string | null
           created_at: string
+          dados_bancarios: string | null
+          email_empresa: string | null
           empresa: string | null
+          endereco: string | null
+          estado: string | null
           id: string
+          inscricao_estadual: string | null
+          inscricao_municipal: string | null
+          logo_url: string | null
           nome_completo: string
+          numero: string | null
+          observacoes_empresa: string | null
+          site: string | null
           telefone: string | null
           updated_at: string
         }
         Insert: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
           created_at?: string
+          dados_bancarios?: string | null
+          email_empresa?: string | null
           empresa?: string | null
+          endereco?: string | null
+          estado?: string | null
           id: string
+          inscricao_estadual?: string | null
+          inscricao_municipal?: string | null
+          logo_url?: string | null
           nome_completo: string
+          numero?: string | null
+          observacoes_empresa?: string | null
+          site?: string | null
           telefone?: string | null
           updated_at?: string
         }
         Update: {
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          complemento?: string | null
           created_at?: string
+          dados_bancarios?: string | null
+          email_empresa?: string | null
           empresa?: string | null
+          endereco?: string | null
+          estado?: string | null
           id?: string
+          inscricao_estadual?: string | null
+          inscricao_municipal?: string | null
+          logo_url?: string | null
           nome_completo?: string
+          numero?: string | null
+          observacoes_empresa?: string | null
+          site?: string | null
           telefone?: string | null
           updated_at?: string
         }

@@ -2,16 +2,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, Printer, Clock, CheckCircle, AlertCircle, Phone, Mail, MapPin } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { OrdemServico, Cliente } from '../types';
 import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency } from '../utils/masks';
 import { isTokenValid } from '../utils/tokenUtils';
 import { useReactToPrint } from 'react-to-print';
+import { CompanyProfile } from '../hooks/useProfile';
 
 export const PortalCliente = () => {
   const { token } = useParams<{ token: string }>();
   const [ordem, setOrdem] = useState<OrdemServico | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -22,7 +25,7 @@ export const PortalCliente = () => {
   });
 
   useEffect(() => {
-    const loadOrdemData = () => {
+    const loadOrdemData = async () => {
       try {
         if (!token) {
           setError('Token não fornecido');
@@ -30,46 +33,51 @@ export const PortalCliente = () => {
           return;
         }
 
-        const ordensSalvas = localStorage.getItem('ordens');
-        const clientesSalvos = localStorage.getItem('clientes');
+        console.log('Buscando ordem com token:', token);
 
-        if (!ordensSalvas || !clientesSalvos) {
-          setError('Dados não encontrados');
-          setLoading(false);
-          return;
-        }
+        // Buscar ordem pelo token no Supabase
+        const { data: ordemData, error: ordemError } = await supabase
+          .from('ordens_servico')
+          .select(`
+            *,
+            clientes (*)
+          `)
+          .eq('link_token', token)
+          .single();
 
-        const ordens: OrdemServico[] = JSON.parse(ordensSalvas);
-        const clientes: Cliente[] = JSON.parse(clientesSalvos);
-
-        // Buscar ordem pelo token
-        const ordemEncontrada = ordens.find(o => o.link_token === token);
-
-        if (!ordemEncontrada) {
+        if (ordemError || !ordemData) {
+          console.error('Erro ao buscar ordem:', ordemError);
           setError('Ordem de serviço não encontrada ou link inválido');
           setLoading(false);
           return;
         }
 
+        console.log('Ordem encontrada:', ordemData);
+
         // Verificar se o token não expirou
-        if (!isTokenValid(ordemEncontrada.link_expires_at)) {
+        if (!isTokenValid(ordemData.link_expires_at)) {
           setError('Link expirado. Entre em contato conosco para obter um novo link.');
           setLoading(false);
           return;
         }
 
-        // Buscar cliente
-        const clienteEncontrado = clientes.find(c => c.id === ordemEncontrada.cliente_id);
+        // Buscar perfil da empresa do usuário que criou a ordem
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', ordemData.user_id)
+          .single();
 
-        if (!clienteEncontrado) {
-          setError('Dados do cliente não encontrados');
-          setLoading(false);
-          return;
+        if (profileError) {
+          console.error('Erro ao buscar perfil da empresa:', profileError);
         }
 
-        setOrdem(ordemEncontrada);
-        setCliente(clienteEncontrado);
+        setOrdem(ordemData);
+        setCliente(ordemData.clientes);
+        setCompanyProfile(profileData);
+        
       } catch (err) {
+        console.error('Erro geral:', err);
         setError('Erro ao carregar dados');
       } finally {
         setLoading(false);
@@ -130,11 +138,11 @@ export const PortalCliente = () => {
             <div className="mt-2 space-y-1 text-sm text-blue-700">
               <div className="flex items-center justify-center">
                 <Phone className="h-4 w-4 mr-2" />
-                (11) 9999-9999
+                {companyProfile?.telefone || '(11) 9999-9999'}
               </div>
               <div className="flex items-center justify-center">
                 <Mail className="h-4 w-4 mr-2" />
-                contato@techservice.com
+                {companyProfile?.email_empresa || 'contato@techservice.com'}
               </div>
             </div>
           </div>
@@ -150,7 +158,9 @@ export const PortalCliente = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-blue-600">TechService</h1>
+              <h1 className="text-2xl font-bold text-blue-600">
+                {companyProfile?.empresa || 'TechService'}
+              </h1>
               <p className="text-gray-600">Portal do Cliente</p>
             </div>
             <button
@@ -260,21 +270,21 @@ export const PortalCliente = () => {
           </div>
         )}
 
-        {/* Contato */}
+        {/* Contato - usando dados dinâmicos */}
         <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">
           <h3 className="text-lg font-semibold mb-4 text-blue-900">Entre em Contato</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center text-blue-700">
               <Phone className="h-4 w-4 mr-2" />
-              <span>(11) 9999-9999</span>
+              <span>{companyProfile?.telefone || '(11) 9999-9999'}</span>
             </div>
             <div className="flex items-center text-blue-700">
               <Mail className="h-4 w-4 mr-2" />
-              <span>contato@techservice.com</span>
+              <span>{companyProfile?.email_empresa || 'contato@techservice.com'}</span>
             </div>
             <div className="flex items-center text-blue-700">
               <MapPin className="h-4 w-4 mr-2" />
-              <span>São Paulo/SP</span>
+              <span>{companyProfile?.cidade || 'São Paulo'}/{companyProfile?.estado || 'SP'}</span>
             </div>
           </div>
         </div>
@@ -282,7 +292,7 @@ export const PortalCliente = () => {
 
       {/* Componente de impressão (oculto) */}
       <div className="hidden">
-        <OrderPrint ref={printRef} ordem={ordem} cliente={cliente} />
+        <OrderPrint ref={printRef} ordem={ordem} cliente={cliente} companyProfile={companyProfile} />
       </div>
     </div>
   );
