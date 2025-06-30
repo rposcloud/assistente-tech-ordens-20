@@ -90,7 +90,8 @@ export const Ordens = () => {
 
   const handleView = (ordem: OrdemServico) => {
     console.log('Visualizando ordem:', ordem);
-    window.open(`/impressao/${ordem.id}`, '_blank');
+    // Tenta navegar na mesma aba primeiro para testar
+    window.location.href = `/impressao/${ordem.id}`;
   };
 
   const handleDeleteClick = (ordem: OrdemServico) => {
