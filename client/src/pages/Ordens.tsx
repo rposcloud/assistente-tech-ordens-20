@@ -90,7 +90,7 @@ export const Ordens = () => {
 
   const handleView = (ordem: OrdemServico) => {
     console.log('Visualizando ordem:', ordem);
-    toast.info('Funcionalidade de visualização será implementada em breve');
+    window.open(`/impressao/${ordem.id}`, '_blank');
   };
 
   const handleDeleteClick = (ordem: OrdemServico) => {
