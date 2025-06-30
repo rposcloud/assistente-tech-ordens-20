@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, FileText, Home, LogOut, Package, DollarSign } from 'lucide-react';
+import { Users, FileText, Home, LogOut, Package, DollarSign, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export const Sidebar = () => {
@@ -10,6 +10,7 @@ export const Sidebar = () => {
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Building2, label: 'Empresa', path: '/empresa' },
     { icon: Users, label: 'Clientes', path: '/clientes' },
     { icon: Package, label: 'Produtos & Serviços', path: '/produtos' },
     { icon: FileText, label: 'Ordens de Serviço', path: '/ordens' },

@@ -15,6 +15,7 @@ import { Clientes } from './pages/Clientes';
 import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
 import { Financeiro } from './pages/Financeiro';
+import { Empresa } from './pages/Empresa';
 import { PortalCliente } from './pages/PortalCliente';
 
 const queryClient = new QueryClient();
@@ -35,6 +36,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/empresa" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Empresa />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -286,6 +286,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para impressão com dados da empresa
+  app.get('/api/ordens/:id/print', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      const ordem = await storage.getOrdemServico(id, req.userId!);
+      if (!ordem) {
+        return res.status(404).json({ error: 'Ordem not found' });
+      }
+
+      const empresa = await storage.getProfile(req.userId!);
+      
+      res.json({
+        ordem,
+        empresa
+      });
+    } catch (error) {
+      console.error('Get ordem for print error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Portal do cliente (acesso público via token)
   app.get('/api/portal/:token', async (req, res) => {
     try {
