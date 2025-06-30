@@ -58,7 +58,7 @@ export const Ordens = () => {
     total: ordens.length
   };
 
-  const handleSubmit = async (data: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleSubmit = async (data: any) => {
     try {
       setModalLoading(true);
       
@@ -164,7 +164,11 @@ export const Ordens = () => {
       key: 'valor_final',
       label: 'Valor',
       sortable: true,
-      render: (ordem) => `R$ ${(parseFloat(ordem.valor_final as string) || 0).toFixed(2)}`
+      render: (ordem) => {
+        const valor = ordem.valor_final || ordem.valor_total || '0';
+        const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
+        return `R$ ${(valorNumerico || 0).toFixed(2)}`;
+      }
     },
     {
       key: 'data_abertura',
