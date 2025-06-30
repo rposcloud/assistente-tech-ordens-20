@@ -39,39 +39,8 @@ export const useProfile = () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Erro ao buscar perfil:', error);
-        // Se não existe perfil, criar um básico
-        if (error.code === 'PGRST116') {
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              nome_completo: user.email || 'Usuário',
-              empresa: 'TechService',
-              telefone: '(11) 9999-9999',
-              email_empresa: 'contato@techservice.com',
-              cidade: 'São Paulo',
-              estado: 'SP'
-            })
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error('Erro ao criar perfil:', createError);
-          } else {
-            setProfile(newProfile);
-          }
-        }
-      } else {
-        setProfile(data);
-      }
+      const data = await api.get('/profile');
+      setProfile(data);
     } catch (error) {
       console.error('Erro no useProfile:', error);
     } finally {
@@ -83,18 +52,7 @@ export const useProfile = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erro ao atualizar perfil:', error);
-        throw error;
-      }
-
+      const data = await api.put('/profile', updates);
       setProfile(data);
       return data;
     } catch (error) {

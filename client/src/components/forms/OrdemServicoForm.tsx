@@ -457,6 +457,3 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     </form>
   );
 };
-```
-
-The code above represents the original code, without the modified error handling, I will now add the error handling to the code.

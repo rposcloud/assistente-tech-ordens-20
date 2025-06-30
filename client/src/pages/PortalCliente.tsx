@@ -171,7 +171,7 @@ export const PortalCliente = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Data de Abertura:</span>
-              <p className="font-medium">{ordem.data_entrada ? new Date(ordem.data_entrada).toLocaleDateString('pt-BR') : 'N/A'}</p>
+              <p className="font-medium">{ordem.data_abertura ? new Date(ordem.data_abertura).toLocaleDateString('pt-BR') : 'N/A'}</p>
             </div>
             {ordem.prazo_entrega && (
               <div>
@@ -240,7 +240,7 @@ export const PortalCliente = () => {
               <div>
                 <span className="text-gray-500 text-sm">Valor Total:</span>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(ordem.valor_final || ordem.valor_total)}
+                  {formatCurrency(parseFloat(ordem.valor_final || ordem.valor_total || '0'))}
                 </p>
               </div>
               {ordem.forma_pagamento && (
