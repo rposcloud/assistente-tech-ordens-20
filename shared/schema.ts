@@ -310,11 +310,15 @@ export const insertProdutoSchema = createInsertSchema(produtos).omit({
 
 export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   id: true,
+  numero: true,
+  user_id: true,
   created_at: true,
   updated_at: true,
 }).extend({
+  lucro: z.union([z.string(), z.number()]).transform(val => String(val)),
+  margem_lucro: z.union([z.string(), z.number()]).transform(val => String(val)),
   valor_mao_obra: z.union([z.string(), z.number()]).transform(val => String(val)),
-  valor_orcamento: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  valor_orcamento: z.union([z.string(), z.number()]).transform(val => String(val)),
   valor_total: z.union([z.string(), z.number()]).transform(val => String(val)),
   desconto: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   acrescimo: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
@@ -322,6 +326,7 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   data_abertura: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
   ),
+  garantia: z.union([z.string(), z.number()]).transform(val => Number(val)).optional(),
 });
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,7 +67,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     const acrescimo = (formData.acrescimo || 0);
     const valorTotal = valorBase;
     const valorFinal = valorTotal - desconto + acrescimo;
-    
+
     setFormData(prev => ({ 
       ...prev, 
       valor_total: valorTotal,
@@ -78,13 +77,13 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!formData.cliente_id) {
       alert('Por favor, selecione um cliente');
       return;
     }
-    
+
     if (!formData.defeito_relatado.trim()) {
       alert('Por favor, informe o defeito relatado');
       return;
@@ -145,7 +144,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
   const adicionarProduto = (produtoId: string) => {
     if (!produtoId) return;
-    
+
     const produto = produtos.find(p => p.id === produtoId);
     if (!produto) return;
 
@@ -458,3 +457,6 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     </form>
   );
 };
+```
+
+The code above represents the original code, without the modified error handling, I will now add the error handling to the code.
