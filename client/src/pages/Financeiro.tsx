@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar, Edit } from 'lucide-react';
+import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar, Edit, Trash2 } from 'lucide-react';
 import { useFinanceiro, EntradaFinanceira } from '@/hooks/useFinanceiro';
 import { EntradaFinanceiraModal } from '@/components/modals/EntradaFinanceiraModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
@@ -24,7 +24,7 @@ const statusLabels: { [key: string]: string } = {
 };
 
 export const Financeiro = () => {
-  const { entradas, categorias, loading, createEntrada, updateEntrada } = useFinanceiro();
+  const { entradas, categorias, loading, createEntrada, updateEntrada, deleteEntrada } = useFinanceiro();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEntrada, setSelectedEntrada] = useState<EntradaFinanceira | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
@@ -75,6 +75,17 @@ export const Financeiro = () => {
   const handleEdit = (entrada: EntradaFinanceira) => {
     setSelectedEntrada(entrada);
     setModalOpen(true);
+  };
+
+  const handleDelete = async (entrada: EntradaFinanceira) => {
+    if (window.confirm(`Tem certeza que deseja excluir a entrada "${entrada.descricao}"?`)) {
+      try {
+        await deleteEntrada(entrada.id);
+        toast.success('Entrada excluída com sucesso!');
+      } catch (error) {
+        toast.error('Erro ao excluir entrada');
+      }
+    }
   };
 
   const handleNewEntrada = () => {
@@ -149,16 +160,29 @@ export const Financeiro = () => {
       label: 'Ações',
       sortable: false,
       render: (entrada) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEdit(entrada);
-          }}
-        >
-          <Edit className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(entrada);
+            }}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(entrada);
+            }}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       )
     }
   ];

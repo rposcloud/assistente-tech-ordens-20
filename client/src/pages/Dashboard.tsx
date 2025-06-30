@@ -3,6 +3,8 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useClientes } from '../hooks/useClientes';
 import { useProdutos } from '../hooks/useProdutos';
+import { useOrdens } from '../hooks/useOrdens';
+import { useFinanceiro } from '../hooks/useFinanceiro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Package, FileText, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 
@@ -10,11 +12,32 @@ export const Dashboard = () => {
   const { profile } = useAuth();
   const { clientes, loading: loadingClientes } = useClientes();
   const { produtos, loading: loadingProdutos } = useProdutos();
+  const { ordens, loading: loadingOrdens } = useOrdens();
+  const { entradas, loading: loadingFinanceiro } = useFinanceiro();
 
   const totalClientes = clientes?.length || 0;
   const totalProdutos = produtos?.length || 0;
-  const produtosAtivos = produtos?.filter(p => p.ativo)?.length || 0;
-  const produtosBaixoEstoque = produtos?.filter(p => (p.estoque || 0) < 5)?.length || 0;
+  const produtosAtivos = produtos?.filter((p: any) => p.ativo)?.length || 0;
+  const produtosBaixoEstoque = produtos?.filter((p: any) => (p.estoque || 0) < 5)?.length || 0;
+  
+  // Cálculos financeiros
+  const hoje = new Date();
+  const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  
+  const receitasDoMes = entradas?.filter(e => 
+    e.tipo === 'receita' && 
+    new Date(e.data_vencimento) >= primeiroDiaDoMes &&
+    new Date(e.data_vencimento) <= hoje
+  ) || [];
+  
+  const totalReceitaMes = receitasDoMes.reduce((acc, entrada) => {
+    const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+    return acc + (valor || 0);
+  }, 0);
+  
+  // Estatísticas de ordens
+  const ordensAbertas = ordens?.filter(o => o.status !== 'entregue')?.length || 0;
+  const ordensEntregues = ordens?.filter(o => o.status === 'entregue')?.length || 0;
 
   const cards = [
     {
@@ -32,15 +55,15 @@ export const Dashboard = () => {
       bgColor: 'bg-green-50'
     },
     {
-      title: 'Ordens de Serviço',
-      value: '0', // Será implementado quando criarmos a funcionalidade
+      title: 'Ordens Abertas',
+      value: loadingOrdens ? '...' : `${ordensAbertas}`,
       icon: FileText,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
     },
     {
       title: 'Receita do Mês',
-      value: 'R$ 0,00', // Será implementado quando criarmos a funcionalidade
+      value: loadingFinanceiro ? '...' : `R$ ${totalReceitaMes.toFixed(2).replace('.', ',')}`,
       icon: DollarSign,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50'

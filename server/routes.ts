@@ -277,7 +277,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const ordemData = insertOrdemServicoSchema.partial().parse(req.body);
+      
+      // Verificar se o status está sendo alterado para "entregue"
+      const ordemAnterior = await storage.getOrdemServico(id, req.userId!);
+      const statusAnterior = ordemAnterior?.status;
+      const novoStatus = ordemData.status;
+      
       const ordem = await storage.updateOrdemServico(id, req.userId!, ordemData);
+      
+      // Se a ordem foi marcada como entregue, criar entrada financeira automaticamente
+      const valorTotal = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : Number(ordem.valor_total);
+      if (novoStatus === 'entregue' && statusAnterior !== 'entregue' && valorTotal > 0) {
+        try {
+          const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
+          const entradaFinanceira = {
+            user_id: req.userId!,
+            tipo: 'receita' as const,
+            descricao: `Serviço realizado - OS #${ordem.numero || ordem.id.slice(0, 8)}`,
+            valor: ordem.valor_total.toString(),
+            categoria: 'Serviços',
+            forma_pagamento: 'dinheiro' as const,
+            data_vencimento: new Date().toISOString().split('T')[0],
+            status_pagamento: 'pago' as const,
+            observacoes: `Cliente: ${cliente?.nome || 'N/A'} - Equipamento: ${ordem.tipo_equipamento} ${ordem.marca} ${ordem.modelo}`,
+            parcelas: 1,
+            parcela_atual: 1,
+            valor_parcela: ordem.valor_total.toString(),
+            centro_custo: '',
+            conta_bancaria: '',
+            numero_documento: '',
+            pessoa_responsavel: ''
+          };
+          
+          await storage.createEntradaFinanceira(entradaFinanceira);
+          console.log(`Entrada financeira criada automaticamente para OS ${ordem.id}`);
+        } catch (financeiroError) {
+          console.error('Erro ao criar entrada financeira automática:', financeiroError);
+          // Não falha a atualização da ordem se houver erro no financeiro
+        }
+      }
+      
       res.json(ordem);
     } catch (error) {
       console.error('Update ordem error:', error);
