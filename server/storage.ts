@@ -175,7 +175,28 @@ export class DatabaseStorage implements IStorage {
 
   // Ordens de Serviço
   async getOrdensServico(userId: string): Promise<OrdemServico[]> {
-    return db.select().from(ordensServico).where(eq(ordensServico.user_id, userId)).orderBy(desc(ordensServico.created_at));
+    // Buscar todas as ordens
+    const ordens = await db.select().from(ordensServico)
+      .where(eq(ordensServico.user_id, userId))
+      .orderBy(desc(ordensServico.created_at));
+    
+    // Buscar todos os clientes para fazer o mapeamento
+    const clientesMap = new Map();
+    if (ordens.length > 0) {
+      const clienteIds = Array.from(new Set(ordens.map(o => o.cliente_id)));
+      const todosClientes = await db.select().from(clientes)
+        .where(eq(clientes.user_id, userId));
+      
+      todosClientes.forEach(cliente => {
+        clientesMap.set(cliente.id, cliente);
+      });
+    }
+    
+    // Combinar os dados
+    return ordens.map(ordem => ({
+      ...ordem,
+      clientes: clientesMap.get(ordem.cliente_id) || null
+    })) as any;
   }
 
   async getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined> {
@@ -184,7 +205,18 @@ export class DatabaseStorage implements IStorage {
       .from(ordensServico)
       .where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)))
       .limit(1);
-    return result[0];
+    
+    if (result[0]) {
+      // Buscar dados do cliente separadamente
+      const cliente = await db
+        .select()
+        .from(clientes)
+        .where(eq(clientes.id, result[0].cliente_id))
+        .limit(1);
+        
+      return { ...result[0], clientes: cliente[0] } as any;
+    }
+    return undefined;
   }
 
   async getOrdemServicoByToken(token: string): Promise<OrdemServico | undefined> {

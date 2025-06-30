@@ -3,9 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import { OrdemServico } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Printer } from 'lucide-react';
 
 interface OrdemDetalhesModalProps {
   isOpen: boolean;
@@ -66,13 +68,316 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
     }).format(numValue || 0);
   };
 
+  const handlePrint = () => {
+    // Criar uma nova janela para impressão
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Ordem de Serviço #${ordem.numero}</title>
+          <style>
+            @media print {
+              @page {
+                size: A4;
+                margin: 1cm;
+              }
+            }
+            
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 12px;
+              line-height: 1.4;
+              color: #000;
+              margin: 0;
+              padding: 20px;
+              background: white;
+            }
+            
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #333;
+              padding-bottom: 15px;
+              margin-bottom: 20px;
+            }
+            
+            .header h1 {
+              margin: 0;
+              font-size: 24px;
+              color: #333;
+            }
+            
+            .header h2 {
+              margin: 5px 0 0 0;
+              font-size: 18px;
+              color: #666;
+            }
+            
+            .section {
+              margin-bottom: 20px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+              overflow: hidden;
+            }
+            
+            .section-header {
+              background: #f5f5f5;
+              padding: 8px 12px;
+              font-weight: bold;
+              border-bottom: 1px solid #ddd;
+            }
+            
+            .section-content {
+              padding: 12px;
+            }
+            
+            .row {
+              display: flex;
+              margin-bottom: 8px;
+            }
+            
+            .col {
+              flex: 1;
+              padding-right: 15px;
+            }
+            
+            .col:last-child {
+              padding-right: 0;
+            }
+            
+            .label {
+              font-weight: bold;
+              color: #555;
+              margin-bottom: 2px;
+            }
+            
+            .value {
+              color: #000;
+            }
+            
+            .status {
+              display: inline-block;
+              padding: 4px 8px;
+              border-radius: 3px;
+              font-size: 11px;
+              font-weight: bold;
+            }
+            
+            .status-aguardando { background: #fff3cd; color: #856404; }
+            .status-aprovacao { background: #d1ecf1; color: #0c5460; }
+            .status-pecas { background: #ffeaa7; color: #6c5ce7; }
+            .status-reparo { background: #e1d5f7; color: #6f42c1; }
+            .status-pronto { background: #d4edda; color: #155724; }
+            .status-entregue { background: #f8f9fa; color: #6c757d; }
+            
+            .footer {
+              margin-top: 30px;
+              padding-top: 15px;
+              border-top: 1px solid #ddd;
+              text-align: center;
+              color: #666;
+              font-size: 11px;
+            }
+            
+            .signature-area {
+              margin-top: 40px;
+              display: flex;
+              justify-content: space-between;
+            }
+            
+            .signature {
+              text-align: center;
+              width: 200px;
+            }
+            
+            .signature-line {
+              border-top: 1px solid #000;
+              margin-top: 40px;
+              padding-top: 5px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>ORDEM DE SERVIÇO</h1>
+            <h2>#${ordem.numero}</h2>
+          </div>
+          
+          <div class="section">
+            <div class="section-header">Informações da Ordem</div>
+            <div class="section-content">
+              <div class="row">
+                <div class="col">
+                  <div class="label">Status:</div>
+                  <div class="value">
+                    <span class="status status-${ordem.status}">${statusLabels[ordem.status as keyof typeof statusLabels]}</span>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="label">Prioridade:</div>
+                  <div class="value">${prioridadeLabels[ordem.prioridade as keyof typeof prioridadeLabels]}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Data de Abertura:</div>
+                  <div class="value">${formatDate(ordem.data_abertura)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="section">
+            <div class="section-header">Dados do Cliente</div>
+            <div class="section-content">
+              <div class="row">
+                <div class="col">
+                  <div class="label">Nome:</div>
+                  <div class="value">${(ordem as any).clientes?.nome || 'N/A'}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Telefone:</div>
+                  <div class="value">${(ordem as any).clientes?.telefone || 'N/A'}</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="label">Email:</div>
+                  <div class="value">${(ordem as any).clientes?.email || 'N/A'}</div>
+                </div>
+                <div class="col">
+                  <div class="label">CPF/CNPJ:</div>
+                  <div class="value">${(ordem as any).clientes?.cpf_cnpj || 'N/A'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="section">
+            <div class="section-header">Dados do Equipamento</div>
+            <div class="section-content">
+              <div class="row">
+                <div class="col">
+                  <div class="label">Tipo:</div>
+                  <div class="value">${ordem.tipo_equipamento}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Marca:</div>
+                  <div class="value">${ordem.marca || 'N/A'}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Modelo:</div>
+                  <div class="value">${ordem.modelo || 'N/A'}</div>
+                </div>
+              </div>
+              ${ordem.numero_serie ? `
+                <div class="row">
+                  <div class="col">
+                    <div class="label">Número de Série:</div>
+                    <div class="value">${ordem.numero_serie}</div>
+                  </div>
+                </div>
+              ` : ''}
+              ${ordem.senha_equipamento ? `
+                <div class="row">
+                  <div class="col">
+                    <div class="label">Senha do Equipamento:</div>
+                    <div class="value">${ordem.senha_equipamento}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <div class="section">
+            <div class="section-header">Problema e Diagnóstico</div>
+            <div class="section-content">
+              <div class="row">
+                <div class="col">
+                  <div class="label">Defeito Relatado:</div>
+                  <div class="value">${ordem.defeito_relatado || 'N/A'}</div>
+                </div>
+              </div>
+              ${ordem.diagnostico_tecnico ? `
+                <div class="row">
+                  <div class="col">
+                    <div class="label">Diagnóstico Técnico:</div>
+                    <div class="value">${ordem.diagnostico_tecnico}</div>
+                  </div>
+                </div>
+              ` : ''}
+              ${ordem.solucao_aplicada ? `
+                <div class="row">
+                  <div class="col">
+                    <div class="label">Solução Aplicada:</div>
+                    <div class="value">${ordem.solucao_aplicada}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          <div class="section">
+            <div class="section-header">Valores</div>
+            <div class="section-content">
+              <div class="row">
+                <div class="col">
+                  <div class="label">Mão de Obra:</div>
+                  <div class="value">${formatCurrency(ordem.valor_mao_obra)}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Peças/Serviços:</div>
+                  <div class="value">${formatCurrency(ordem.valor_total)}</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="label">Desconto:</div>
+                  <div class="value">${formatCurrency(ordem.desconto)}</div>
+                </div>
+                <div class="col">
+                  <div class="label">Valor Final:</div>
+                  <div class="value" style="font-weight: bold; font-size: 14px;">${formatCurrency(ordem.valor_final)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="signature-area">
+            <div class="signature">
+              <div class="signature-line">Cliente</div>
+            </div>
+            <div class="signature">
+              <div class="signature-line">Técnico</div>
+            </div>
+          </div>
+          
+          <div class="footer">
+            Documento gerado em ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+          </div>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            Ordem de Serviço #{ordem.numero}
-          </DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-semibold">
+              Ordem de Serviço #{ordem.numero}
+            </DialogTitle>
+            <Button onClick={handlePrint} size="sm" variant="outline">
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimir
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -116,19 +421,19 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-600">Nome</label>
-                  <p className="mt-1">{(ordem as any).clientes?.nome || 'N/A'}</p>
+                  <p className="mt-1">{ordem.clientes?.nome || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Email</label>
-                  <p className="mt-1">{(ordem as any).clientes?.email || 'N/A'}</p>
+                  <p className="mt-1">{ordem.clientes?.email || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Telefone</label>
-                  <p className="mt-1">{(ordem as any).clientes?.telefone || 'N/A'}</p>
+                  <p className="mt-1">{ordem.clientes?.telefone || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">CPF/CNPJ</label>
-                  <p className="mt-1">{(ordem as any).clientes?.cpf_cnpj || 'N/A'}</p>
+                  <p className="mt-1">{ordem.clientes?.cpf_cnpj || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>
