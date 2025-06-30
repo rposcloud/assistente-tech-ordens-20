@@ -17,7 +17,7 @@ import { Ordens } from './pages/Ordens';
 import { Financeiro } from './pages/Financeiro';
 import { Empresa } from './pages/Empresa';
 import { PortalCliente } from './pages/PortalCliente';
-import { ImpressaoOrdem } from './pages/ImpressaoOrdem';
+
 
 const queryClient = new QueryClient();
 
@@ -33,11 +33,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/portal/:token" element={<PortalCliente />} />
-            <Route path="/impressao/:id" element={
-              <ProtectedRoute>
-                <ImpressaoOrdem />
-              </ProtectedRoute>
-            } />
+
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout>

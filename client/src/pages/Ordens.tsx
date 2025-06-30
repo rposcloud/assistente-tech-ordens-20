@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Eye, Edit, Trash2, Link, Printer } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
-import { GenerateLinkModal } from '@/components/portal/GenerateLinkModal';
+
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -45,8 +45,7 @@ export const Ordens = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
-  const [linkModalOpen, setLinkModalOpen] = useState(false);
-  const [ordemForLink, setOrdemForLink] = useState<OrdemServico | null>(null);
+
 
   console.log('Ordens disponíveis:', ordens.length);
   console.log('Loading:', loading);
@@ -88,12 +87,6 @@ export const Ordens = () => {
     setModalOpen(true);
   };
 
-  const handleView = (ordem: OrdemServico) => {
-    console.log('Visualizando ordem:', ordem);
-    // Tenta navegar na mesma aba primeiro para testar
-    window.location.href = `/impressao/${ordem.id}`;
-  };
-
   const handleDeleteClick = (ordem: OrdemServico) => {
     setOrdemToDelete(ordem);
     setDeleteDialogOpen(true);
@@ -118,24 +111,7 @@ export const Ordens = () => {
     setModalOpen(true);
   };
 
-  const handleGenerateLink = (ordem: OrdemServico) => {
-    setOrdemForLink(ordem);
-    setLinkModalOpen(true);
-  };
 
-  const handleSaveLink = async (ordemAtualizada: OrdemServico) => {
-    try {
-      await updateOrdem(ordemAtualizada.id!, ordemAtualizada);
-      toast.success('Link gerado com sucesso!');
-    } catch (error: any) {
-      console.error('Erro ao salvar link:', error);
-      toast.error(`Erro ao gerar link: ${error.message || 'Erro desconhecido'}`);
-    }
-  };
-
-  const handlePrint = (ordem: OrdemServico) => {
-    window.open(`/impressao/${ordem.id}`, '_blank');
-  };
 
   const columns: Column<OrdemServico>[] = [
     {
@@ -192,44 +168,11 @@ export const Ordens = () => {
             variant="outline"
             onClick={(e) => {
               e.stopPropagation();
-              handleView(ordem);
-            }}
-            title="Visualizar"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
               handleEdit(ordem);
             }}
             title="Editar"
           >
             <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleGenerateLink(ordem);
-            }}
-            title="Gerar Link Portal"
-          >
-            <Link className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePrint(ordem);
-            }}
-            title="Imprimir/Visualizar"
-          >
-            <Printer className="h-4 w-4" />
           </Button>
           <Button
             size="sm"
@@ -351,16 +294,7 @@ export const Ordens = () => {
         loading={modalLoading}
       />
 
-      {ordemForLink && (
-        <GenerateLinkModal
-          ordem={ordemForLink}
-          onClose={() => {
-            setLinkModalOpen(false);
-            setOrdemForLink(null);
-          }}
-          onSave={handleSaveLink}
-        />
-      )}
+
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
