@@ -4,7 +4,7 @@ import { FileText, Package, Plus } from 'lucide-react';
 import { useProdutos } from '../hooks/useProdutos';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ProductForm } from '../components/forms/ProductForm';
-import type { Produto } from '../types';
+import type { Produto } from '../types/produto';
 
 export const Produtos = () => {
   const { produtos, loading, createProduto, updateProduto, deleteProduto } = useProdutos();
@@ -13,7 +13,7 @@ export const Produtos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<'todos' | 'peca' | 'servico'>('todos');
 
-  const handleSaveProduto = async (produtoData: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveProduto = async (produtoData: Omit<Produto, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
       if (editingProduto) {
         await updateProduto(editingProduto.id, produtoData);
@@ -59,7 +59,7 @@ export const Produtos = () => {
       label: 'Categoria',
       render: (produto) => produto.categoria === 'peca' ? 'Peça' : 'Serviço'
     },
-    { key: 'precoVenda', label: 'Preço', render: (produto) => `R$ ${produto.precoVenda.toFixed(2)}` },
+    { key: 'preco_venda', label: 'Preço', render: (produto) => `R$ ${produto.preco_venda.toFixed(2)}` },
     {
       key: 'acoes',
       label: 'Ações',

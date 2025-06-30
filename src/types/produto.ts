@@ -1,26 +1,49 @@
 
 export interface Produto {
   id: string;
-  codigo?: string; // Adding the missing codigo property
+  codigo?: string;
   nome: string;
-  descricao: string;
+  descricao?: string;
   categoria: 'peca' | 'servico';
-  precoCusto: number;
-  precoVenda: number;
-  estoque?: number; // apenas para peças
+  preco_custo: number;
+  preco_venda: number;
+  estoque?: number;
   unidade: string;
   ativo: boolean;
-  tipoEquipamento?: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
-  tempoEstimado?: number; // em minutos, para serviços
-  createdAt: string;
-  updatedAt: string;
+  tipo_equipamento?: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
+  tempo_estimado?: number;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 export interface ProdutoUtilizado {
   id: string;
-  produtoId: string;
-  produto: Produto;
+  ordem_servico_id: string;
+  produto_id: string;
+  produto?: Produto;
   quantidade: number;
-  valorUnitario: number;
-  valorTotal: number;
+  valor_unitario: number;
+  valor_total: number;
+  created_at: string;
+}
+
+export interface PecaUtilizada {
+  id: string;
+  ordem_servico_id: string;
+  nome: string;
+  quantidade: number;
+  valor_unitario: number;
+  valor_total: number;
+  created_at: string;
+}
+
+export interface TipoDefeito {
+  id: string;
+  user_id: string;
+  nome: string;
+  descricao?: string;
+  tipo_equipamento: 'smartphone' | 'notebook' | 'desktop' | 'tablet' | 'outros' | 'todos';
+  ativo: boolean;
+  created_at: string;
 }

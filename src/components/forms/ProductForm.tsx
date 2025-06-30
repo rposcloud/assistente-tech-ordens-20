@@ -7,7 +7,7 @@ import { useToast } from '../ui/use-toast';
 
 interface ProductFormProps {
   produto?: Produto;
-  onSave: (produto: Produto) => void;
+  onSave: (produto: Omit<Produto, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   onCancel: () => void;
 }
 
@@ -19,12 +19,13 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
     nome: produto?.nome || '',
     descricao: produto?.descricao || '',
     categoria: produto?.categoria || 'peca' as 'peca' | 'servico',
-    precoCusto: produto?.precoCusto || 0,
-    precoVenda: produto?.precoVenda || 0,
+    preco_custo: produto?.preco_custo || 0,
+    preco_venda: produto?.preco_venda || 0,
     estoque: produto?.estoque || 0,
     unidade: produto?.unidade || 'un',
-    tipoEquipamento: produto?.tipoEquipamento || 'todos' as any,
-    tempoEstimado: produto?.tempoEstimado || 0
+    tipo_equipamento: produto?.tipo_equipamento || 'todos' as any,
+    tempo_estimado: produto?.tempo_estimado || 0,
+    ativo: produto?.ativo ?? true
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -36,24 +37,24 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
       newErrors.nome = 'Nome é obrigatório';
     }
 
-    if (formData.precoVenda <= 0) {
-      newErrors.precoVenda = 'Preço de venda deve ser maior que zero';
+    if (formData.preco_venda <= 0) {
+      newErrors.preco_venda = 'Preço de venda deve ser maior que zero';
     }
 
-    if (formData.precoCusto < 0) {
-      newErrors.precoCusto = 'Preço de custo não pode ser negativo';
+    if (formData.preco_custo < 0) {
+      newErrors.preco_custo = 'Preço de custo não pode ser negativo';
     }
 
-    if (formData.precoCusto > 0 && formData.precoVenda <= formData.precoCusto) {
-      newErrors.precoVenda = 'Preço de venda deve ser maior que o preço de custo';
+    if (formData.preco_custo > 0 && formData.preco_venda <= formData.preco_custo) {
+      newErrors.preco_venda = 'Preço de venda deve ser maior que o preço de custo';
     }
 
     if (formData.categoria === 'peca' && formData.estoque < 0) {
       newErrors.estoque = 'Estoque não pode ser negativo';
     }
 
-    if (formData.categoria === 'servico' && formData.tempoEstimado < 0) {
-      newErrors.tempoEstimado = 'Tempo estimado não pode ser negativo';
+    if (formData.categoria === 'servico' && formData.tempo_estimado < 0) {
+      newErrors.tempo_estimado = 'Tempo estimado não pode ser negativo';
     }
 
     setErrors(newErrors);
@@ -72,15 +73,7 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
       return;
     }
 
-    const produtoData: Produto = {
-      id: produto?.id || Date.now().toString(),
-      ...formData,
-      ativo: true,
-      createdAt: produto?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    onSave(produtoData);
+    onSave(formData);
     
     toast({
       title: produto ? "Produto atualizado" : "Produto criado",
@@ -171,12 +164,12 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   Preço de Custo (Opcional)
                 </label>
                 <CurrencyInput
-                  value={formData.precoCusto}
-                  onChange={(value) => setFormData(prev => ({ ...prev, precoCusto: value }))}
+                  value={formData.preco_custo}
+                  onChange={(value) => setFormData(prev => ({ ...prev, preco_custo: value }))}
                   placeholder="R$ 0,00"
-                  className={errors.precoCusto ? 'border-red-500' : ''}
+                  className={errors.preco_custo ? 'border-red-500' : ''}
                 />
-                {renderError('precoCusto')}
+                {renderError('preco_custo')}
               </div>
 
               <div>
@@ -185,13 +178,13 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                   Preço de Venda *
                 </label>
                 <CurrencyInput
-                  value={formData.precoVenda}
-                  onChange={(value) => setFormData(prev => ({ ...prev, precoVenda: value }))}
+                  value={formData.preco_venda}
+                  onChange={(value) => setFormData(prev => ({ ...prev, preco_venda: value }))}
                   placeholder="R$ 0,00"
                   required
-                  className={errors.precoVenda ? 'border-red-500' : ''}
+                  className={errors.preco_venda ? 'border-red-500' : ''}
                 />
-                {renderError('precoVenda')}
+                {renderError('preco_venda')}
               </div>
             </div>
 
@@ -233,22 +226,22 @@ export const ProductForm = ({ produto, onSave, onCancel }: ProductFormProps) => 
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tempo Estimado (minutos)</label>
                 <input
                   type="number"
-                  value={formData.tempoEstimado}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tempoEstimado: parseInt(e.target.value) || 0 }))}
+                  value={formData.tempo_estimado}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tempo_estimado: parseInt(e.target.value) || 0 }))}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.tempoEstimado ? 'border-red-500' : 'border-gray-300'
+                    errors.tempo_estimado ? 'border-red-500' : 'border-gray-300'
                   }`}
                   min="0"
                 />
-                {renderError('tempoEstimado')}
+                {renderError('tempo_estimado')}
               </div>
             )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Equipamento</label>
               <select
-                value={formData.tipoEquipamento}
-                onChange={(e) => setFormData(prev => ({ ...prev, tipoEquipamento: e.target.value as any }))}
+                value={formData.tipo_equipamento}
+                onChange={(e) => setFormData(prev => ({ ...prev, tipo_equipamento: e.target.value as any }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="todos">Todos os Equipamentos</option>

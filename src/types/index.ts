@@ -90,4 +90,4 @@ export interface EnderecoViaCep {
 }
 
 // Re-export from produto.ts
-export type { Produto, ProdutoUtilizado } from './produto';
+export type { Produto, ProdutoUtilizado, PecaUtilizada as PecaUtilizadaDB, TipoDefeito } from './produto';
