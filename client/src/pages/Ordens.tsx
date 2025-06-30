@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Eye, Edit, Trash2, Link } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Eye, Edit, Trash2, Link, Printer } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
@@ -132,6 +132,10 @@ export const Ordens = () => {
     }
   };
 
+  const handlePrint = (ordem: OrdemServico) => {
+    window.open(`/impressao/${ordem.id}`, '_blank');
+  };
+
   const columns: Column<OrdemServico>[] = [
     {
       key: 'numero',
@@ -214,6 +218,17 @@ export const Ordens = () => {
             title="Gerar Link Portal"
           >
             <Link className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrint(ordem);
+            }}
+            title="Imprimir/Visualizar"
+          >
+            <Printer className="h-4 w-4" />
           </Button>
           <Button
             size="sm"

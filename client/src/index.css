@@ -101,3 +101,41 @@
     @apply bg-background text-foreground;
   }
 }
+/* Estilos para impressão - formatação A4 */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  body {
+    font-size: 11pt !important;
+    line-height: 1.3 !important;
+    background: white !important;
+  }
+  
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:block {
+    display: block !important;
+  }
+  
+  /* Evitar quebras de página em elementos importantes */
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Ajustes de layout para impressão */
+  .max-w-4xl {
+    max-width: 100% !important;
+  }
+  
+  /* Remover sombras e efeitos desnecessários */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
