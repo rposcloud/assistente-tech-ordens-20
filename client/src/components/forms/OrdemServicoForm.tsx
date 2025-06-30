@@ -161,8 +161,8 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
         id: produto.id,
         nome: produto.nome,
         quantidade: 1,
-        valorUnitario: produto.precoVenda,
-        valorTotal: produto.precoVenda
+        valorUnitario: Number(produto.preco_venda),
+        valorTotal: Number(produto.preco_venda)
       };
 
       setProdutosSelecionados(prev => [...prev, novoProduto]);
@@ -356,7 +356,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
               <SelectContent>
                 {produtos.map((produto) => (
                   <SelectItem key={produto.id} value={produto.id}>
-                    {produto.nome} - R$ {produto.precoVenda.toFixed(2)}
+                    {produto.nome} - R$ {Number(produto.preco_venda).toFixed(2)}
                   </SelectItem>
                 ))}
               </SelectContent>
