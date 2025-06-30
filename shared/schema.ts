@@ -297,6 +297,21 @@ export const insertClienteSchema = createInsertSchema(clientes).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  user_id: true, // Adicionado pelo backend
+}).extend({
+  // Tornar campos opcionais para flexibilidade
+  email: z.string().email().optional(),
+  telefone: z.string().optional(),
+  cpf_cnpj: z.string().optional(),
+  data_nascimento: z.string().optional(),
+  cep: z.string().optional(),
+  endereco: z.string().optional(),
+  numero: z.string().optional(),
+  complemento: z.string().optional(),
+  bairro: z.string().optional(),
+  cidade: z.string().optional(),
+  estado: z.string().optional(),
+  observacoes: z.string().optional(),
 });
 
 export const insertProdutoSchema = createInsertSchema(produtos).omit({
@@ -312,7 +327,10 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   id: true,
   created_at: true,
   updated_at: true,
+  user_id: true, // Removido para ser adicionado pelo backend
+  numero: true, // Gerado automaticamente
 }).extend({
+  // Campos de valores - opcionais
   valor_mao_obra: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   valor_orcamento: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   valor_total: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
@@ -321,9 +339,34 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   valor_final: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   lucro: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   margem_lucro: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  
+  // Campos de data - opcionais
   data_abertura: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
   ).optional(),
+  data_previsao_entrega: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
+  data_vencimento: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
+  data_pagamento: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
+  prazo_entrega: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ).optional(),
+  
+  // Campos opcionais
+  numero_serie: z.string().optional(),
+  senha_equipamento: z.string().optional(),
+  acessorios: z.string().optional(),
+  condicoes_equipamento: z.string().optional(),
+  diagnostico_tecnico: z.string().optional(),
+  solucao_aplicada: z.string().optional(),
+  tecnico_responsavel: z.string().optional(),
+  observacoes_internas: z.string().optional(),
+  observacoes_pagamento: z.string().optional(),
 });
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({

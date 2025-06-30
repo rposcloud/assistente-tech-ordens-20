@@ -155,11 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/clientes', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const clienteData = insertClienteSchema.parse({
-        ...req.body,
-        user_id: req.userId!
-      });
-      const cliente = await storage.createCliente(clienteData);
+      const clienteData = insertClienteSchema.parse(req.body);
+      const cliente = await storage.createCliente(clienteData, req.userId!);
       res.json(cliente);
     } catch (error) {
       console.error('Create cliente error:', error);
@@ -261,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Dados validados para ordem:', ordemData);
       
-      const ordem = await storage.createOrdemServico(ordemData);
+      const ordem = await storage.createOrdemServico(ordemData, req.userId!);
       res.json(ordem);
     } catch (error) {
       console.error('Create ordem error:', error);

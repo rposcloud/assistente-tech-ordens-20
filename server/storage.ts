@@ -28,7 +28,7 @@ export interface IStorage {
   // Clientes
   getClientes(userId: string): Promise<Cliente[]>;
   getCliente(id: string, userId: string): Promise<Cliente | undefined>;
-  createCliente(cliente: InsertCliente): Promise<Cliente>;
+  createCliente(cliente: InsertCliente, userId: string): Promise<Cliente>;
   updateCliente(id: string, userId: string, cliente: Partial<InsertCliente>): Promise<Cliente>;
   deleteCliente(id: string, userId: string): Promise<void>;
   
@@ -43,7 +43,7 @@ export interface IStorage {
   getOrdensServico(userId: string): Promise<OrdemServico[]>;
   getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined>;
   getOrdemServicoByToken(token: string): Promise<OrdemServico | undefined>;
-  createOrdemServico(ordem: InsertOrdemServico): Promise<OrdemServico>;
+  createOrdemServico(ordem: InsertOrdemServico, userId: string): Promise<OrdemServico>;
   updateOrdemServico(id: string, userId: string, ordem: Partial<InsertOrdemServico>): Promise<OrdemServico>;
   deleteOrdemServico(id: string, userId: string): Promise<void>;
   
@@ -122,8 +122,9 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async createCliente(cliente: InsertCliente): Promise<Cliente> {
-    const result = await db.insert(clientes).values(cliente).returning();
+  async createCliente(cliente: InsertCliente, userId: string): Promise<Cliente> {
+    const clienteComUserId = { ...cliente, user_id: userId };
+    const result = await db.insert(clientes).values(clienteComUserId as any).returning();
     return result[0];
   }
 
@@ -195,12 +196,12 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async createOrdemServico(ordem: InsertOrdemServico): Promise<OrdemServico> {
+  async createOrdemServico(ordem: InsertOrdemServico, userId: string): Promise<OrdemServico> {
     // Gerar número sequencial
     const lastOrder = await db
       .select({ numero: ordensServico.numero })
       .from(ordensServico)
-      .where(eq(ordensServico.user_id, ordem.user_id))
+      .where(eq(ordensServico.user_id, userId))
       .orderBy(desc(ordensServico.created_at))
       .limit(1);
     
@@ -208,19 +209,20 @@ export class DatabaseStorage implements IStorage {
       ? String(parseInt(lastOrder[0].numero) + 1).padStart(6, '0')
       : '000001';
     
-    const ordemComNumero = {
+    const ordemComDados = {
       ...ordem,
+      user_id: userId,
       numero: nextNumber
     };
     
-    const result = await db.insert(ordensServico).values(ordemComNumero).returning();
+    const result = await db.insert(ordensServico).values(ordemComDados as any).returning();
     return result[0];
   }
 
   async updateOrdemServico(id: string, userId: string, ordem: Partial<InsertOrdemServico>): Promise<OrdemServico> {
     const result = await db
       .update(ordensServico)
-      .set({ ...ordem, updated_at: new Date() })
+      .set({ ...ordem, updated_at: new Date() } as any)
       .where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)))
       .returning();
     return result[0];
