@@ -340,33 +340,36 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   lucro: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   margem_lucro: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   
-  // Campos de data - opcionais
+  // Campos de data - opcionais e aceita null
   data_abertura: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+  ).nullable().optional(),
   data_previsao_entrega: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+  ).nullable().optional(),
   data_vencimento: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+  ).nullable().optional(),
   data_pagamento: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+  ).nullable().optional(),
   prazo_entrega: z.union([z.date(), z.string()]).transform(val => 
     typeof val === 'string' ? new Date(val) : val
-  ).optional(),
+  ).nullable().optional(),
   
-  // Campos opcionais
-  numero_serie: z.string().optional(),
-  senha_equipamento: z.string().optional(),
-  acessorios: z.string().optional(),
-  condicoes_equipamento: z.string().optional(),
-  diagnostico_tecnico: z.string().optional(),
-  solucao_aplicada: z.string().optional(),
-  tecnico_responsavel: z.string().optional(),
-  observacoes_internas: z.string().optional(),
-  observacoes_pagamento: z.string().optional(),
+  // Campos de pagamento - aceita null
+  forma_pagamento: z.enum(["dinheiro", "cartao_credito", "cartao_debito", "pix", "transferencia", "parcelado"]).nullable().optional(),
+  
+  // Campos opcionais - aceita string, null ou undefined
+  numero_serie: z.string().nullable().optional(),
+  senha_equipamento: z.string().nullable().optional(),
+  acessorios: z.string().nullable().optional(),
+  condicoes_equipamento: z.string().nullable().optional(),
+  diagnostico_tecnico: z.string().nullable().optional(),
+  solucao_aplicada: z.string().nullable().optional(),
+  tecnico_responsavel: z.string().nullable().optional(),
+  observacoes_internas: z.string().nullable().optional(),
+  observacoes_pagamento: z.string().nullable().optional(),
 });
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({

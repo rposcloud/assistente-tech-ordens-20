@@ -140,6 +140,12 @@ Changelog:
   * Ajustado schema de validação Zod para aceitar ambos tipos
   * Corrigido erro toFixed() na exibição de valores na tabela
   * Sistema de ordens de serviço agora funciona completamente
+- June 30, 2025. Implementação completa de integração financeira e dashboard dinâmico:
+  * Adicionado funcionalidade de exclusão no sistema financeiro
+  * Implementada integração automática: ordens "entregue" → entradas de receita
+  * Dashboard sincronizado com dados reais (clientes, produtos, ordens, receitas)
+  * Schema flexibilizado para aceitar campos null/undefined
+  * Sistema totalmente operacional com todas funcionalidades integradas
 
 ## User Preferences
 
