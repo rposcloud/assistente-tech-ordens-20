@@ -134,7 +134,13 @@ TechService is a comprehensive web application designed for technical service ma
 
 Changelog:
 - June 30, 2025. Initial setup
+- June 30, 2025. Correção crítica dos erros de validação de tipos e criação de ordens de serviço:
+  * Resolvido conflitos entre tipos do frontend e backend
+  * Corrigido conversões string/number para campos decimais  
+  * Ajustado schema de validação Zod para aceitar ambos tipos
+  * Corrigido erro toFixed() na exibição de valores na tabela
+  * Sistema de ordens de serviço agora funciona completamente
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Português brasileiro (PT-BR), linguagem simples e cotidiana.
