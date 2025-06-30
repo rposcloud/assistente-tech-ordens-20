@@ -319,6 +319,9 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   desconto: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   acrescimo: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
   valor_final: z.union([z.string(), z.number()]).transform(val => String(val)).optional(),
+  data_abertura: z.union([z.date(), z.string()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  ),
 });
 
 export const insertEntradaFinanceiraSchema = createInsertSchema(entradasFinanceiras).omit({
