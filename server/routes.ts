@@ -458,6 +458,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Produtos Utilizados
+  app.post('/api/ordens/:id/produtos', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { produtoId, quantidade, valorUnitario } = req.body;
+      
+      const produtoUtilizado = await storage.addProdutoUtilizado(id, produtoId, quantidade, valorUnitario);
+      res.json(produtoUtilizado);
+    } catch (error) {
+      console.error('Add produto utilizado error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/api/produtos-utilizados/:id', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      await storage.removeProdutoUtilizado(id);
+      res.json({ message: 'Produto utilizado removido com sucesso' });
+    } catch (error) {
+      console.error('Remove produto utilizado error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Peças Utilizadas
+  app.post('/api/ordens/:id/pecas', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { nome, quantidade, valorUnitario } = req.body;
+      
+      const pecaUtilizada = await storage.addPecaUtilizada(id, nome, quantidade, valorUnitario);
+      res.json(pecaUtilizada);
+    } catch (error) {
+      console.error('Add peca utilizada error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.delete('/api/pecas-utilizadas/:id', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      await storage.removePecaUtilizada(id);
+      res.json({ message: 'Peça utilizada removida com sucesso' });
+    } catch (error) {
+      console.error('Remove peca utilizada error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

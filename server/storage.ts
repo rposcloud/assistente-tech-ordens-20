@@ -61,6 +61,14 @@ export interface IStorage {
   // Tipos de Defeito
   getTiposDefeito(userId: string): Promise<TipoDefeito[]>;
   createTipoDefeito(tipo: InsertTipoDefeito): Promise<TipoDefeito>;
+  
+  // Produtos Utilizados
+  addProdutoUtilizado(ordemId: string, produtoId: string, quantidade: number, valorUnitario: number): Promise<any>;
+  removeProdutoUtilizado(id: string): Promise<void>;
+  
+  // Peças Utilizadas  
+  addPecaUtilizada(ordemId: string, nome: string, quantidade: number, valorUnitario: number): Promise<any>;
+  removePecaUtilizada(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -393,6 +401,40 @@ export class DatabaseStorage implements IStorage {
   async createTipoDefeito(tipo: InsertTipoDefeito): Promise<TipoDefeito> {
     const result = await db.insert(tiposDefeito).values(tipo).returning();
     return result[0];
+  }
+
+  // Produtos Utilizados
+  async addProdutoUtilizado(ordemId: string, produtoId: string, quantidade: number, valorUnitario: number): Promise<any> {
+    const valorTotal = quantidade * valorUnitario;
+    const result = await db.insert(produtosUtilizados).values({
+      ordem_servico_id: ordemId,
+      produto_id: produtoId,
+      quantidade,
+      valor_unitario: valorUnitario.toString(),
+      valor_total: valorTotal.toString()
+    }).returning();
+    return result[0];
+  }
+
+  async removeProdutoUtilizado(id: string): Promise<void> {
+    await db.delete(produtosUtilizados).where(eq(produtosUtilizados.id, id));
+  }
+
+  // Peças Utilizadas
+  async addPecaUtilizada(ordemId: string, nome: string, quantidade: number, valorUnitario: number): Promise<any> {
+    const valorTotal = quantidade * valorUnitario;
+    const result = await db.insert(pecasUtilizadas).values({
+      ordem_servico_id: ordemId,
+      nome,
+      quantidade,
+      valor_unitario: valorUnitario.toString(),
+      valor_total: valorTotal.toString()
+    }).returning();
+    return result[0];
+  }
+
+  async removePecaUtilizada(id: string): Promise<void> {
+    await db.delete(pecasUtilizadas).where(eq(pecasUtilizadas.id, id));
   }
 }
 

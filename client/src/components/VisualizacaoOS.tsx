@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { GerenciarProdutosModal } from '@/components/modals/GerenciarProdutosModal';
+import { toast } from 'sonner';
 
 interface VisualizacaoOSProps {
   isOpen: boolean;
   onClose: () => void;
   ordem: any;
+  onUpdate?: () => void;
 }
 
 const statusLabels = {
@@ -28,7 +31,9 @@ const prioridadeLabels = {
   urgente: 'Urgente'
 };
 
-export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) => {
+export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: VisualizacaoOSProps) => {
+  const [produtosModalOpen, setProdutosModalOpen] = useState(false);
+  
   if (!ordem) return null;
 
   const formatCurrency = (value: any) => {
@@ -354,6 +359,28 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
     printWindow.print();
   };
 
+  const handleRemoverProduto = async (id: string, tipo: 'produto' | 'peca') => {
+    try {
+      const endpoint = tipo === 'produto' ? `/api/produtos-utilizados/${id}` : `/api/pecas-utilizadas/${id}`;
+      const response = await fetch(endpoint, { method: 'DELETE' });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao remover item');
+      }
+      
+      toast.success(`${tipo === 'produto' ? 'Produto' : 'Peça'} removido com sucesso`);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Erro ao remover item:', error);
+      toast.error('Erro ao remover item');
+    }
+  };
+
+  const handleProdutoAdded = () => {
+    setProdutosModalOpen(false);
+    onUpdate?.();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -363,6 +390,10 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               Ordem de Serviço #{ordem.numero}
             </DialogTitle>
             <div className="flex gap-2">
+              <Button onClick={() => setProdutosModalOpen(true)} size="sm" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Produtos
+              </Button>
               <Button onClick={handlePrint} size="sm" variant="outline">
                 <Printer className="h-4 w-4 mr-2" />
                 Imprimir
@@ -541,6 +572,13 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
           </div>
         </div>
       </DialogContent>
+      
+      <GerenciarProdutosModal
+        isOpen={produtosModalOpen}
+        onClose={() => setProdutosModalOpen(false)}
+        ordemId={ordem.id}
+        onProdutoAdded={handleProdutoAdded}
+      />
     </Dialog>
   );
 };
