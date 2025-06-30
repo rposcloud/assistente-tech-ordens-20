@@ -5,7 +5,7 @@ import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2 } from 'l
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
-import { OrdemDetalhesModal } from '@/components/modals/OrdemDetalhesModal';
+import { VisualizacaoOS } from '@/components/VisualizacaoOS';
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
@@ -303,7 +303,7 @@ export const Ordens = () => {
         loading={modalLoading}
       />
 
-      <OrdemDetalhesModal
+      <VisualizacaoOS
         isOpen={detalhesModalOpen}
         onClose={() => {
           setDetalhesModalOpen(false);
