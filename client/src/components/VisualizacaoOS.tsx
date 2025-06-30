@@ -381,6 +381,31 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: Visualizaca
     onUpdate?.();
   };
 
+  const handleFinalizarOS = async () => {
+    try {
+      const response = await fetch(`/api/ordens/${ordem.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'entregue',
+          data_finalizacao: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao finalizar ordem');
+      }
+
+      toast.success('Ordem de serviço finalizada e entrada financeira criada!');
+      onUpdate?.();
+    } catch (error) {
+      console.error('Erro ao finalizar OS:', error);
+      toast.error('Erro ao finalizar ordem de serviço');
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -394,6 +419,11 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: Visualizaca
                 <Plus className="h-4 w-4 mr-2" />
                 Produtos
               </Button>
+              {ordem.status !== 'entregue' && (
+                <Button onClick={handleFinalizarOS} size="sm" variant="default" className="bg-green-600 hover:bg-green-700">
+                  Finalizar OS
+                </Button>
+              )}
               <Button onClick={handlePrint} size="sm" variant="outline">
                 <Printer className="h-4 w-4 mr-2" />
                 Imprimir

@@ -311,14 +311,8 @@ export const Ordens = () => {
         }}
         ordem={ordemDetalhes}
         onUpdate={() => {
-          refetch();
-          // Recarregar dados da ordem específica
-          if (ordemDetalhes?.id) {
-            fetch(`/api/ordens/${ordemDetalhes.id}`)
-              .then(res => res.json())
-              .then(data => setOrdemDetalhes(data))
-              .catch(err => console.error('Erro ao recarregar ordem:', err));
-          }
+          // Recarregar lista de ordens
+          window.location.reload();
         }}
       />
 

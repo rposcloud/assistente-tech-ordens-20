@@ -146,6 +146,13 @@ Changelog:
   * Dashboard sincronizado com dados reais (clientes, produtos, ordens, receitas)
   * Schema flexibilizado para aceitar campos null/undefined
   * Sistema totalmente operacional com todas funcionalidades integradas
+- June 30, 2025. Sistema de produtos/serviços nas ordens de serviço totalmente implementado:
+  * Corrigido problema principal: falta de endpoints e métodos para gerenciar produtos utilizados
+  * Implementado sistema completo: storage, rotas API, modal de gerenciamento
+  * Criado botão "Finalizar OS" que muda status para entregue e cria entrada financeira
+  * Removidas todas referências ao Supabase, sistema 100% PostgreSQL
+  * Interface moderna para adicionar produtos cadastrados ou peças avulsas
+  * Visualização de OS atualizada com produtos/serviços e botões funcionais
 
 ## User Preferences
 

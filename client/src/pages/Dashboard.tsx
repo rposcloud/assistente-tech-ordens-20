@@ -135,7 +135,7 @@ export const Dashboard = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="text-sm text-gray-600">
-                Sistema integrado com sucesso ao banco de dados Supabase
+                Sistema integrado com PostgreSQL funcionando perfeitamente
               </div>
               <div className="text-sm text-gray-600">
                 {totalClientes > 0 ? `${totalClientes} clientes cadastrados` : 'Nenhum cliente cadastrado ainda'}
