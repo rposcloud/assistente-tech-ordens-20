@@ -124,14 +124,14 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       // Fields that will be set by the backend
       numero: '',
       user_id: '',
-      data_abertura: new Date().toISOString(),
+      data_abertura: new Date(),
       finalizada: false,
       aprovado_cliente: false,
       historico_status: [],
       // Optional fields with defaults
-      valor_orcamento: 0,
-      lucro: 0,
-      margem_lucro: 0,
+      valor_orcamento: Number(formData.valor_orcamento) || 0,
+      lucro: String(0),
+      margem_lucro: String(0),
       prioridade: 'normal'
     };
 
