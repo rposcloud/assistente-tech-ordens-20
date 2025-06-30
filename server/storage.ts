@@ -196,7 +196,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrdemServico(ordem: InsertOrdemServico): Promise<OrdemServico> {
-    const result = await db.insert(ordensServico).values(ordem).returning();
+    // Gerar número sequencial
+    const lastOrder = await db
+      .select({ numero: ordensServico.numero })
+      .from(ordensServico)
+      .where(eq(ordensServico.user_id, ordem.user_id))
+      .orderBy(desc(ordensServico.created_at))
+      .limit(1);
+    
+    const nextNumber = lastOrder.length > 0 && lastOrder[0].numero
+      ? String(parseInt(lastOrder[0].numero) + 1).padStart(6, '0')
+      : '000001';
+    
+    const ordemComNumero = {
+      ...ordem,
+      numero: nextNumber
+    };
+    
+    const result = await db.insert(ordensServico).values(ordemComNumero).returning();
     return result[0];
   }
 

@@ -251,15 +251,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/ordens', authenticateToken, async (req: AuthRequest, res) => {
     try {
+      console.log('Dados recebidos para ordem:', req.body);
+      console.log('User ID:', req.userId);
+      
       const ordemData = insertOrdemServicoSchema.parse({
         ...req.body,
         user_id: req.userId!
       });
+      
+      console.log('Dados validados para ordem:', ordemData);
+      
       const ordem = await storage.createOrdemServico(ordemData);
       res.json(ordem);
     } catch (error) {
       console.error('Create ordem error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   });
 

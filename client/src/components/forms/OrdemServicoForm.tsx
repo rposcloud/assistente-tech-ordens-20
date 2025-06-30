@@ -120,18 +120,14 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       observacoes_internas: formData.observacoes_internas?.trim() || undefined,
       senha_equipamento: formData.senha_equipamento?.trim() || undefined,
       acessorios: formData.acessorios?.trim() || undefined,
-      // Fields that will be set by the backend
-      numero: '',
-      user_id: '',
-      data_abertura: new Date(),
-      finalizada: false,
-      aprovado_cliente: false,
-      historico_status: [],
       // Optional fields with defaults
       valor_orcamento: Number(formData.valor_orcamento) || 0,
       lucro: String(0),
       margem_lucro: String(0),
-      prioridade: 'normal'
+      prioridade: 'normal',
+      finalizada: false,
+      aprovado_cliente: false,
+      historico_status: []
     };
 
     console.log('Submitting order data:', dadosCompletos);
