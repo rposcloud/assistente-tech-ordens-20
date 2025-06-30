@@ -20,17 +20,50 @@ export const Dashboard = () => {
   const produtosAtivos = produtos?.filter((p: any) => p.ativo)?.length || 0;
   const produtosBaixoEstoque = produtos?.filter((p: any) => (p.estoque || 0) < 5)?.length || 0;
   
-  // Cálculos financeiros
+  // Cálculos financeiros detalhados
   const hoje = new Date();
   const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
   
-  const receitasDoMes = entradas?.filter(e => 
-    e.tipo === 'receita' && 
-    new Date(e.data_vencimento) >= primeiroDiaDoMes &&
-    new Date(e.data_vencimento) <= hoje
-  ) || [];
+  // Separar receitas e despesas
+  const todasReceitas = entradas?.filter(e => e.tipo === 'receita') || [];
+  const todasDespesas = entradas?.filter(e => e.tipo === 'despesa') || [];
   
+  // Receitas do mês atual
+  const receitasDoMes = todasReceitas.filter(e => {
+    const dataEntrada = new Date(e.data_vencimento);
+    return dataEntrada >= primeiroDiaDoMes && dataEntrada <= ultimoDiaDoMes;
+  });
+  
+  // Despesas do mês atual
+  const despesasDoMes = todasDespesas.filter(e => {
+    const dataEntrada = new Date(e.data_vencimento);
+    return dataEntrada >= primeiroDiaDoMes && dataEntrada <= ultimoDiaDoMes;
+  });
+  
+  // Calcular totais
   const totalReceitaMes = receitasDoMes.reduce((acc, entrada) => {
+    const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+    return acc + (valor || 0);
+  }, 0);
+  
+  const totalDespesaMes = despesasDoMes.reduce((acc, entrada) => {
+    const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+    return acc + (valor || 0);
+  }, 0);
+  
+  const lucroMes = totalReceitaMes - totalDespesaMes;
+  
+  // Receitas pagas (status pago)
+  const receitasPagas = receitasDoMes.filter(e => e.status_pagamento === 'pago');
+  const totalReceitaPaga = receitasPagas.reduce((acc, entrada) => {
+    const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+    return acc + (valor || 0);
+  }, 0);
+  
+  // Receitas pendentes
+  const receitasPendentes = receitasDoMes.filter(e => e.status_pagamento === 'pendente');
+  const totalReceitaPendente = receitasPendentes.reduce((acc, entrada) => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
   }, 0);
@@ -38,6 +71,13 @@ export const Dashboard = () => {
   // Estatísticas de ordens
   const ordensAbertas = ordens?.filter(o => o.status !== 'entregue')?.length || 0;
   const ordensEntregues = ordens?.filter(o => o.status === 'entregue')?.length || 0;
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
 
   const cards = [
     {
@@ -48,11 +88,39 @@ export const Dashboard = () => {
       bgColor: 'bg-blue-50'
     },
     {
-      title: 'Produtos Ativos',
-      value: loadingProdutos ? '...' : `${produtosAtivos}/${totalProdutos}`,
-      icon: Package,
+      title: 'Receita do Mês',
+      value: loadingFinanceiro ? '...' : formatCurrency(totalReceitaMes),
+      icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
+    },
+    {
+      title: 'Despesas do Mês',
+      value: loadingFinanceiro ? '...' : formatCurrency(totalDespesaMes),
+      icon: DollarSign,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50'
+    },
+    {
+      title: 'Lucro do Mês',
+      value: loadingFinanceiro ? '...' : formatCurrency(lucroMes),
+      icon: TrendingUp,
+      color: lucroMes >= 0 ? 'text-green-600' : 'text-red-600',
+      bgColor: lucroMes >= 0 ? 'bg-green-50' : 'bg-red-50'
+    },
+    {
+      title: 'Receita Paga',
+      value: loadingFinanceiro ? '...' : formatCurrency(totalReceitaPaga),
+      icon: DollarSign,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50'
+    },
+    {
+      title: 'A Receber',
+      value: loadingFinanceiro ? '...' : formatCurrency(totalReceitaPendente),
+      icon: DollarSign,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50'
     },
     {
       title: 'Ordens Abertas',
@@ -62,11 +130,11 @@ export const Dashboard = () => {
       bgColor: 'bg-purple-50'
     },
     {
-      title: 'Receita do Mês',
-      value: loadingFinanceiro ? '...' : `R$ ${totalReceitaMes.toFixed(2).replace('.', ',')}`,
-      icon: DollarSign,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50'
+      title: 'Ordens Entregues',
+      value: loadingOrdens ? '...' : `${ordensEntregues}`,
+      icon: FileText,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
     }
   ];
 
@@ -81,28 +149,58 @@ export const Dashboard = () => {
         </p>
       </div>
 
-      {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cards.map((card, index) => {
-          const Icon = card.icon;
-          return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  {card.title}
-                </CardTitle>
-                <div className={`p-2 rounded-lg ${card.bgColor}`}>
-                  <Icon className={`h-4 w-4 ${card.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {card.value}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Cards Financeiros - Primeira Linha */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Visão Financeira</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {cards.slice(1, 5).map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">
+                    {card.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                    <Icon className={`h-4 w-4 ${card.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {card.value}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Cards Operacionais - Segunda Linha */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Visão Operacional</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[cards[0], ...cards.slice(5)].map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Card key={index}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">
+                    {card.title}
+                  </CardTitle>
+                  <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                    <Icon className={`h-4 w-4 ${card.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {card.value}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       {/* Alertas e Notificações */}
@@ -123,25 +221,68 @@ export const Dashboard = () => {
         </Card>
       )}
 
-      {/* Resumo Rápido */}
+      {/* Resumo Detalhado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <TrendingUp className="mr-2 h-5 w-5 text-green-600" />
-              Atividade Recente
+              Resumo Financeiro do Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Receitas Total:</span>
+                <span className="font-semibold text-green-600">{formatCurrency(totalReceitaMes)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Receitas Pagas:</span>
+                <span className="font-semibold text-emerald-600">{formatCurrency(totalReceitaPaga)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">A Receber:</span>
+                <span className="font-semibold text-orange-600">{formatCurrency(totalReceitaPendente)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Despesas:</span>
+                <span className="font-semibold text-red-600">{formatCurrency(totalDespesaMes)}</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex justify-between">
+                  <span className="font-semibold text-gray-900">Lucro Líquido:</span>
+                  <span className={`font-bold ${lucroMes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(lucroMes)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="mr-2 h-5 w-5 text-blue-600" />
+              Status Operacional
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="text-sm text-gray-600">
-                Sistema integrado com PostgreSQL funcionando perfeitamente
+                Sistema PostgreSQL funcionando perfeitamente
               </div>
               <div className="text-sm text-gray-600">
                 {totalClientes > 0 ? `${totalClientes} clientes cadastrados` : 'Nenhum cliente cadastrado ainda'}
               </div>
               <div className="text-sm text-gray-600">
                 {totalProdutos > 0 ? `${totalProdutos} produtos no catálogo` : 'Nenhum produto cadastrado ainda'}
+              </div>
+              <div className="text-sm text-gray-600">
+                {ordensAbertas > 0 ? `${ordensAbertas} ordens em andamento` : 'Nenhuma ordem em andamento'}
+              </div>
+              <div className="text-sm text-gray-600">
+                {ordensEntregues > 0 ? `${ordensEntregues} ordens finalizadas` : 'Nenhuma ordem finalizada ainda'}
               </div>
             </div>
           </CardContent>
