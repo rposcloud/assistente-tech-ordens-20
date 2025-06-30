@@ -59,7 +59,7 @@ export const Produtos = () => {
       label: 'Categoria',
       render: (produto) => produto.categoria === 'peca' ? 'Peça' : 'Serviço'
     },
-    { key: 'preco_venda', label: 'Preço', render: (produto) => `R$ ${produto.preco_venda.toFixed(2)}` },
+    { key: 'preco_venda', label: 'Preço', render: (produto) => `R$ ${Number(produto.preco_venda).toFixed(2)}` },
     {
       key: 'acoes',
       label: 'Ações',
