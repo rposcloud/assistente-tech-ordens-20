@@ -52,13 +52,17 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
   const { data: ordemCompleta, isLoading } = useQuery({
     queryKey: ['/api/ordens', ordem?.id, 'print'],
     queryFn: async () => {
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(`/api/ordens/${ordem?.id}/print`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      if (!response.ok) throw new Error('Erro ao buscar detalhes da ordem');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao buscar detalhes da ordem');
+      }
       return response.json();
     },
     enabled: !!ordem?.id && isOpen,
