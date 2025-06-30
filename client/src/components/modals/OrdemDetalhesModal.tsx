@@ -52,7 +52,12 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
   const { data: ordemCompleta, isLoading } = useQuery({
     queryKey: ['/api/ordens', ordem?.id, 'print'],
     queryFn: async () => {
-      const response = await fetch(`/api/ordens/${ordem?.id}/print`);
+      const response = await fetch(`/api/ordens/${ordem?.id}/print`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
       if (!response.ok) throw new Error('Erro ao buscar detalhes da ordem');
       return response.json();
     },
@@ -214,8 +219,18 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
         </head>
         <body>
           <div class="header">
+            ${dadosOrdem.empresa ? `
+              <div style="text-align: left; margin-bottom: 15px; font-size: 14px;">
+                <strong>${dadosOrdem.empresa.empresa || dadosOrdem.empresa.nome_completo}</strong><br>
+                ${dadosOrdem.empresa.cnpj ? `CNPJ: ${dadosOrdem.empresa.cnpj}<br>` : ''}
+                ${dadosOrdem.empresa.telefone ? `Tel: ${dadosOrdem.empresa.telefone}<br>` : ''}
+                ${dadosOrdem.empresa.email_empresa ? `Email: ${dadosOrdem.empresa.email_empresa}<br>` : ''}
+                ${dadosOrdem.empresa.endereco ? `${dadosOrdem.empresa.endereco}${dadosOrdem.empresa.numero ? ', ' + dadosOrdem.empresa.numero : ''}<br>` : ''}
+                ${dadosOrdem.empresa.cidade && dadosOrdem.empresa.estado ? `${dadosOrdem.empresa.cidade}/${dadosOrdem.empresa.estado}` : ''}
+              </div>
+            ` : ''}
             <h1>ORDEM DE SERVIÇO</h1>
-            <h2>#${ordem.numero}</h2>
+            <h2>#${dadosOrdem.numero}</h2>
           </div>
           
           <div class="section">
@@ -225,16 +240,16 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
                 <div class="col">
                   <div class="label">Status:</div>
                   <div class="value">
-                    <span class="status status-${ordem.status}">${statusLabels[ordem.status as keyof typeof statusLabels]}</span>
+                    <span class="status status-${dadosOrdem.status}">${statusLabels[dadosOrdem.status as keyof typeof statusLabels]}</span>
                   </div>
                 </div>
                 <div class="col">
                   <div class="label">Prioridade:</div>
-                  <div class="value">${prioridadeLabels[ordem.prioridade as keyof typeof prioridadeLabels]}</div>
+                  <div class="value">${prioridadeLabels[dadosOrdem.prioridade as keyof typeof prioridadeLabels]}</div>
                 </div>
                 <div class="col">
                   <div class="label">Data de Abertura:</div>
-                  <div class="value">${formatDate(ordem.data_abertura)}</div>
+                  <div class="value">${formatDate(dadosOrdem.data_abertura)}</div>
                 </div>
               </div>
             </div>
@@ -329,6 +344,41 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
               ` : ''}
             </div>
           </div>
+          
+          ${(dadosOrdem.produtos_utilizados?.length > 0 || dadosOrdem.pecas_utilizadas?.length > 0) ? `
+            <div class="section">
+              <div class="section-header">Produtos e Serviços Utilizados</div>
+              <div class="section-content">
+                ${dadosOrdem.produtos_utilizados?.map((item: any) => `
+                  <div class="row" style="border-left: 3px solid #3b82f6; padding-left: 10px; margin-bottom: 10px;">
+                    <div class="col">
+                      <div class="label">${item.produto?.nome || 'Produto não encontrado'}:</div>
+                      <div class="value">${item.produto?.descricao || 'Sem descrição'}</div>
+                      <div class="value" style="font-size: 11px; color: #666;">
+                        Categoria: ${item.produto?.categoria || 'N/A'} | 
+                        Qtd: ${item.quantidade} | 
+                        Unit: ${formatCurrency(item.valor_unitario)} | 
+                        Total: ${formatCurrency(item.valor_total)}
+                      </div>
+                    </div>
+                  </div>
+                `).join('') || ''}
+                ${dadosOrdem.pecas_utilizadas?.map((item: any) => `
+                  <div class="row" style="border-left: 3px solid #f97316; padding-left: 10px; margin-bottom: 10px;">
+                    <div class="col">
+                      <div class="label">${item.nome}:</div>
+                      <div class="value" style="font-size: 11px; color: #666;">
+                        Categoria: Peça | 
+                        Qtd: ${item.quantidade} | 
+                        Unit: ${formatCurrency(item.valor_unitario)} | 
+                        Total: ${formatCurrency(item.valor_total)}
+                      </div>
+                    </div>
+                  </div>
+                `).join('') || ''}
+              </div>
+            </div>
+          ` : ''}
           
           <div class="section">
             <div class="section-header">Valores</div>
@@ -533,6 +583,69 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
               )}
             </CardContent>
           </Card>
+
+          {/* Produtos e Serviços Utilizados */}
+          {(dadosOrdem.produtos_utilizados?.length > 0 || dadosOrdem.pecas_utilizadas?.length > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Produtos e Serviços Utilizados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Produtos Utilizados */}
+                  {dadosOrdem.produtos_utilizados?.map((item: any, index: number) => (
+                    <div key={index} className="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">
+                            {item.produto?.nome || 'Produto não encontrado'}
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {item.produto?.descricao || 'Sem descrição'}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2 text-sm">
+                            <span className="text-gray-500">
+                              Categoria: <span className="font-medium">{item.produto?.categoria || 'N/A'}</span>
+                            </span>
+                            <span className="text-gray-500">
+                              Qtd: <span className="font-medium">{item.quantidade}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-500">Unit: {formatCurrency(item.valor_unitario)}</div>
+                          <div className="font-semibold">{formatCurrency(item.valor_total)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Peças Utilizadas */}
+                  {dadosOrdem.pecas_utilizadas?.map((item: any, index: number) => (
+                    <div key={index} className="border-l-4 border-orange-500 pl-4 py-2 bg-orange-50">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{item.nome}</h4>
+                          <div className="flex items-center gap-4 mt-2 text-sm">
+                            <span className="text-gray-500">
+                              Categoria: <span className="font-medium">Peça</span>
+                            </span>
+                            <span className="text-gray-500">
+                              Qtd: <span className="font-medium">{item.quantidade}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-500">Unit: {formatCurrency(item.valor_unitario)}</div>
+                          <div className="font-semibold">{formatCurrency(item.valor_total)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Informações Financeiras */}
           <Card>
