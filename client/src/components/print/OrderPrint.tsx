@@ -146,6 +146,47 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
           )}
         </div>
 
+        {/* Produtos e Serviços Utilizados */}
+        {((ordem as any).produtos_utilizados?.length > 0 || (ordem as any).pecas_utilizadas?.length > 0) && (
+          <div className="border rounded-lg p-4 mb-6">
+            <h3 className="font-bold text-gray-800 mb-3 border-b pb-2">PRODUTOS E SERVIÇOS UTILIZADOS</h3>
+            <div className="space-y-3">
+              {/* Produtos */}
+              {(ordem as any).produtos_utilizados?.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between items-start bg-blue-50 p-3 rounded">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{item.produto?.nome || 'Produto não encontrado'}</p>
+                    <p className="text-sm text-gray-600">{item.produto?.descricao || 'Sem descrição'}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Categoria: {item.produto?.categoria || 'N/A'} | Qtd: {item.quantidade}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p>Unit: {formatCurrency(item.valor_unitario)}</p>
+                    <p className="font-medium">Total: {formatCurrency(item.valor_total)}</p>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Peças */}
+              {(ordem as any).pecas_utilizadas?.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between items-start bg-orange-50 p-3 rounded">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{item.nome}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Categoria: Peça | Qtd: {item.quantidade}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm">
+                    <p>Unit: {formatCurrency(item.valor_unitario)}</p>
+                    <p className="font-medium">Total: {formatCurrency(item.valor_total)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Valores */}
         <div className="border rounded-lg p-4 mb-6">
           <h3 className="font-bold text-gray-800 mb-3 border-b pb-2">VALORES</h3>

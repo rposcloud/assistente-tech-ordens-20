@@ -341,7 +341,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Ordem not found' });
       }
       
-      res.json(ordem);
+      // Retornar dados formatados para impressão
+      res.json({
+        ordem: {
+          ...ordem,
+          cliente: ordem.clientes,
+          produtos_utilizados: ordem.produtos_utilizados || [],
+          pecas_utilizadas: ordem.pecas_utilizadas || []
+        },
+        empresa: ordem.empresa
+      });
     } catch (error) {
       console.error('Get ordem for print error:', error);
       res.status(500).json({ error: 'Internal server error' });

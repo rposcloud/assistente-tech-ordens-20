@@ -318,6 +318,63 @@ export const ImpressaoOrdem = () => {
           </Card>
         </div>
 
+        {/* Produtos e Serviços Utilizados */}
+        {((ordem as any).produtos_utilizados?.length > 0 || (ordem as any).pecas_utilizadas?.length > 0) && (
+          <div className="mb-8">
+            <Card className="border border-gray-200">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-2">
+                  Produtos e Serviços Utilizados
+                </h3>
+                <div className="space-y-4">
+                  {/* Produtos */}
+                  {(ordem as any).produtos_utilizados?.map((item: any, index: number) => (
+                    <div key={index} className="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">
+                            {item.produto?.nome || 'Produto não encontrado'}
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {item.produto?.descricao || 'Sem descrição'}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span>Categoria: <strong>{item.produto?.categoria || 'N/A'}</strong></span>
+                            <span>Quantidade: <strong>{item.quantidade}</strong></span>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <div className="text-sm text-gray-500">Unit: R$ {parseFloat(item.valor_unitario).toFixed(2).replace('.', ',')}</div>
+                          <div className="font-medium text-gray-900">Total: R$ {parseFloat(item.valor_total).toFixed(2).replace('.', ',')}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Peças */}
+                  {(ordem as any).pecas_utilizadas?.map((item: any, index: number) => (
+                    <div key={index} className="border-l-4 border-orange-500 pl-4 py-3 bg-orange-50 rounded-r">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{item.nome}</h4>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span>Categoria: <strong>Peça</strong></span>
+                            <span>Quantidade: <strong>{item.quantidade}</strong></span>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <div className="text-sm text-gray-500">Unit: R$ {parseFloat(item.valor_unitario).toFixed(2).replace('.', ',')}</div>
+                          <div className="font-medium text-gray-900">Total: R$ {parseFloat(item.valor_total).toFixed(2).replace('.', ',')}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Observações */}
         {ordem.observacoes_internas && (
           <div className="mb-8">

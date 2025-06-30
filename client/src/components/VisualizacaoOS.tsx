@@ -64,7 +64,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               @page { size: A4; margin: 1cm; }
               body { font-size: 12px; }
             }
-            
+
             body {
               font-family: Arial, sans-serif;
               line-height: 1.4;
@@ -72,57 +72,57 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               margin: 0;
               padding: 20px;
             }
-            
+
             .header {
               text-align: center;
               border-bottom: 2px solid #333;
               padding-bottom: 15px;
               margin-bottom: 20px;
             }
-            
+
             .empresa-info {
               text-align: left;
               margin-bottom: 15px;
               font-size: 14px;
             }
-            
+
             .section {
               margin-bottom: 15px;
               border: 1px solid #ddd;
               border-radius: 5px;
             }
-            
+
             .section-header {
               background: #f5f5f5;
               padding: 8px 12px;
               font-weight: bold;
               border-bottom: 1px solid #ddd;
             }
-            
+
             .section-content {
               padding: 12px;
             }
-            
+
             .row {
               display: flex;
               margin-bottom: 8px;
             }
-            
+
             .col {
               flex: 1;
               padding-right: 15px;
             }
-            
+
             .label {
               font-weight: bold;
               color: #555;
             }
-            
+
             .value {
               color: #000;
               margin-top: 2px;
             }
-            
+
             .produto-item {
               border-left: 3px solid #3b82f6;
               padding-left: 10px;
@@ -130,7 +130,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               background: #f8fafc;
               padding: 8px;
             }
-            
+
             .peca-item {
               border-left: 3px solid #f97316;
               padding-left: 10px;
@@ -138,18 +138,18 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               background: #fef7f0;
               padding: 8px;
             }
-            
+
             .signature-area {
               margin-top: 40px;
               display: flex;
               justify-content: space-between;
             }
-            
+
             .signature {
               text-align: center;
               width: 200px;
             }
-            
+
             .signature-line {
               border-top: 1px solid #000;
               margin-top: 40px;
@@ -172,7 +172,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
             <h1>ORDEM DE SERVIÇO</h1>
             <h2>#${ordem.numero}</h2>
           </div>
-          
+
           <div class="section">
             <div class="section-header">Informações da Ordem</div>
             <div class="section-content">
@@ -192,7 +192,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               </div>
             </div>
           </div>
-          
+
           <div class="section">
             <div class="section-header">Dados do Cliente</div>
             <div class="section-content">
@@ -218,7 +218,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               </div>
             </div>
           </div>
-          
+
           <div class="section">
             <div class="section-header">Equipamento</div>
             <div class="section-content">
@@ -246,7 +246,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               ` : ''}
             </div>
           </div>
-          
+
           <div class="section">
             <div class="section-header">Problema e Diagnóstico</div>
             <div class="section-content">
@@ -274,7 +274,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               ` : ''}
             </div>
           </div>
-          
+
           ${(ordem.produtos_utilizados?.length > 0 || ordem.pecas_utilizadas?.length > 0) ? `
             <div class="section">
               <div class="section-header">Produtos e Serviços Utilizados</div>
@@ -305,7 +305,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               </div>
             </div>
           ` : ''}
-          
+
           <div class="section">
             <div class="section-header">Valores</div>
             <div class="section-content">
@@ -331,7 +331,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               </div>
             </div>
           </div>
-          
+
           <div class="signature-area">
             <div class="signature">
               <div class="signature-line">Cliente</div>
@@ -340,14 +340,14 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
               <div class="signature-line">Técnico</div>
             </div>
           </div>
-          
+
           <div style="text-align: center; margin-top: 30px; font-size: 11px; color: #666;">
             Documento gerado em ${formatDate(new Date())}
           </div>
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
@@ -488,13 +488,13 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
                         </div>
                       </div>
                       <div className="text-right ml-4">
-                        <div className="text-sm text-gray-500">Unit: {formatCurrency(item.valor_unitario)}</div>
-                        <div className="font-semibold text-lg">{formatCurrency(item.valor_total)}</div>
+                        <div className="text-sm text-gray-500">Unit: R$ {parseFloat(item.valor_unitario || 0).toFixed(2).replace('.', ',')}</div>
+                        <div className="font-medium text-gray-900">Total: R$ {parseFloat(item.valor_total || 0).toFixed(2).replace('.', ',')}</div>
                       </div>
                     </div>
                   </div>
                 ))}
-                
+
                 {/* Peças */}
                 {ordem.pecas_utilizadas?.map((item: any, index: number) => (
                   <div key={index} className="border-l-4 border-orange-500 pl-4 py-3 bg-orange-50 rounded-r">
@@ -507,8 +507,8 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem }: VisualizacaoOSProps) 
                         </div>
                       </div>
                       <div className="text-right ml-4">
-                        <div className="text-sm text-gray-500">Unit: {formatCurrency(item.valor_unitario)}</div>
-                        <div className="font-semibold text-lg">{formatCurrency(item.valor_total)}</div>
+                        <div className="text-sm text-gray-500">Unit: R$ {parseFloat(item.valor_unitario || 0).toFixed(2).replace('.', ',')}</div>
+                        <div className="font-medium text-gray-900">Total: R$ {parseFloat(item.valor_total || 0).toFixed(2).replace('.', ',')}</div>
                       </div>
                     </div>
                   </div>
