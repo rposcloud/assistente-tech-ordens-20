@@ -9,14 +9,14 @@ import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-const statusColors = {
+const statusColors: { [key: string]: string } = {
   pendente: 'bg-yellow-100 text-yellow-800',
   pago: 'bg-green-100 text-green-800',
   parcial: 'bg-blue-100 text-blue-800',
   cancelado: 'bg-red-100 text-red-800'
 };
 
-const statusLabels = {
+const statusLabels: { [key: string]: string } = {
   pendente: 'Pendente',
   pago: 'Pago',
   parcial: 'Parcial',
@@ -39,18 +39,18 @@ export const Financeiro = () => {
   });
 
   const receitas = entradasMesAtual
-    .filter(entrada => entrada.tipo === 'receita' && entrada.status === 'pago')
-    .reduce((sum, entrada) => sum + entrada.valor, 0);
+    .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pago')
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
 
   const despesas = entradasMesAtual
-    .filter(entrada => entrada.tipo === 'despesa' && entrada.status === 'pago')
-    .reduce((sum, entrada) => sum + entrada.valor, 0);
+    .filter(entrada => entrada.tipo === 'despesa' && entrada.status_pagamento === 'pago')
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
 
   const saldo = receitas - despesas;
 
   const aReceber = entradas
-    .filter(entrada => entrada.tipo === 'receita' && entrada.status === 'pendente')
-    .reduce((sum, entrada) => sum + entrada.valor, 0);
+    .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pendente')
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
 
   const handleSubmit = async (data: Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -107,14 +107,17 @@ export const Financeiro = () => {
       key: 'valor',
       label: 'Valor',
       sortable: true,
-      render: (entrada) => `R$ ${entrada.valor.toFixed(2)}`
+      render: (entrada) => {
+        const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+        return `R$ ${(valor || 0).toFixed(2)}`;
+      }
     },
     {
       key: 'forma_pagamento',
       label: 'Forma Pagamento',
       sortable: true,
       render: (entrada) => {
-        const formas = {
+        const formas: { [key: string]: string } = {
           dinheiro: 'Dinheiro',
           cartao_credito: 'Cartão Crédito',
           cartao_debito: 'Cartão Débito',
@@ -122,16 +125,16 @@ export const Financeiro = () => {
           transferencia: 'Transferência',
           parcelado: 'Parcelado'
         };
-        return formas[entrada.forma_pagamento] || entrada.forma_pagamento;
+        return formas[entrada.forma_pagamento || ''] || entrada.forma_pagamento || '';
       }
     },
     {
-      key: 'status',
+      key: 'status_pagamento',
       label: 'Status',
       sortable: true,
       render: (entrada) => (
-        <Badge className={statusColors[entrada.status]}>
-          {statusLabels[entrada.status]}
+        <Badge className={statusColors[entrada.status_pagamento] || 'bg-gray-100 text-gray-800'}>
+          {statusLabels[entrada.status_pagamento] || entrada.status_pagamento}
         </Badge>
       )
     },
