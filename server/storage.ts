@@ -180,6 +180,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(ordensServico.user_id, userId))
       .orderBy(desc(ordensServico.created_at));
     
+    // Buscar dados da empresa
+    const empresa = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+    
     // Buscar todos os clientes para fazer o mapeamento
     const clientesMap = new Map();
     if (ordens.length > 0) {
@@ -192,11 +199,44 @@ export class DatabaseStorage implements IStorage {
       });
     }
     
-    // Combinar os dados
-    return ordens.map(ordem => ({
-      ...ordem,
-      clientes: clientesMap.get(ordem.cliente_id) || null
-    })) as any;
+    // Para cada ordem, buscar produtos e peças utilizadas
+    const ordensCompletas = await Promise.all(ordens.map(async (ordem) => {
+      // Buscar produtos utilizados
+      const produtosUtilizadosData = await db
+        .select({
+          id: produtosUtilizados.id,
+          quantidade: produtosUtilizados.quantidade,
+          valor_unitario: produtosUtilizados.valor_unitario,
+          valor_total: produtosUtilizados.valor_total,
+          produto: {
+            id: produtos.id,
+            nome: produtos.nome,
+            categoria: produtos.categoria,
+            descricao: produtos.descricao,
+            preco_custo: produtos.preco_custo,
+            preco_venda: produtos.preco_venda
+          }
+        })
+        .from(produtosUtilizados)
+        .leftJoin(produtos, eq(produtosUtilizados.produto_id, produtos.id))
+        .where(eq(produtosUtilizados.ordem_servico_id, ordem.id));
+
+      // Buscar peças utilizadas
+      const pecasUtilizadasData = await db
+        .select()
+        .from(pecasUtilizadas)
+        .where(eq(pecasUtilizadas.ordem_servico_id, ordem.id));
+
+      return {
+        ...ordem,
+        clientes: clientesMap.get(ordem.cliente_id) || null,
+        produtos_utilizados: produtosUtilizadosData,
+        pecas_utilizadas: pecasUtilizadasData,
+        empresa: empresa[0] || null
+      };
+    }));
+
+    return ordensCompletas as any;
   }
 
   async getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined> {

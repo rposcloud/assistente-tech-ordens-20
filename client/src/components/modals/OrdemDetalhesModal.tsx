@@ -49,28 +49,10 @@ const prioridadeColors = {
 };
 
 export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModalProps) => {
-  const { data: ordemCompleta, isLoading } = useQuery({
-    queryKey: ['/api/ordens', ordem?.id, 'print'],
-    queryFn: async () => {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/ordens/${ordem?.id}/print`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao buscar detalhes da ordem');
-      }
-      return response.json();
-    },
-    enabled: !!ordem?.id && isOpen,
-  });
-  
   if (!ordem) return null;
   
-  const dadosOrdem = ordemCompleta || ordem;
+  // Os dados já vêm completos da API principal
+  const dadosOrdem = ordem as any;
 
   const formatDate = (date: string | null) => {
     if (!date) return 'Não informado';
