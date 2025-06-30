@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRoute } from 'wouter';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, ArrowLeft } from 'lucide-react';
@@ -49,12 +49,13 @@ const statusLabels = {
 };
 
 export const ImpressaoOrdem = () => {
-  const [match, params] = useRoute('/impressao/:id');
-  const id = match ? params?.id : null;
+  const { id } = useParams<{ id: string }>();
   const [ordem, setOrdem] = useState<OrdemCompleta | null>(null);
   const [empresa, setEmpresa] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { profile } = useProfile();
+
+  console.log('ImpressaoOrdem carregada, ID:', id);
 
   useEffect(() => {
     const fetchDados = async () => {
@@ -95,7 +96,7 @@ export const ImpressaoOrdem = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando dados para impressão...</p>
+          <p className="text-gray-600">Carregando dados para impressão... (ID: {id})</p>
         </div>
       </div>
     );
@@ -105,7 +106,7 @@ export const ImpressaoOrdem = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Ordem de serviço não encontrada</p>
+          <p className="text-gray-600 mb-4">Ordem de serviço não encontrada (ID: {id})</p>
           <Button onClick={handleVoltar} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
