@@ -75,7 +75,7 @@ export const PagamentoOSModal: React.FC<PagamentoOSModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-green-600" />
@@ -83,17 +83,13 @@ export const PagamentoOSModal: React.FC<PagamentoOSModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Valor da OS */}
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <div className="bg-green-50 p-3 rounded border border-green-200">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-green-700">Valor Total da OS:</span>
-              <div className="flex items-center gap-1 text-lg font-bold text-green-800">
-                <DollarSign className="h-4 w-4" />
-                R$ {valorFinal.toFixed(2)}
-              </div>
+              <span className="text-sm text-green-700">Valor:</span>
+              <span className="font-bold text-green-800">R$ {valorFinal.toFixed(2)}</span>
             </div>
-            <p className="text-xs text-green-600 mt-1">Cliente: {(ordem as any).clientes?.nome || 'N/A'}</p>
           </div>
 
           {/* Forma de Pagamento */}
