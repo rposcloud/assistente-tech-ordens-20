@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +47,7 @@ const statusOptions = [
 
 export const Ordens = () => {
   const { ordens, loading, createOrdem, updateOrdem, deleteOrdem } = useOrdens();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
@@ -223,8 +225,7 @@ export const Ordens = () => {
   };
 
   const handleNewOrdem = () => {
-    setSelectedOrdem(undefined);
-    setModalOpen(true);
+    navigate('/ordens/nova');
   };
 
   const handleVisualizarOrdem = (ordem: OrdemServico) => {

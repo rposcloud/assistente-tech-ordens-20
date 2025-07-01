@@ -88,4 +88,5 @@ export const api = {
   },
 };
 
+export { apiRequest };
 export default api;

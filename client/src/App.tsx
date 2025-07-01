@@ -14,6 +14,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
 import { Produtos } from './pages/Produtos';
 import { Ordens } from './pages/Ordens';
+import { NovaOrdem } from './pages/NovaOrdem';
 import { Financeiro } from './pages/Financeiro';
 import { Empresa } from './pages/Empresa';
 import { PortalCliente } from './pages/PortalCliente';
@@ -66,6 +67,13 @@ const App = () => (
               <ProtectedRoute>
                 <Layout>
                   <Ordens />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/ordens/nova" element={
+              <ProtectedRoute>
+                <Layout>
+                  <NovaOrdem />
                 </Layout>
               </ProtectedRoute>
             } />
