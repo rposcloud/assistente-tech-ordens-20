@@ -5,11 +5,13 @@ import { useClientes } from '../hooks/useClientes';
 import { useProdutos } from '../hooks/useProdutos';
 import { useOrdens } from '../hooks/useOrdens';
 import { useFinanceiro } from '../hooks/useFinanceiro';
+import { useProfile } from '../hooks/useProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Package, FileText, DollarSign, TrendingUp, AlertCircle, Calculator } from 'lucide-react';
 
 export const Dashboard = () => {
   const { profile } = useAuth();
+  const { companyProfile } = useProfile();
   const { clientes, loading: loadingClientes } = useClientes();
   const { produtos, loading: loadingProdutos } = useProdutos();
   const { ordens, loading: loadingOrdens } = useOrdens();
@@ -173,13 +175,11 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          Bem-vindo, {profile?.nome_completo || 'Usuário'}!
+      {/* Cabeçalho da Empresa */}
+      <div className="text-center py-4">
+        <h1 className="text-4xl font-bold text-gray-900">
+          {companyProfile?.empresa || 'TechService'}
         </h1>
-        <p className="text-gray-600 mt-2">
-          Aqui está um resumo do seu negócio hoje
-        </p>
       </div>
 
       {/* Cards Principais - Informações Relevantes */}
@@ -206,25 +206,6 @@ export const Dashboard = () => {
         })}
       </div>
 
-      {/* Alertas e Notificações */}
-      {produtosBaixoEstoque > 0 && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader>
-            <CardTitle className="flex items-center text-yellow-800">
-              <AlertCircle className="mr-2 h-5 w-5" />
-              Atenção: Produtos com Estoque Baixo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-yellow-700">
-              Você tem {produtosBaixoEstoque} produto(s) com estoque abaixo de 5 unidades.
-              Considere fazer reposição.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-
-    </div>
+      </div>
   );
 };
