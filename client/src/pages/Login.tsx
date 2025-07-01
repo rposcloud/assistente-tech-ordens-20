@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { OSCloudLogo } from '../components/OSCloudLogo';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -58,11 +59,9 @@ export const Login = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <Link to="/" className="flex justify-center items-center mb-4">
-              <div className="bg-blue-500 p-3 rounded-full">
-                <Monitor className="text-white" size={24} />
-              </div>
+              <OSCloudLogo size="lg" showText={false} />
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">TechService</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">OS Cloud</h1>
             <p className="text-gray-600">Sistema de Gestão de Assistência Técnica</p>
           </div>
 

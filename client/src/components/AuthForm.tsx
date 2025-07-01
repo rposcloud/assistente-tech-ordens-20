@@ -118,7 +118,7 @@ export const AuthForm = () => {
 
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="text-sm text-blue-700 font-medium mb-2">Dados de teste:</p>
-            <p className="text-sm text-blue-600">Email: admin@techservice.com</p>
+            <p className="text-sm text-blue-600">Email: admin@oscloud.com</p>
             <p className="text-sm text-blue-600">Senha: admin123</p>
           </div>
         </TabsContent>

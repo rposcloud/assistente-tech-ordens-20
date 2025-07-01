@@ -6,6 +6,7 @@ import { UserPlus, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { OSCloudLogo } from '../components/OSCloudLogo';
 
 export const Cadastro = () => {
   const [name, setName] = useState('');
@@ -86,12 +87,10 @@ export const Cadastro = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <Link to="/" className="flex justify-center items-center mb-4">
-              <div className="bg-blue-500 p-3 rounded-full">
-                <Monitor className="text-white" size={24} />
-              </div>
+              <OSCloudLogo size="lg" showText={false} />
             </Link>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Criar Conta</h1>
-            <p className="text-gray-600">Cadastre-se no TechService</p>
+            <p className="text-gray-600">Cadastre-se no OS Cloud</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, FileText, Package, DollarSign, CheckCircle, BarChart3, Shield, Clock, Monitor, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { OSCloudLogo } from '../components/OSCloudLogo';
 
 export const HomePage = () => {
   const features = [
@@ -54,12 +55,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-500 p-2 rounded-lg">
-                  <Monitor className="text-white" size={20} />
-                </div>
-                <span className="text-xl font-bold text-gray-900">OS Cloud</span>
-              </div>
+              <OSCloudLogo size="md" showText={true} />
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/login">

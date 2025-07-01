@@ -167,9 +167,10 @@ Changelog:
 - July 1, 2025. Rebranding completo do sistema para "OS Cloud":
   * Sistema rebatizado de TechService para OS Cloud em toda a aplicação
   * Novo logo SVG criado e implementado no componente OSCloudLogo
-  * Atualização de todas as referências em Header, Sidebar, Landing Page, Home Page
+  * Atualização de todas as referências em Header, Sidebar, Landing Page, Home Page, Login, Cadastro
+  * Dados de teste atualizados de "admin@techservice.com" para "admin@oscloud.com"
   * Documentação e descrição do sistema atualizadas para refletir novo nome
-  * Identidade visual unificada com novo nome e logo em todas as páginas
+  * Identidade visual unificada com novo nome e logo em 100% das páginas do sistema
 
 ## User Preferences
 
