@@ -7,7 +7,7 @@ import { relations } from "drizzle-orm";
 export const tipoDocumentoEnum = pgEnum("tipo_documento", ["cpf", "cnpj"]);
 export const categoriaProdutoEnum = pgEnum("categoria_produto", ["peca", "servico"]);
 export const tipoEquipamentoEnum = pgEnum("tipo_equipamento", ["smartphone", "notebook", "desktop", "tablet", "outros", "todos"]);
-export const statusOrdemEnum = pgEnum("status_ordem", ["aguardando_diagnostico", "aguardando_aprovacao", "aguardando_pecas", "em_reparo", "pronto_entrega", "entregue"]);
+export const statusOrdemEnum = pgEnum("status_ordem", ["aberta", "em_andamento", "aguardando_pecas", "pronta", "finalizada"]);
 export const formaPagamentoEnum = pgEnum("forma_pagamento", ["dinheiro", "cartao_credito", "cartao_debito", "pix", "transferencia", "parcelado"]);
 export const statusPagamentoEnum = pgEnum("status_pagamento", ["pendente", "pago", "parcial", "cancelado"]);
 export const tipoEntradaFinanceiraEnum = pgEnum("tipo_entrada_financeira", ["receita", "despesa"]);
@@ -120,7 +120,7 @@ export const ordensServico = pgTable("ordens_servico", {
   link_expires_at: timestamp("link_expires_at", { withTimezone: true }),
   prazo_entrega: date("prazo_entrega"),
   garantia: integer("garantia").default(90).notNull(),
-  status: statusOrdemEnum("status").default("aguardando_diagnostico").notNull(),
+  status: statusOrdemEnum("status").default("aberta").notNull(),
   aprovado_cliente: boolean("aprovado_cliente").default(false),
   data_aprovacao: timestamp("data_aprovacao", { withTimezone: true }),
   data_abertura: timestamp("data_abertura", { withTimezone: true }).defaultNow().notNull(),

@@ -22,30 +22,27 @@ import {
 import { toast } from 'sonner';
 
 const statusColors = {
-  aguardando_diagnostico: 'bg-yellow-100 text-yellow-800',
-  aguardando_aprovacao: 'bg-blue-100 text-blue-800',
+  aberta: 'bg-blue-100 text-blue-800',
+  em_andamento: 'bg-yellow-100 text-yellow-800',
   aguardando_pecas: 'bg-orange-100 text-orange-800',
-  em_reparo: 'bg-purple-100 text-purple-800',
-  pronto_entrega: 'bg-green-100 text-green-800',
-  entregue: 'bg-gray-100 text-gray-800'
+  pronta: 'bg-green-100 text-green-800',
+  finalizada: 'bg-gray-100 text-gray-800'
 };
 
 const statusLabels = {
-  aguardando_diagnostico: 'Aguardando Diagnóstico',
-  aguardando_aprovacao: 'Aguardando Aprovação',
+  aberta: 'Aberta',
+  em_andamento: 'Em Andamento',
   aguardando_pecas: 'Aguardando Peças',
-  em_reparo: 'Em Reparo',
-  pronto_entrega: 'Pronto p/ Entrega',
-  entregue: 'Entregue'
+  pronta: 'Pronta',
+  finalizada: 'Finalizada'
 };
 
 const statusOptions = [
-  { value: 'aguardando_diagnostico', label: 'Aguardando Diagnóstico' },
-  { value: 'aguardando_aprovacao', label: 'Aguardando Aprovação' },
+  { value: 'aberta', label: 'Aberta' },
+  { value: 'em_andamento', label: 'Em Andamento' },
   { value: 'aguardando_pecas', label: 'Aguardando Peças' },
-  { value: 'em_reparo', label: 'Em Reparo' },
-  { value: 'pronto_entrega', label: 'Pronto p/ Entrega' },
-  { value: 'entregue', label: 'Entregue' }
+  { value: 'pronta', label: 'Pronta' },
+  { value: 'finalizada', label: 'Finalizada' }
 ];
 
 export const Ordens = () => {
@@ -236,39 +233,7 @@ export const Ordens = () => {
     setVisualizacaoModalOpen(true);
   };
 
-  const handleFinalizarOS = async (ordem: OrdemServico) => {
-    if (ordem.status === 'entregue') {
-      toast.warning('Esta OS já foi finalizada');
-      return;
-    }
 
-    try {
-      // Confirmar com o usuário
-      const confirmado = window.confirm(
-        `Deseja finalizar a OS #${ordem.numero}?\n\n` +
-        `Isso irá:\n` +
-        `• Alterar o status para "Entregue"\n` +
-        `• Criar entrada financeira de receita\n` +
-        `• Proteger a OS contra alterações futuras\n\n` +
-        `Valor da OS: R$ ${(parseFloat(ordem.valor_total || '0')).toFixed(2)}`
-      );
-
-      if (!confirmado) return;
-
-      // Atualizar OS para status entregue
-      await updateOrdem(ordem.id!, {
-        ...ordem,
-        status: 'entregue',
-        data_conclusao: new Date().toISOString()
-      });
-
-      toast.success(`OS #${ordem.numero} finalizada com sucesso!`);
-      
-    } catch (error: any) {
-      console.error('Erro ao finalizar OS:', error);
-      toast.error(`Erro ao finalizar OS: ${error.message || 'Erro desconhecido'}`);
-    }
-  };
 
   const handleChangeStatus = async (ordem: OrdemServico, newStatus: string) => {
     try {
@@ -277,15 +242,7 @@ export const Ordens = () => {
         status: newStatus
       });
       
-      // Se o status foi alterado para "entregue", abrir modal de pagamento
-      if (newStatus === 'entregue') {
-        // Buscar a ordem atualizada com todos os dados
-        const ordemCompleta = await fetch(`/api/ordens/${ordem.id}/print`);
-        const dadosCompletos = await ordemCompleta.json();
-        
-        setOrdemParaPagamento(dadosCompletos);
-        setPagamentoModalOpen(true);
-      }
+      // Lógica simplificada: não abrir modal automaticamente na mudança de status
       
       toast.success(`Status alterado para: ${statusLabels[newStatus as keyof typeof statusLabels]}`);
     } catch (error: any) {
@@ -294,27 +251,62 @@ export const Ordens = () => {
     }
   };
 
-  // Função para confirmar pagamento e criar entrada financeira
+  // Função para abrir modal de finalização/pagamento
+  const handleFinalizarOS = async (ordem: OrdemServico) => {
+    try {
+      // Buscar dados completos da OS
+      const response = await fetch(`/api/ordens/${ordem.id}/print`);
+      const dadosCompletos = await response.json();
+      
+      setOrdemParaPagamento(dadosCompletos);
+      setPagamentoModalOpen(true);
+    } catch (error) {
+      console.error('Erro ao buscar dados da OS:', error);
+      toast.error('Erro ao carregar dados da OS');
+    }
+  };
+
+  // Função para confirmar pagamento e finalizar OS
   const handleConfirmarPagamento = async (dadosPagamento: any) => {
     if (!ordemParaPagamento) return;
     
     setLoadingPagamento(true);
     try {
-      // Atualizar dados de pagamento na OS
+      // 1. Atualizar OS para status "finalizada" com dados de pagamento
       await updateOrdem(ordemParaPagamento.id, {
         ...ordemParaPagamento,
+        status: 'finalizada',
         forma_pagamento: dadosPagamento.forma_pagamento,
         status_pagamento: dadosPagamento.status_pagamento,
         data_pagamento: dadosPagamento.data_pagamento,
         observacoes_pagamento: dadosPagamento.observacoes_pagamento
       });
 
-      toast.success('Dados de pagamento atualizados com sucesso!');
+      // 2. Criar entrada financeira
+      const valorTotal = parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0');
+      const cliente = ordemParaPagamento.clientes;
+
+      await fetch('/api/financeiro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          descricao: `OS #${ordemParaPagamento.numero} - ${cliente?.nome || 'Cliente'}`,
+          valor: valorTotal,
+          tipo: 'receita',
+          data_vencimento: dadosPagamento.data_pagamento,
+          forma_pagamento: dadosPagamento.forma_pagamento,
+          status_pagamento: dadosPagamento.status_pagamento,
+          observacoes: dadosPagamento.observacoes_pagamento || `Finalização OS - ${ordemParaPagamento.tipo_equipamento} ${ordemParaPagamento.marca} ${ordemParaPagamento.modelo}`.trim(),
+          ordem_servico_id: ordemParaPagamento.id
+        })
+      });
+
+      toast.success('OS finalizada e entrada financeira criada com sucesso!');
       setPagamentoModalOpen(false);
       setOrdemParaPagamento(null);
     } catch (error) {
-      console.error('Erro ao confirmar pagamento:', error);
-      toast.error('Erro ao registrar pagamento');
+      console.error('Erro ao finalizar OS:', error);
+      toast.error('Erro ao finalizar OS');
     } finally {
       setLoadingPagamento(false);
     }
@@ -404,55 +396,58 @@ export const Ordens = () => {
       label: 'Ações',
       sortable: false,
       render: (ordem) => (
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleVisualizarOrdem(ordem);
-            }}
-            title="Visualizar OS"
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit(ordem);
-            }}
-            title="Editar"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {ordem.status !== 'entregue' && (
+        <div className="flex items-center gap-2">
+          {ordem.status !== 'finalizada' && (
             <Button
               size="sm"
-              variant="outline"
               onClick={(e) => {
                 e.stopPropagation();
                 handleFinalizarOS(ordem);
               }}
-              title="Finalizar OS"
-              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
-              <CheckSquare className="h-4 w-4" />
+              Finalizar
             </Button>
           )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteClick(ordem);
-            }}
-            title="Excluir"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleVisualizarOrdem(ordem);
+                }}
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                Visualizar
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEdit(ordem);
+                }}
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick(ordem);
+                }}
+                className="flex items-center gap-2 text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+                Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     }

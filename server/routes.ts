@@ -423,11 +423,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
       const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
       
-      // Proteção: Se alterar valor total e houver entradas financeiras E a OS já foi entregue
-      if (entradasDaOS.length > 0 && statusAnterior === 'entregue' && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
+      // Proteção: Se alterar valor total e houver entradas financeiras E a OS já foi finalizada
+      if (entradasDaOS.length > 0 && statusAnterior === 'finalizada' && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
         return res.status(400).json({
           error: 'Não é possível alterar o valor total desta OS finalizada',
-          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi entregue',
+          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi finalizada',
           entradas_vinculadas: entradasDaOS.length,
           valor_atual: ordemAnterior.valor_total,
           valor_tentativa: ordemData.valor_total,
@@ -435,11 +435,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Proteção: Se alterar status de "entregue" para outro e houver entradas financeiras
-      if (statusAnterior === 'entregue' && novoStatus && novoStatus !== 'entregue' && entradasDaOS.length > 0) {
+      // Proteção: Se alterar status de "finalizada" para outro e houver entradas financeiras
+      if (statusAnterior === 'finalizada' && novoStatus && novoStatus !== 'finalizada' && entradasDaOS.length > 0) {
         return res.status(400).json({
           error: 'Não é possível alterar o status desta OS finalizada',
-          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi entregue',
+          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi finalizada',
           entradas_vinculadas: entradasDaOS.length,
           sugestao: 'Para reabrir esta OS, primeiro trate as entradas financeiras associadas'
         });
@@ -473,53 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Se a ordem foi marcada como entregue, criar entrada financeira automaticamente
-      const valorTotal = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : Number(ordem.valor_total);
-      if (novoStatus === 'entregue' && statusAnterior !== 'entregue' && valorTotal > 0) {
-        try {
-          // Verificar se já existe entrada financeira para esta OS
-          const entradasExistentes = await storage.getEntradasFinanceiras(req.userId!);
-          const jaExisteEntrada = entradasExistentes.some(entrada => entrada.ordem_servico_id === ordem.id);
-          
-          if (!jaExisteEntrada) {
-            const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
-            
-            // Buscar categoria padrão ou criar uma
-            const categorias = await storage.getCategoriasFinanceiras(req.userId!);
-            let categoriaReceita = categorias.find(cat => cat.nome.toLowerCase().includes('receita') || cat.nome.toLowerCase().includes('serviço'));
-            
-            if (!categoriaReceita) {
-              // Criar categoria padrão se não existir
-              categoriaReceita = await storage.createCategoriaFinanceira({
-                user_id: req.userId!,
-                nome: 'Receitas de Serviços',
-                tipo: 'receita'
-              });
-            }
-            
-            const entradaFinanceira = {
-              user_id: req.userId!,
-              ordem_servico_id: ordem.id,
-              tipo: 'receita' as 'receita',
-              descricao: `OS #${ordem.numero || ordem.id.slice(0, 8)} - ${cliente?.nome || 'Cliente'}`,
-              valor: valorTotal.toString(),
-              categoria_id: categoriaReceita.id,
-              forma_pagamento: (ordemData.forma_pagamento || 'dinheiro') as 'dinheiro',
-              data_vencimento: ordemData.data_pagamento ? ordemData.data_pagamento.toString().split('T')[0] : new Date().toISOString().split('T')[0],
-              status_pagamento: (ordemData.status_pagamento || 'pago') as 'pago' | 'pendente',
-              observacoes: `Finalização automática - Equipamento: ${ordem.tipo_equipamento || ''} ${ordem.marca || ''} ${ordem.modelo || ''}`.trim()
-            };
-            
-            await storage.createEntradaFinanceira(entradaFinanceira);
-            console.log(`Entrada financeira criada automaticamente para OS ${ordem.id}`);
-          } else {
-            console.log(`Entrada financeira já existe para OS ${ordem.id}, pulando criação`);
-          }
-        } catch (financeiroError) {
-          console.error('Erro ao criar entrada financeira automática:', financeiroError);
-          // Não falha a atualização da ordem se houver erro no financeiro
-        }
-      }
+      // Lógica simplificada: sem criação automática de entrada financeira
       
       res.json(ordem);
     } catch (error) {
