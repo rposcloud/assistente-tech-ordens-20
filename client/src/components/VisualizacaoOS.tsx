@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { api } from '@/lib/api';
 
 interface VisualizacaoOSProps {
   ordem: any;
@@ -60,43 +61,22 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   const finalizarOS = async () => {
       try {
-        // Atualizar status da OS para entregue
-        const response = await fetch(`/api/ordens/${ordem.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...ordem,
-            status: 'entregue'
-          }),
+        // 1. Atualizar status da OS para 'entregue'
+        await api.ordens.update(ordem.id, {
+          status: 'entregue'
         });
 
-        if (!response.ok) {
-          throw new Error('Erro ao finalizar OS');
-        }
-
-        // Criar entrada financeira
-        const entradaResponse = await fetch('/api/financeiro', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            tipo: 'receita',
-            descricao: `OS #${ordem.id.slice(-8)} - ${ordem.cliente?.nome || 'Cliente'}`,
-            valor: ordem.valor_total || 0,
-            categoria: 'Serviços de Reparo',
-            forma_pagamento: formaPagamento,
-            data_vencimento: dataVencimento,
-            status: formaPagamento === 'dinheiro' ? 'pago' : 'pendente',
-            observacoes: `Finalização da OS ${ordem.id}`
-          }),
+        // 2. Criar entrada financeira
+        await api.financeiro.create({
+          tipo: 'receita',
+          descricao: `OS #${ordem.id.slice(-8)} - ${ordem.cliente?.nome || 'Cliente'}`,
+          valor: ordem.valor_total || 0,
+          categoria: 'Serviços de Reparo',
+          forma_pagamento: formaPagamento,
+          data_vencimento: dataVencimento,
+          status: formaPagamento === 'dinheiro' ? 'pago' : 'pendente',
+          observacoes: `Finalização da OS ${ordem.id}`
         });
-
-        if (!entradaResponse.ok) {
-          throw new Error('Erro ao criar entrada financeira');
-        }
 
         toast({
           title: "Sucesso",
