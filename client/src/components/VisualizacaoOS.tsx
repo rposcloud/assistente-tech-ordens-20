@@ -1,21 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield } from 'lucide-react';
+import { User, Package, Wrench, CreditCard } from 'lucide-react';
 
 interface VisualizacaoOSProps {
   ordem: any;
 }
-
-const statusColors = {
-  'aguardando_diagnostico': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'aguardando_aprovacao': 'bg-blue-100 text-blue-800 border-blue-200',
-  'aguardando_pecas': 'bg-orange-100 text-orange-800 border-orange-200',
-  'em_reparo': 'bg-purple-100 text-purple-800 border-purple-200',
-  'pronto_entrega': 'bg-green-100 text-green-800 border-green-200',
-  'entregue': 'bg-gray-100 text-gray-800 border-gray-200'
-};
 
 const statusLabels = {
   'aguardando_diagnostico': 'Aguardando Diagnóstico',
@@ -26,15 +16,7 @@ const statusLabels = {
   'entregue': 'Entregue'
 };
 
-const prioridadeColors = {
-  'baixa': 'bg-green-50 text-green-700 border-green-200',
-  'normal': 'bg-blue-50 text-blue-700 border-blue-200',
-  'alta': 'bg-orange-50 text-orange-700 border-orange-200',
-  'urgente': 'bg-red-50 text-red-700 border-red-200'
-};
-
 export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
-  // Verificação de segurança
   if (!ordem) {
     return (
       <div className="p-4 text-center">
@@ -45,16 +27,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const formatCurrency = (value: string | number) => {
+  const formatCurrency = (value: any) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -63,310 +39,178 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
+    <div className="p-6 space-y-6 print:p-4 print:space-y-4">
       {/* Cabeçalho da Empresa */}
-      <div className="text-center border-b border-gray-200 pb-3 print:pb-2">
-        <h1 className="text-xl font-bold text-gray-900 print:text-lg">
-          TechService - Assistência Técnica
-        </h1>
-        <p className="text-gray-600 text-sm print:text-xs">
-          (11) 99999-9999 | contato@techservice.com.br
-        </p>
+      <div className="text-center border-b pb-4 print:pb-2">
+        <h1 className="text-2xl font-bold text-gray-900 print:text-xl">TechService - Assistência Técnica</h1>
+        <p className="text-gray-600 print:text-sm">(11) 99999-9999 | contato@techservice.com.br</p>
       </div>
 
-      {/* Cabeçalho da OS */}
-      <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
-        <div className="p-4 print:p-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 print:text-lg">
-                Ordem de Serviço #{ordem.numero || 'N/A'}
-              </h2>
-              <p className="text-gray-600 text-sm print:text-xs">
-                {ordem.clientes?.nome || 'Cliente não informado'} - {ordem.clientes?.telefone || 'N/A'}
-              </p>
+      {/* Informações da OS */}
+      <Card className="print:shadow-none print:border-gray-300">
+        <CardHeader className="print:pb-2">
+          <CardTitle className="flex justify-between items-center print:text-lg">
+            <span>Ordem de Serviço #{ordem.numero}</span>
+            <div className="flex gap-2">
+              <Badge variant="outline">{statusLabels[ordem.status] || ordem.status}</Badge>
+              <Badge variant="outline">{(ordem.prioridade || 'normal').toUpperCase()}</Badge>
             </div>
-            <div className="flex gap-2 print:gap-1">
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {statusLabels[ordem.status] || ordem.status || 'Status não informado'}
-              </Badge>
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {ordem.prioridade?.toUpperCase() || 'NORMAL'}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="print:pt-0">
+          <p className="text-gray-600 print:text-sm">Data: {formatDate(ordem.data_abertura)}</p>
+        </CardContent>
+      </Card>
 
-      {/* Linha 1: Cliente e Equipamento */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
-        {/* Informações do Cliente */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <User className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
+      {/* Cliente e Equipamento */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:gap-4">
+        {/* Cliente */}
+        <Card className="print:shadow-none print:border-gray-300">
+          <CardHeader className="print:pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg print:text-base">
+              <User className="h-5 w-5 text-blue-600" />
               Cliente
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
-              <div>
-                <p className="font-medium text-gray-700">Nome:</p>
-                <p className="text-gray-900">{ordem.clientes?.nome}</p>
-              </div>
-              <div>
-                <p className="font-medium text-gray-700">Telefone:</p>
-                <p className="text-gray-900">{ordem.clientes?.telefone}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="font-medium text-gray-700">E-mail:</p>
-                <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="font-medium text-gray-700">Endereço:</p>
-                <p className="text-gray-900 text-xs">
-                  {ordem.clientes?.endereco ? 
-                    `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
-                    : 'Não informado'
-                  }
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Informações do Equipamento */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Package className="h-4 w-4 text-green-600 print:h-3 print:w-3" />
-              Equipamento
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
-              <div>
-                <p className="font-medium text-gray-700">Tipo:</p>
-                <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
-              </div>
-              <div>
-                <p className="font-medium text-gray-700">Marca:</p>
-                <p className="text-gray-900">{ordem.marca}</p>
-              </div>
-              <div>
-                <p className="font-medium text-gray-700">Modelo:</p>
-                <p className="text-gray-900">{ordem.modelo}</p>
-              </div>
-              <div>
-                <p className="font-medium text-gray-700">N° Série:</p>
-                <p className="text-gray-900">{ordem.numero_serie || 'N/A'}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="font-medium text-gray-700">Senha:</p>
-                <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Descrição do Problema */}
-      <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="p-3 border-b border-gray-100">
-          <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-            <FileText className="h-4 w-4 text-orange-600 print:h-3 print:w-3" />
-            Descrição do Problema
-          </h3>
-        </div>
-        <div className="p-3 print:p-2 space-y-3 print:space-y-2">
-          <div>
-            <p className="text-xs font-medium text-gray-700 mb-1">Defeito Relatado:</p>
-            <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded border print:p-1">
-              {ordem.defeito_relatado}
-            </p>
-          </div>
-          
-          {ordem.diagnostico_tecnico && (
-            <div>
-              <p className="text-xs font-medium text-gray-700 mb-1">Diagnóstico Técnico:</p>
-              <p className="text-xs text-gray-900 bg-blue-50 p-2 rounded border border-blue-200 print:p-1">
-                {ordem.diagnostico_tecnico}
-              </p>
-            </div>
-          )}
-          
-          {ordem.solucao_aplicada && (
-            <div>
-              <p className="text-xs font-medium text-gray-700 mb-1">Solução Aplicada:</p>
-              <p className="text-xs text-gray-900 bg-green-50 p-2 rounded border border-green-200 print:p-1">
-                {ordem.solucao_aplicada}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Produtos e Serviços */}
-      {(ordem.produtos_utilizados?.length > 0 || ordem.pecas_utilizadas?.length > 0) && (
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Wrench className="h-4 w-4 text-purple-600 print:h-3 print:w-3" />
-              Produtos e Serviços Utilizados
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="print:pt-0">
             <div className="space-y-2 print:space-y-1">
-              {ordem.produtos_utilizados?.map((produto: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900">{produto.produto?.nome}</p>
-                    <p className="text-xs text-gray-600">
-                      {produto.quantidade}x - {formatCurrency(produto.valor_unitario)} cada
-                    </p>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900">
-                    {formatCurrency(produto.valor_total)}
-                  </p>
-                </div>
-              ))}
-              
-              {ordem.pecas_utilizadas?.map((peca: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900">{peca.nome}</p>
-                    <p className="text-xs text-gray-600">
-                      {peca.quantidade}x - {formatCurrency(peca.valor_unitario)} cada
-                    </p>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900">
-                    {formatCurrency(peca.valor_total)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Linha 2: Serviço e Financeiro */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:gap-3">
-        {/* Informações de Serviço */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Clock className="h-4 w-4 text-indigo-600 print:h-3 print:w-3" />
-              Serviço
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="space-y-2 print:space-y-1 text-xs print:text-xs">
               <div>
-                <p className="font-medium text-gray-700">Data Abertura:</p>
-                <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
+                <p className="font-medium text-gray-700 print:text-sm">Nome:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.clientes?.nome || 'Não informado'}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700">Técnico:</p>
-                <p className="text-gray-900">{ordem.tecnico_responsavel || 'Não atribuído'}</p>
+                <p className="font-medium text-gray-700 print:text-sm">Telefone:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.clientes?.telefone || 'Não informado'}</p>
               </div>
-              <div className="flex items-center gap-1">
-                <Shield className="h-3 w-3 text-green-600" />
-                <div>
-                  <p className="font-medium text-gray-700">Garantia: {ordem.garantia} dias</p>
-                </div>
+              <div>
+                <p className="font-medium text-gray-700 print:text-sm">E-mail:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.clientes?.email || 'Não informado'}</p>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Resumo Financeiro */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <CreditCard className="h-4 w-4 text-emerald-600 print:h-3 print:w-3" />
-              Resumo Financeiro
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-4 print:gap-2 text-xs print:text-xs">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Mão de Obra:</span>
-                  <span>{formatCurrency(ordem.valor_mao_obra)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Orçamento:</span>
-                  <span>{formatCurrency(ordem.valor_orcamento)}</span>
-                </div>
-                {parseFloat(ordem.desconto || '0') > 0 && (
-                  <div className="flex justify-between text-red-600">
-                    <span>Desconto:</span>
-                    <span>- {formatCurrency(ordem.desconto)}</span>
-                  </div>
-                )}
-                {parseFloat(ordem.acrescimo || '0') > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Acréscimo:</span>
-                    <span>+ {formatCurrency(ordem.acrescimo)}</span>
-                  </div>
-                )}
+        {/* Equipamento */}
+        <Card className="print:shadow-none print:border-gray-300">
+          <CardHeader className="print:pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg print:text-base">
+              <Package className="h-5 w-5 text-green-600" />
+              Equipamento
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="print:pt-0">
+            <div className="space-y-2 print:space-y-1">
+              <div>
+                <p className="font-medium text-gray-700 print:text-sm">Tipo:</p>
+                <p className="text-gray-900 capitalize print:text-sm">{ordem.tipo_equipamento}</p>
               </div>
-              <div className="flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-xs text-gray-500 mb-1">VALOR TOTAL</p>
-                  <p className="text-2xl font-bold text-green-600 print:text-xl">
-                    {formatCurrency(ordem.valor_total)}
-                  </p>
-                </div>
+              <div>
+                <p className="font-medium text-gray-700 print:text-sm">Marca:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.marca}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700 print:text-sm">Modelo:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.modelo}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700 print:text-sm">N° Série:</p>
+                <p className="text-gray-900 print:text-sm">{ordem.numero_serie || 'N/A'}</p>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Observações Internas */}
-      {ordem.observacoes_internas && (
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold print:text-xs">Observações Internas</h3>
-          </div>
-          <div className="p-2 print:p-1">
-            <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200 print:p-1">
-              {ordem.observacoes_internas}
-            </p>
-          </div>
-        </div>
+      {/* Problema e Solução */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:gap-4">
+        <Card className="print:shadow-none print:border-gray-300">
+          <CardHeader className="print:pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg print:text-base">
+              <Wrench className="h-5 w-5 text-orange-600" />
+              Problema Relatado
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="print:pt-0">
+            <p className="text-gray-900 print:text-sm">{ordem.descricao_problema || 'Não informado'}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="print:shadow-none print:border-gray-300">
+          <CardHeader className="print:pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg print:text-base">
+              <Wrench className="h-5 w-5 text-green-600" />
+              Solução Aplicada
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="print:pt-0">
+            <p className="text-gray-900 print:text-sm">{ordem.descricao_solucao || 'Não informado'}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Observações */}
+      {ordem.observacoes && (
+        <Card className="print:shadow-none print:border-gray-300">
+          <CardHeader className="print:pb-2">
+            <CardTitle className="text-lg print:text-base">Observações</CardTitle>
+          </CardHeader>
+          <CardContent className="print:pt-0">
+            <p className="text-gray-900 print:text-sm">{ordem.observacoes}</p>
+          </CardContent>
+        </Card>
       )}
+
+      {/* Valores */}
+      <Card className="print:shadow-none print:border-gray-300">
+        <CardHeader className="print:pb-2">
+          <CardTitle className="flex items-center gap-2 text-lg print:text-base">
+            <CreditCard className="h-5 w-5 text-blue-600" />
+            Valores
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="print:pt-0">
+          <div className="grid grid-cols-2 gap-4 print:gap-2">
+            <div>
+              <p className="font-medium text-gray-700 print:text-sm">Valor do Serviço:</p>
+              <p className="text-lg font-bold text-gray-900 print:text-base">{formatCurrency(ordem.valor_servico)}</p>
+            </div>
+            <div>
+              <p className="font-medium text-gray-700 print:text-sm">Valor Total:</p>
+              <p className="text-lg font-bold text-green-600 print:text-base">{formatCurrency(ordem.valor_total)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Assinaturas */}
-      <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="p-3 border-b border-gray-100">
-          <h3 className="text-sm font-semibold print:text-xs">Assinaturas e Termo de Garantia</h3>
-        </div>
-        <div className="p-3 print:p-2">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
+      <Card className="print:shadow-none print:border-gray-300">
+        <CardHeader className="print:pb-2">
+          <CardTitle className="text-lg print:text-base">Assinaturas e Termo de Garantia</CardTitle>
+        </CardHeader>
+        <CardContent className="print:pt-0">
+          <div className="grid grid-cols-2 gap-6 print:gap-4">
             <div>
-              <p className="text-xs font-medium text-gray-700 mb-2">Cliente:</p>
+              <p className="font-medium text-gray-700 mb-2 print:text-sm">Cliente:</p>
               <div className="border-b border-gray-300 h-8 mb-1"></div>
-              <p className="text-xs text-gray-600">{ordem.clientes?.nome}</p>
+              <p className="text-sm text-gray-600">{ordem.clientes?.nome}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-700 mb-2">Técnico Responsável:</p>
+              <p className="font-medium text-gray-700 mb-2 print:text-sm">Técnico Responsável:</p>
               <div className="border-b border-gray-300 h-8 mb-1"></div>
-              <p className="text-xs text-gray-600">{ordem.tecnico_responsavel || 'Técnico'}</p>
+              <p className="text-sm text-gray-600">{ordem.tecnico_responsavel || 'Técnico'}</p>
             </div>
           </div>
-          <div className="mt-4 print:mt-3 pt-3 border-t border-gray-200">
-            <p className="text-xs font-medium text-gray-700 mb-2">
-              Garantia: {ordem.garantia} dias para o serviço realizado
+          <div className="mt-4 pt-3 border-t border-gray-200 print:mt-2 print:pt-2">
+            <p className="font-medium text-gray-700 mb-2 print:text-sm">
+              Garantia: {ordem.garantia || 30} dias para o serviço realizado
             </p>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm text-gray-600 print:text-xs">
               A garantia cobre apenas o serviço executado. Não cobre danos por mau uso ou acidente. 
               Válida mediante apresentação desta OS.
             </p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

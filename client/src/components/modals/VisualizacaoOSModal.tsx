@@ -98,12 +98,12 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="px-6 py-4 border-b bg-white sticky top-0 z-10 print:hidden">
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-xl font-semibold">
-              Visualização da Ordem de Serviço
-            </DialogTitle>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="flex flex-row items-center justify-between print:hidden">
+          <DialogTitle className="text-xl font-semibold">
+            Visualização da Ordem de Serviço
+          </DialogTitle>
+          <div className="flex items-center gap-2">
             <Button
               onClick={handlePrint}
               variant="outline"
@@ -116,7 +116,7 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
           </div>
         </DialogHeader>
         
-        <div className="p-6 print-area">
+        <div className="print-area">
           <VisualizacaoOS ordem={ordem} />
         </div>
       </DialogContent>
