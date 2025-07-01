@@ -239,6 +239,12 @@ Changelog:
   * CSS de impressão otimizado para melhor qualidade e eliminação de problemas visuais
   * Ambas as funcionalidades (impressão e download PDF) totalmente operacionais
   * Interface moderna com botões coloridos distintos para cada ação
+- July 1, 2025. INTEGRAÇÃO DINÂMICA DE DADOS DA EMPRESA:
+  * Removidos dados fixos da empresa em VisualizacaoOS e OrdemPrintView
+  * Integração completa com dados do perfil da empresa vindo do banco de dados
+  * Informações atualizadas automaticamente quando empresa é modificada na página Empresa
+  * Sistema totalmente dinâmico: nome, CNPJ, endereço, telefone e email vindos do profile
+  * Fallbacks informativos quando dados não estão cadastrados ("Não informado")
 
 ## User Preferences
 

@@ -151,22 +151,25 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 print:text-sm">
-                  Rp Informática
+                  {profile?.empresa || 'Nome da Empresa'}
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-xs">
-                  <p>CNPJ: 43.510.169/0001-31</p>
+                  <p>CNPJ: {profile?.cnpj || 'Não informado'}</p>
                 </div>
               </div>
             </div>
             <div className="text-right text-sm text-gray-600 print:text-xs max-w-xs">
               <div className="space-y-1">
                 <p className="font-medium">Endereço:</p>
-                <p>Avenida Professor João Fiúsa, 507</p>
-                <p>Alto da Boa Vista - CEP: 14025-310</p>
-                <p>Ribeirão Preto/SP</p>
+                <p>{profile?.endereco || 'Endereço não informado'}</p>
+                <p>{profile?.bairro ? `${profile.bairro} - ` : ''}CEP: {profile?.cep || 'Não informado'}</p>
+                <p>{profile?.cidade ? `${profile.cidade}/${profile.estado}` : 'Cidade/Estado não informado'}</p>
               </div>
               <div className="mt-2 space-y-1">
-                <p><span className="font-medium">Tel:</span> (16) 98853-3739</p>
+                <p><span className="font-medium">Tel:</span> {profile?.telefone || 'Não informado'}</p>
+                {profile?.email && (
+                  <p><span className="font-medium">Email:</span> {profile.email}</p>
+                )}
               </div>
             </div>
           </div>

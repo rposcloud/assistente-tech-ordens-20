@@ -62,22 +62,25 @@ export const OrdemPrintView: React.FC<OrdemPrintViewProps> = ({ ordem, profile }
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900">
-                  {profile?.empresa || 'Rp Informática'}
+                  {profile?.empresa || 'Nome da Empresa'}
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600">
-                  <p>CNPJ: {profile?.cnpj || '43.510.169/0001-31'}</p>
+                  <p>CNPJ: {profile?.cnpj || 'Não informado'}</p>
                 </div>
               </div>
             </div>
             <div className="text-right text-sm text-gray-600 max-w-xs">
               <div className="space-y-1">
                 <p className="font-medium">Endereço:</p>
-                <p>{profile?.endereco || 'Avenida Professor João Fiúsa, 507'}</p>
-                <p>{profile?.bairro || 'Alto da Boa Vista'} - CEP: {profile?.cep || '14025-310'}</p>
-                <p>{profile?.cidade || 'Ribeirão Preto'}/{profile?.estado || 'SP'}</p>
+                <p>{profile?.endereco || 'Endereço não informado'}</p>
+                <p>{profile?.bairro ? `${profile.bairro} - ` : ''}CEP: {profile?.cep || 'Não informado'}</p>
+                <p>{profile?.cidade ? `${profile.cidade}/${profile.estado}` : 'Cidade/Estado não informado'}</p>
               </div>
               <div className="mt-2 space-y-1">
-                <p><span className="font-medium">Tel:</span> {profile?.telefone || '(16) 98853-3739'}</p>
+                <p><span className="font-medium">Tel:</span> {profile?.telefone || 'Não informado'}</p>
+                {profile?.email && (
+                  <p><span className="font-medium">Email:</span> {profile.email}</p>
+                )}
               </div>
             </div>
           </div>
