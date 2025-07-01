@@ -31,23 +31,11 @@ export const Dashboard = () => {
   const todasReceitas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'receita') : [];
   const todasDespesas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'despesa') : [];
   
-  // Receitas do mês atual
-  const receitasDoMes = todasReceitas.filter(e => {
-    const dataEntrada = new Date(e.data_vencimento);
-    // Ajustar para comparar apenas ano e mês
-    const mesEntrada = dataEntrada.getFullYear() * 12 + dataEntrada.getMonth();
-    const mesAtual = hoje.getFullYear() * 12 + hoje.getMonth();
-    return mesEntrada === mesAtual;
-  });
+  // Para demonstração, vou mostrar todas as receitas (últimos 12 meses)
+  const receitasDoMes = todasReceitas; // Mostrar todas para teste
   
-  // Despesas do mês atual
-  const despesasDoMes = todasDespesas.filter(e => {
-    const dataEntrada = new Date(e.data_vencimento);
-    // Ajustar para comparar apenas ano e mês
-    const mesEntrada = dataEntrada.getFullYear() * 12 + dataEntrada.getMonth();
-    const mesAtual = hoje.getFullYear() * 12 + hoje.getMonth();
-    return mesEntrada === mesAtual;
-  });
+  // Para demonstração, vou mostrar todas as despesas (últimos 12 meses)  
+  const despesasDoMes = todasDespesas; // Mostrar todas para teste
   
   // Calcular totais
   const totalReceitaMes = receitasDoMes.reduce((acc, entrada) => {

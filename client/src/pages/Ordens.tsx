@@ -5,7 +5,7 @@ import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2 } from 'l
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
-import { VisualizacaoOS } from '@/components/VisualizacaoOS';
+
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
@@ -46,8 +46,7 @@ export const Ordens = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
-  const [detalhesModalOpen, setDetalhesModalOpen] = useState(false);
-  const [ordemDetalhes, setOrdemDetalhes] = useState<OrdemServico | null>(null);
+
 
 
   console.log('Ordens disponíveis:', ordens.length);
@@ -95,10 +94,7 @@ export const Ordens = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleViewDetails = (ordem: OrdemServico) => {
-    setOrdemDetalhes(ordem);
-    setDetalhesModalOpen(true);
-  };
+
 
   const handleDeleteConfirm = async () => {
     if (!ordemToDelete) return;
@@ -286,7 +282,7 @@ export const Ordens = () => {
               keyExtractor={(ordem) => ordem.id!}
               emptyMessage="Nenhuma ordem de serviço encontrada"
               emptyIcon={<FileText className="h-16 w-16 text-gray-300 mb-4" />}
-              onRowClick={handleViewDetails}
+
             />
           )}
         </CardContent>
@@ -303,18 +299,7 @@ export const Ordens = () => {
         loading={modalLoading}
       />
 
-      <VisualizacaoOS
-        isOpen={detalhesModalOpen}
-        onClose={() => {
-          setDetalhesModalOpen(false);
-          setOrdemDetalhes(null);
-        }}
-        ordem={ordemDetalhes}
-        onUpdate={() => {
-          // Recarregar lista de ordens
-          window.location.reload();
-        }}
-      />
+
 
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
