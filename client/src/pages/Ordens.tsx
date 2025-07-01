@@ -284,7 +284,10 @@ export const Ordens = () => {
       if (valorTotal > 0) {
         const response = await fetch('/api/financeiro', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
           body: JSON.stringify({
             descricao: `OS #${ordemParaPagamento.numero} - Finalização`,
             valor: valorTotal,
@@ -295,7 +298,8 @@ export const Ordens = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Erro ao criar entrada financeira');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao criar entrada financeira');
         }
       }
 
