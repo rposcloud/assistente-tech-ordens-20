@@ -272,41 +272,39 @@ export const Ordens = () => {
     setLoadingPagamento(true);
     try {
       console.log('Finalizando OS com ID:', ordemParaPagamento.id);
-      // 1. Atualizar OS para status "finalizada" com dados de pagamento
+      
+      // 1. Atualizar OS para status "finalizada" - simplificado
       await updateOrdem(ordemParaPagamento.id, {
-        ...ordemParaPagamento,
-        status: 'finalizada',
-        forma_pagamento: dadosPagamento.forma_pagamento,
-        status_pagamento: dadosPagamento.status_pagamento,
-        data_pagamento: dadosPagamento.data_pagamento,
-        observacoes_pagamento: dadosPagamento.observacoes_pagamento
+        status: 'finalizada'
       });
 
-      // 2. Criar entrada financeira
+      // 2. Criar entrada financeira - simplificado
       const valorTotal = parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0');
-      const cliente = clientes.find(c => c.id === ordemParaPagamento.cliente_id);
 
-      await fetch('/api/financeiro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          descricao: `OS #${ordemParaPagamento.numero} - ${cliente?.nome || 'Cliente'}`,
-          valor: valorTotal,
-          tipo: 'receita',
-          data_vencimento: dadosPagamento.data_pagamento,
-          forma_pagamento: dadosPagamento.forma_pagamento,
-          status_pagamento: dadosPagamento.status_pagamento,
-          observacoes: dadosPagamento.observacoes_pagamento || `Finalização OS - ${ordemParaPagamento.tipo_equipamento} ${ordemParaPagamento.marca} ${ordemParaPagamento.modelo}`.trim(),
-          ordem_servico_id: ordemParaPagamento.id
-        })
-      });
+      if (valorTotal > 0) {
+        const response = await fetch('/api/financeiro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            descricao: `OS #${ordemParaPagamento.numero} - Finalização`,
+            valor: valorTotal,
+            tipo: 'receita',
+            data_vencimento: dadosPagamento.data_pagamento || new Date().toISOString().split('T')[0],
+            ordem_servico_id: ordemParaPagamento.id
+          })
+        });
 
-      toast.success('OS finalizada e entrada financeira criada com sucesso!');
+        if (!response.ok) {
+          throw new Error('Erro ao criar entrada financeira');
+        }
+      }
+
+      toast.success('OS finalizada com sucesso!');
       setPagamentoModalOpen(false);
       setOrdemParaPagamento(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao finalizar OS:', error);
-      toast.error('Erro ao finalizar OS');
+      toast.error(error.message || 'Erro ao finalizar OS');
     } finally {
       setLoadingPagamento(false);
     }
