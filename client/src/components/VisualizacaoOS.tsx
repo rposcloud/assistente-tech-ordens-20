@@ -53,118 +53,123 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Cabeçalho */}
-      <Card className="border-l-4 border-l-blue-500">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
+    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
+      {/* Cabeçalho Compacto */}
+      <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
+        <div className="p-4 print:p-3">
+          <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 print:text-lg">
                 Ordem de Serviço #{ordem.numero}
-              </CardTitle>
-              <p className="text-gray-600 mt-1">
+              </h1>
+              <p className="text-gray-600 text-sm print:text-xs">
                 {ordem.clientes?.nome} - {ordem.clientes?.telefone}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Badge className={`px-3 py-1 text-sm font-medium border ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+            <div className="flex gap-2 print:gap-1">
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                 {statusLabels[ordem.status] || ordem.status}
               </Badge>
-              <Badge className={`px-3 py-1 text-sm font-medium border ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                 {ordem.prioridade?.toUpperCase()}
               </Badge>
             </div>
           </div>
-        </CardHeader>
-      </Card>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Linha 1: Cliente e Equipamento */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
         {/* Informações do Cliente */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="h-5 w-5 text-blue-600" />
-              Informações do Cliente
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Nome</p>
-              <p className="text-gray-900">{ordem.clientes?.nome}</p>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+              <User className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
+              Cliente
+            </h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+              <div>
+                <p className="font-medium text-gray-700">Nome:</p>
+                <p className="text-gray-900">{ordem.clientes?.nome}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Telefone:</p>
+                <p className="text-gray-900">{ordem.clientes?.telefone}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="font-medium text-gray-700">E-mail:</p>
+                <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="font-medium text-gray-700">Endereço:</p>
+                <p className="text-gray-900 text-xs">
+                  {ordem.clientes?.endereco ? 
+                    `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
+                    : 'Não informado'
+                  }
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Telefone</p>
-              <p className="text-gray-900">{ordem.clientes?.telefone}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">E-mail</p>
-              <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Endereço</p>
-              <p className="text-gray-900">
-                {ordem.clientes?.endereco ? 
-                  `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
-                  : 'Não informado'
-                }
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Informações do Equipamento */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Package className="h-5 w-5 text-green-600" />
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+              <Package className="h-4 w-4 text-green-600 print:h-3 print:w-3" />
               Equipamento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Tipo</p>
-              <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
+            </h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+              <div>
+                <p className="font-medium text-gray-700">Tipo:</p>
+                <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Marca:</p>
+                <p className="text-gray-900">{ordem.marca}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Modelo:</p>
+                <p className="text-gray-900">{ordem.modelo}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">N° Série:</p>
+                <p className="text-gray-900">{ordem.numero_serie || 'N/A'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="font-medium text-gray-700">Senha:</p>
+                <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Marca</p>
-              <p className="text-gray-900">{ordem.marca}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Modelo</p>
-              <p className="text-gray-900">{ordem.modelo}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Número de Série</p>
-              <p className="text-gray-900">{ordem.numero_serie || 'Não informado'}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Senha</p>
-              <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Descrição do Problema */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FileText className="h-5 w-5 text-orange-600" />
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="p-3 border-b border-gray-100">
+          <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+            <FileText className="h-4 w-4 text-orange-600 print:h-3 print:w-3" />
             Descrição do Problema
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </h3>
+        </div>
+        <div className="p-3 print:p-2 space-y-3 print:space-y-2">
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">Defeito Relatado</p>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md border">
+            <p className="text-xs font-medium text-gray-700 mb-1">Defeito Relatado:</p>
+            <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded border print:p-1">
               {ordem.defeito_relatado}
             </p>
           </div>
           
           {ordem.diagnostico_tecnico && (
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Diagnóstico Técnico</p>
-              <p className="text-gray-900 bg-blue-50 p-3 rounded-md border border-blue-200">
+              <p className="text-xs font-medium text-gray-700 mb-1">Diagnóstico Técnico:</p>
+              <p className="text-xs text-gray-900 bg-blue-50 p-2 rounded border border-blue-200 print:p-1">
                 {ordem.diagnostico_tecnico}
               </p>
             </div>
@@ -172,133 +177,146 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           
           {ordem.solucao_aplicada && (
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Solução Aplicada</p>
-              <p className="text-gray-900 bg-green-50 p-3 rounded-md border border-green-200">
+              <p className="text-xs font-medium text-gray-700 mb-1">Solução Aplicada:</p>
+              <p className="text-xs text-gray-900 bg-green-50 p-2 rounded border border-green-200 print:p-1">
                 {ordem.solucao_aplicada}
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Produtos e Serviços */}
       {(ordem.produtos_utilizados?.length > 0 || ordem.pecas_utilizadas?.length > 0) && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Wrench className="h-5 w-5 text-purple-600" />
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+              <Wrench className="h-4 w-4 text-purple-600 print:h-3 print:w-3" />
               Produtos e Serviços Utilizados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+            </h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="space-y-2 print:space-y-1">
               {ordem.produtos_utilizados?.map((produto: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-md border">
-                  <div>
-                    <p className="font-medium text-gray-900">{produto.produto?.nome}</p>
-                    <p className="text-sm text-gray-600">
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900">{produto.produto?.nome}</p>
+                    <p className="text-xs text-gray-600">
                       {produto.quantidade}x - {formatCurrency(produto.valor_unitario)} cada
                     </p>
                   </div>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-xs font-semibold text-gray-900">
                     {formatCurrency(produto.valor_total)}
                   </p>
                 </div>
               ))}
               
               {ordem.pecas_utilizadas?.map((peca: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-md border">
-                  <div>
-                    <p className="font-medium text-gray-900">{peca.nome}</p>
-                    <p className="text-sm text-gray-600">
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-900">{peca.nome}</p>
+                    <p className="text-xs text-gray-600">
                       {peca.quantidade}x - {formatCurrency(peca.valor_unitario)} cada
                     </p>
                   </div>
-                  <p className="font-semibold text-gray-900">
+                  <p className="text-xs font-semibold text-gray-900">
                     {formatCurrency(peca.valor_total)}
                   </p>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Linha 2: Serviço e Financeiro */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:gap-3">
         {/* Informações de Serviço */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="h-5 w-5 text-indigo-600" />
-              Informações de Serviço
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Data de Abertura</p>
-              <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Técnico Responsável</p>
-              <p className="text-gray-900">{ordem.tecnico_responsavel || 'Não atribuído'}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-600" />
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+              <Clock className="h-4 w-4 text-indigo-600 print:h-3 print:w-3" />
+              Serviço
+            </h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="space-y-2 print:space-y-1 text-xs print:text-xs">
               <div>
-                <p className="text-sm font-medium text-gray-700">Garantia</p>
-                <p className="text-gray-900">{ordem.garantia} dias</p>
+                <p className="font-medium text-gray-700">Data Abertura:</p>
+                <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Técnico:</p>
+                <p className="text-gray-900">{ordem.tecnico_responsavel || 'Não atribuído'}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <Shield className="h-3 w-3 text-green-600" />
+                <div>
+                  <p className="font-medium text-gray-700">Garantia: {ordem.garantia} dias</p>
+                </div>
               </div>
             </div>
-            {ordem.observacoes_internas && (
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Observações Internas</p>
-                <p className="text-gray-900 bg-yellow-50 p-3 rounded-md border border-yellow-200 text-sm">
-                  {ordem.observacoes_internas}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Resumo Financeiro */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CreditCard className="h-5 w-5 text-emerald-600" />
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+              <CreditCard className="h-4 w-4 text-emerald-600 print:h-3 print:w-3" />
               Resumo Financeiro
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Mão de Obra:</span>
-                <span>{formatCurrency(ordem.valor_mao_obra)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Orçamento:</span>
-                <span>{formatCurrency(ordem.valor_orcamento)}</span>
-              </div>
-              {parseFloat(ordem.desconto || '0') > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Desconto:</span>
-                  <span>- {formatCurrency(ordem.desconto)}</span>
+            </h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="grid grid-cols-2 gap-4 print:gap-2 text-xs print:text-xs">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Mão de Obra:</span>
+                  <span>{formatCurrency(ordem.valor_mao_obra)}</span>
                 </div>
-              )}
-              {parseFloat(ordem.acrescimo || '0') > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Acréscimo:</span>
-                  <span>+ {formatCurrency(ordem.acrescimo)}</span>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Orçamento:</span>
+                  <span>{formatCurrency(ordem.valor_orcamento)}</span>
                 </div>
-              )}
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total:</span>
-                <span className="text-green-600">{formatCurrency(ordem.valor_total)}</span>
+                {parseFloat(ordem.desconto || '0') > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Desconto:</span>
+                    <span>- {formatCurrency(ordem.desconto)}</span>
+                  </div>
+                )}
+                {parseFloat(ordem.acrescimo || '0') > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Acréscimo:</span>
+                    <span>+ {formatCurrency(ordem.acrescimo)}</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 mb-1">VALOR TOTAL</p>
+                  <p className="text-2xl font-bold text-green-600 print:text-xl">
+                    {formatCurrency(ordem.valor_total)}
+                  </p>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+
+      {/* Observações Internas */}
+      {ordem.observacoes_internas && (
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
+            <h3 className="text-sm font-semibold print:text-xs">Observações Internas</h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200 print:p-1">
+              {ordem.observacoes_internas}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
