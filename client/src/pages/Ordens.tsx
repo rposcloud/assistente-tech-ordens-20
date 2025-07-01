@@ -41,8 +41,7 @@ const statusOptions = [
   { value: 'aberta', label: 'Aberta' },
   { value: 'em_andamento', label: 'Em Andamento' },
   { value: 'aguardando_pecas', label: 'Aguardando Peças' },
-  { value: 'pronta', label: 'Pronta' },
-  { value: 'finalizada', label: 'Finalizada' }
+  { value: 'pronta', label: 'Pronta' }
 ];
 
 export const Ordens = () => {
@@ -336,19 +335,16 @@ export const Ordens = () => {
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (ordem) => (
+      render: (ordem) => ordem.status === 'finalizada' ? (
+        <Badge className={statusColors[ordem.status]}>
+          {statusLabels[ordem.status]}
+        </Badge>
+      ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className={`h-auto p-0 ${statusColors[ordem.status]} hover:opacity-80 transition-opacity`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Badge className={`${statusColors[ordem.status]} cursor-pointer flex items-center gap-1`}>
-                {statusLabels[ordem.status]}
-                <ChevronDown className="h-3 w-3" />
-              </Badge>
-            </Button>
+            <span className="text-sm cursor-pointer hover:underline">
+              {statusLabels[ordem.status] || 'Aberta'}
+            </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-48">
             {statusOptions.map((option) => (
