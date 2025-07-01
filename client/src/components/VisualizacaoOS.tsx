@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -6,6 +6,10 @@ import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, B
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 interface VisualizacaoOSProps {
   ordem: any;
@@ -38,8 +42,11 @@ const prioridadeColors = {
 
 export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   const { toast } = useToast();
+  const [showFinalizarDialog, setShowFinalizarDialog] = useState(false);
+  const [formaPagamento, setFormaPagamento] = useState('dinheiro');
+  const [dataVencimento, setDataVencimento] = useState(new Date().toISOString().split('T')[0]);
   
-  const finalizarOS = async () => {
+  const abrirDialogoFinalizar = () => {
     if (ordem.status === 'entregue') {
       toast({
         title: "Erro",
@@ -48,8 +55,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       });
       return;
     }
-    
-    if (window.confirm('Finalizar esta Ordem de Serviço? Isso irá:\n- Alterar status para "Entregue"\n- Criar entrada financeira de receita')) {
+    setShowFinalizarDialog(true);
+  };
+
+  const finalizarOS = async () => {
       try {
         // Atualizar status da OS para entregue
         const response = await fetch(`/api/ordens/${ordem.id}`, {
@@ -78,9 +87,9 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             descricao: `OS #${ordem.id.slice(-8)} - ${ordem.cliente?.nome || 'Cliente'}`,
             valor: ordem.valor_total || 0,
             categoria: 'Serviços de Reparo',
-            forma_pagamento: ordem.forma_pagamento || 'dinheiro',
-            data_vencimento: new Date().toISOString().split('T')[0],
-            status: ordem.forma_pagamento === 'dinheiro' ? 'pago' : 'pendente',
+            forma_pagamento: formaPagamento,
+            data_vencimento: dataVencimento,
+            status: formaPagamento === 'dinheiro' ? 'pago' : 'pendente',
             observacoes: `Finalização da OS ${ordem.id}`
           }),
         });
@@ -94,7 +103,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           description: "OS finalizada com sucesso! Entrada financeira criada."
         });
         
-        // Recarregar a página para atualizar os dados
+        // Fechar o diálogo e recarregar
+        setShowFinalizarDialog(false);
         window.location.reload();
         
       } catch (error) {
@@ -105,7 +115,6 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           variant: "destructive"
         });
       }
-    }
   };
   // Verificação de segurança
   if (!ordem) {
@@ -443,7 +452,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       {ordem.status !== 'entregue' && (
         <div className="flex justify-end print:hidden">
           <Button 
-            onClick={finalizarOS}
+            onClick={abrirDialogoFinalizar}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
             <CheckCircle className="h-4 w-4 mr-2" />
@@ -451,6 +460,59 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           </Button>
         </div>
       )}
+
+      {/* Diálogo de Finalização */}
+      <Dialog open={showFinalizarDialog} onOpenChange={setShowFinalizarDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finalizar Ordem de Serviço</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Isso irá alterar o status para "Entregue" e criar uma entrada financeira de receita.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forma-pagamento">Forma de Pagamento</Label>
+                <Select value={formaPagamento} onValueChange={setFormaPagamento}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a forma de pagamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="transferencia">Transferência</SelectItem>
+                    <SelectItem value="parcelado">Parcelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="data-vencimento">Data de Vencimento</Label>
+                <Input
+                  id="data-vencimento"
+                  type="date"
+                  value={dataVencimento}
+                  onChange={(e) => setDataVencimento(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFinalizarDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={finalizarOS} className="bg-green-600 hover:bg-green-700">
+              Finalizar OS
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
