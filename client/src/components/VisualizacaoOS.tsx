@@ -438,16 +438,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       )}
 
       {/* Botões de Ação */}
-      <div className="flex justify-between items-center print:hidden">
-        <Button 
-          onClick={abrirImpressao}
-          variant="outline"
-          className="border-blue-300 text-blue-700 hover:bg-blue-50"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Imprimir OS
-        </Button>
-        
+      <div className="flex justify-end items-center print:hidden">
         {ordem.status !== 'finalizada' && (
           <Button 
             onClick={abrirDialogoFinalizar}
