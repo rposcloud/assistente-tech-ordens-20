@@ -207,6 +207,13 @@ Changelog:
   * Validação no banco: verificação automática de vínculos antes de qualquer alteração
   * Interface de usuário intuitiva com confirmações e opções claras para o usuário
   * Sistema não prejudica funcionamento normal, apenas adiciona camadas de proteção
+- July 1, 2025. Sistema "soft delete" para produtos com proteção de integridade histórica:
+  * Implementado soft delete: produtos são marcados como inativos ao invés de excluídos fisicamente
+  * Preserva integridade de dados históricos - produtos vinculados a OS permanecem acessíveis
+  * Consulta de produtos filtrada para mostrar apenas itens ativos na interface
+  * Interface atualizada com mensagem explicativa sobre inativação vs exclusão
+  * Elimina erros de chave estrangeira ao tentar excluir produtos em uso
+  * Solução robusta que mantém consistência dos dados em todas as operações
 
 ## User Preferences
 
