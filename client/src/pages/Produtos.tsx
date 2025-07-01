@@ -37,9 +37,15 @@ export const Produtos = () => {
     if (window.confirm('Tem certeza que deseja excluir este produto?')) {
       try {
         await deleteProduto(id);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao deletar produto:', error);
-        alert('Erro ao deletar produto. Tente novamente.');
+        
+        // Verificar se é erro de chave estrangeira (produto em uso)
+        if (error?.message?.includes('foreign key') || error?.message?.includes('produtos_utilizados')) {
+          alert('Este produto não pode ser excluído pois está sendo usado em uma ou mais ordens de serviço. Remova-o das ordens primeiro.');
+        } else {
+          alert('Erro ao deletar produto. Tente novamente.');
+        }
       }
     }
   };

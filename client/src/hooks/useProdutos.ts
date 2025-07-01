@@ -76,8 +76,15 @@ export const useProdutos = () => {
     try {
       await api.produtos.delete(id);
       await fetchProdutos();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao deletar produto:', error);
+      
+      // Se é um erro do servidor, propagar com a resposta completa
+      if (error.response) {
+        const serverError = new Error(error.response.data?.erro || error.message);
+        throw serverError;
+      }
+      
       throw error;
     }
   };

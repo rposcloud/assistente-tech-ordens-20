@@ -336,9 +336,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       await storage.deleteProduto(id, req.userId!);
       res.json({ message: 'Produto deleted successfully' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete produto error:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      
+      // Verificar se é erro de chave estrangeira (produto em uso)
+      if (error.message?.includes('foreign key') || error.message?.includes('constraint') || error.code === '23503') {
+        res.status(400).json({ 
+          erro: 'Este produto não pode ser excluído pois está sendo usado em uma ou mais ordens de serviço. Remova-o das ordens primeiro.' 
+        });
+      } else {
+        res.status(500).json({ erro: 'Erro interno do servidor' });
+      }
     }
   });
 
