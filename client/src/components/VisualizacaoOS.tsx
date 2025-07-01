@@ -81,43 +81,22 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 print:text-sm">
-                  {profile?.empresa || 'Empresa não cadastrada'}
+                  Rp Informática
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-xs">
-                  {profile?.cnpj && (
-                    <p>CNPJ: {profile.cnpj}</p>
-                  )}
-                  {profile?.inscricao_estadual && (
-                    <p>IE: {profile.inscricao_estadual}</p>
-                  )}
+                  <p>CNPJ: 43.510.169/0001-31</p>
                 </div>
               </div>
             </div>
             <div className="text-right text-sm text-gray-600 print:text-xs max-w-xs">
-              {profile?.endereco && (
-                <div className="space-y-1">
-                  <p className="font-medium">Endereço:</p>
-                  <p>{profile.endereco}{profile.numero ? `, ${profile.numero}` : ''}</p>
-                  {profile.complemento && <p>{profile.complemento}</p>}
-                  <p>
-                    {profile.bairro && `${profile.bairro} - `}
-                    {profile.cep && `CEP: ${profile.cep}`}
-                  </p>
-                  <p>
-                    {profile.cidade && profile.estado ? `${profile.cidade}/${profile.estado}` : ''}
-                  </p>
-                </div>
-              )}
+              <div className="space-y-1">
+                <p className="font-medium">Endereço:</p>
+                <p>Avenida Professor João Fiúsa, 507</p>
+                <p>Alto da Boa Vista - CEP: 14025-310</p>
+                <p>Ribeirão Preto/SP</p>
+              </div>
               <div className="mt-2 space-y-1">
-                {profile?.telefone && (
-                  <p><span className="font-medium">Tel:</span> {profile.telefone}</p>
-                )}
-                {profile?.email_empresa && (
-                  <p><span className="font-medium">Email:</span> {profile.email_empresa}</p>
-                )}
-                {profile?.site && (
-                  <p><span className="font-medium">Site:</span> {profile.site}</p>
-                )}
+                <p><span className="font-medium">Tel:</span> (16) 98853-3739</p>
               </div>
             </div>
           </div>
