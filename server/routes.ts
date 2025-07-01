@@ -447,29 +447,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const valorTotal = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : Number(ordem.valor_total);
       if (novoStatus === 'entregue' && statusAnterior !== 'entregue' && valorTotal > 0) {
         try {
-          const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
-          const entradaFinanceira = {
-            user_id: req.userId!,
-            ordem_servico_id: ordem.id,
-            tipo: 'receita' as const,
-            descricao: `Serviço realizado - OS #${ordem.numero || ordem.id.slice(0, 8)}`,
-            valor: ordem.valor_total.toString(),
-            categoria: 'Serviços',
-            forma_pagamento: 'dinheiro' as const,
-            data_vencimento: new Date().toISOString().split('T')[0],
-            status_pagamento: 'pago' as const,
-            observacoes: `Cliente: ${cliente?.nome || 'N/A'} - Equipamento: ${ordem.tipo_equipamento} ${ordem.marca} ${ordem.modelo}`,
-            parcelas: 1,
-            parcela_atual: 1,
-            valor_parcela: ordem.valor_total.toString(),
-            centro_custo: '',
-            conta_bancaria: '',
-            numero_documento: '',
-            pessoa_responsavel: ''
-          };
+          // Verificar se já existe entrada financeira para esta OS
+          const entradasExistentes = await storage.getEntradasFinanceiras(req.userId!);
+          const jaExisteEntrada = entradasExistentes.some(entrada => entrada.ordem_servico_id === ordem.id);
           
-          await storage.createEntradaFinanceira(entradaFinanceira);
-          console.log(`Entrada financeira criada automaticamente para OS ${ordem.id}`);
+          if (!jaExisteEntrada) {
+            const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
+            
+            const entradaFinanceira = {
+              user_id: req.userId!,
+              ordem_servico_id: ordem.id,
+              tipo: 'receita' as 'receita',
+              descricao: `OS #${ordem.numero || ordem.id.slice(0, 8)} - ${cliente?.nome || 'Cliente'}`,
+              valor: valorTotal.toString(),
+              categoria: 'Serviços de Reparo',
+              forma_pagamento: (ordemData.forma_pagamento || 'dinheiro') as 'dinheiro',
+              data_vencimento: ordemData.data_pagamento ? ordemData.data_pagamento.toString().split('T')[0] : new Date().toISOString().split('T')[0],
+              status_pagamento: (ordemData.forma_pagamento === 'dinheiro' ? 'pago' : 'pendente') as 'pago' | 'pendente',
+              observacoes: `Finalização automática - Equipamento: ${ordem.tipo_equipamento || ''} ${ordem.marca || ''} ${ordem.modelo || ''}`.trim()
+            };
+            
+            await storage.createEntradaFinanceira(entradaFinanceira);
+            console.log(`Entrada financeira criada automaticamente para OS ${ordem.id}`);
+          } else {
+            console.log(`Entrada financeira já existe para OS ${ordem.id}, pulando criação`);
+          }
         } catch (financeiroError) {
           console.error('Erro ao criar entrada financeira automática:', financeiroError);
           // Não falha a atualização da ordem se houver erro no financeiro

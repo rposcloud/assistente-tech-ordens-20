@@ -67,32 +67,24 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   const finalizarOS = async () => {
       try {
-        // 1. Atualizar status da OS para 'entregue'
+        // Atualizar status da OS para 'entregue' com dados de pagamento
         await api.ordens.update(ordem.id, {
-          status: 'entregue'
-        });
-
-        // 2. Criar entrada financeira
-        await api.financeiro.create({
-          tipo: 'receita',
-          descricao: `OS #${ordem.numero} - ${ordem.cliente?.nome || 'Cliente'}`,
-          valor: ordem.valor_total || 0,
-          categoria: 'Serviços de Reparo',
+          status: 'entregue',
           forma_pagamento: formaPagamento,
-          data_vencimento: dataVencimento,
-          status: formaPagamento === 'dinheiro' ? 'pago' : 'pendente',
-          observacoes: `Finalização da OS ${ordem.numero}`,
-          ordem_servico_id: ordem.id
+          data_pagamento: dataVencimento
         });
 
         toast({
           title: "Sucesso",
-          description: "OS finalizada com sucesso! Entrada financeira criada."
+          description: "OS finalizada com sucesso! Entrada financeira criada automaticamente."
         });
         
-        // Fechar o diálogo e recarregar
+        // Fechar o diálogo - o backend já criará a entrada financeira
         setShowFinalizarDialog(false);
-        window.location.reload();
+        // Usar uma abordagem melhor que window.location.reload()
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
         
       } catch (error) {
         console.error('Erro:', error);

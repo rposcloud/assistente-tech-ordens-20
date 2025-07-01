@@ -158,10 +158,11 @@ export const entradasFinanceiras = pgTable("entradas_financeiras", {
   tipo: tipoEntradaFinanceiraEnum("tipo").notNull(),
   descricao: text("descricao").notNull(),
   valor: decimal("valor", { precision: 10, scale: 2 }).default("0").notNull(),
-  categoria: text("categoria").notNull(),
+  categoria_id: uuid("categoria_id").references(() => categoriasFinanceiras.id, { onDelete: "restrict" }),
+  categoria: text("categoria"), // Campo legacy, pode ser removido futuramente
   forma_pagamento: formaPagamentoEnum("forma_pagamento").notNull(),
   data_vencimento: date("data_vencimento").notNull(),
-  status: statusPagamentoEnum("status").default("pendente").notNull(),
+  status_pagamento: statusPagamentoEnum("status_pagamento").default("pendente").notNull(),
   observacoes: text("observacoes"),
   parcelas: integer("parcelas").default(1),
   parcela_atual: integer("parcela_atual").default(1),
