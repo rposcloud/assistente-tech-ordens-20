@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield } from 'lucide-react';
+import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface VisualizacaoOSProps {
   ordem: any;
@@ -43,6 +44,12 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
     );
   }
 
+  // Buscar dados do perfil da empresa
+  const { data: profile } = useQuery({
+    queryKey: ['/api/profile'],
+    enabled: true
+  });
+
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Data não informada';
     return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -64,7 +71,33 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   return (
     <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
-      {/* Cabeçalho Compacto */}
+      {/* Cabeçalho da Empresa */}
+      <div className="bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="p-4 print:p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 p-2 rounded-lg print:p-1">
+                <Building className="h-6 w-6 text-white print:h-4 print:w-4" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 print:text-sm">
+                  {profile?.empresa || 'Nome da Empresa'}
+                </h2>
+                <p className="text-sm text-gray-600 print:text-xs">
+                  CNPJ: {profile?.cnpj || 'XX.XXX.XXX/XXXX-XX'}
+                </p>
+              </div>
+            </div>
+            <div className="text-right text-sm text-gray-600 print:text-xs">
+              <p>{profile?.endereco ? `${profile.endereco}, ${profile.numero || 'S/N'}` : 'Endereço da empresa'}</p>
+              <p>{profile?.cidade && profile?.estado ? `${profile.cidade}/${profile.estado}` : 'Cidade/Estado'}</p>
+              <p>{profile?.telefone || 'Telefone da empresa'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cabeçalho da Ordem de Serviço */}
       <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
         <div className="p-4 print:p-3">
           <div className="flex justify-between items-center">
