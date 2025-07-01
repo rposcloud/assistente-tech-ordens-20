@@ -106,15 +106,15 @@
     body {
       font-size: 15px;
     }
-
+    
     .text-sm {
       font-size: 0.9rem;
     }
-
+    
     .text-base {
       font-size: 1.05rem;
     }
-
+    
     .text-lg {
       font-size: 1.2rem;
     }
@@ -125,7 +125,7 @@
     size: A4;
     margin: 0.5in;
   }
-
+  
   html, body, #root, main, .container {
     overflow: hidden !important;
     width: 100vw !important;
@@ -136,243 +136,27 @@
     padding: 0 !important;
     box-sizing: border-box !important;
   }
-
+  
   body {
     font-size: 9pt !important;
     line-height: 1.2 !important;
     background: white !important;
     color: black !important;
   }
-
+  
   * {
     box-shadow: none !important;
     text-shadow: none !important;
     overflow: hidden !important;
   }
-
+  
   .print\:hidden {
     display: none !important;
   }
-
+  
   .print\:block {
     display: block !important;
   }
+  
 
-
-}
-.btn-shine:hover::before {
-  transform: skewX(-45deg) translateX(12.5rem);
-}
-
-/* Estilos específicos para impressão */
-@media print {
-  @page {
-    size: A4;
-    margin: 15mm;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  body {
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .print\:hidden {
-    display: none !important;
-  }
-
-  .print\:block {
-    display: block !important;
-  }
-
-  .print\:text-xs {
-    font-size: 10px !important;
-  }
-
-  .print\:text-sm {
-    font-size: 11px !important;
-  }
-
-  .print\:text-lg {
-    font-size: 14px !important;
-  }
-
-  .print\:text-xl {
-    font-size: 16px !important;
-  }
-
-  .print\:text-2xl {
-    font-size: 20px !important;
-  }
-
-  .print\:flex-row {
-    flex-direction: row !important;
-  }
-
-  .print\:flex-col {
-    flex-direction: column !important;
-  }
-
-  .print\:p-1 {
-    padding: 4px !important;
-  }
-
-  .print\:p-2 {
-    padding: 8px !important;
-  }
-
-  .print\:p-3 {
-    padding: 12px !important;
-  }
-
-  .print\:p-4 {
-    padding: 16px !important;
-  }
-
-  .print\:m-1 {
-    margin: 4px !important;
-  }
-
-  .print\:m-2 {
-    margin: 8px !important;
-  }
-
-  .print\:mb-1 {
-    margin-bottom: 4px !important;
-  }
-
-  .print\:mb-2 {
-    margin-bottom: 8px !important;
-  }
-
-  .print\:mb-4 {
-    margin-bottom: 16px !important;
-  }
-
-  .print\:mb-6 {
-    margin-bottom: 24px !important;
-  }
-
-  .print\:mt-4 {
-    margin-top: 16px !important;
-  }
-
-  .print\:mt-8 {
-    margin-top: 32px !important;
-  }
-
-  .print\:gap-1 {
-    gap: 4px !important;
-  }
-
-  .print\:gap-2 {
-    gap: 8px !important;
-  }
-
-  .print\:gap-3 {
-    gap: 12px !important;
-  }
-
-  .print\:gap-8 {
-    gap: 32px !important;
-  }
-
-  .print\:space-y-1 > * + * {
-    margin-top: 4px !important;
-  }
-
-  .print\:space-y-2 > * + * {
-    margin-top: 8px !important;
-  }
-
-  .print\:h-3 {
-    height: 12px !important;
-  }
-
-  .print\:h-4 {
-    height: 16px !important;
-  }
-
-  .print\:w-3 {
-    width: 12px !important;
-  }
-
-  .print\:w-4 {
-    width: 16px !important;
-  }
-
-  .print\:border {
-    border: 1px solid #e5e7eb !important;
-  }
-
-  .print\:bg-white {
-    background-color: white !important;
-  }
-
-  .print\:pt-2 {
-    padding-top: 8px !important;
-  }
-
-  .print\:pt-4 {
-    padding-top: 16px !important;
-  }
-
-  .print\:pb-2 {
-    padding-bottom: 8px !important;
-  }
-
-  .print\:justify-start {
-    justify-content: flex-start !important;
-  }
-
-  .print\:text-left {
-    text-align: left !important;
-  }
-
-  /* Forçar quebra de página antes de elementos específicos */
-  .print\:break-before {
-    page-break-before: always !important;
-  }
-
-  /* Evitar quebra de página dentro de elementos */
-  .print\:break-inside-avoid {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* Garantir que tabelas e listas não quebrem */
-  table, .grid, .space-y-2, .space-y-3 {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* Garantir visibilidade de bordas */
-  .border, .border-t, .border-b, .border-l, .border-r {
-    border-color: #374151 !important;
-  }
-
-  /* Otimizar para impressão monocromática */
-  .bg-blue-50, .bg-orange-50, .bg-green-50, .bg-gray-50 {
-    background-color: #f9fafb !important;
-    border: 1px solid #d1d5db !important;
-  }
-
-  .text-blue-600, .text-green-600, .text-red-600, .text-orange-600 {
-    color: #374151 !important;
-  }
-
-  /* Garantir legibilidade do texto */
-  .text-gray-500, .text-gray-600 {
-    color: #6b7280 !important;
-  }
-
-  .text-gray-900 {
-    color: #111827 !important;
-  }
 }
