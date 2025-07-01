@@ -151,7 +151,7 @@ export class DatabaseStorage implements IStorage {
 
   // Produtos
   async getProdutos(userId: string): Promise<Produto[]> {
-    return db.select().from(produtos).where(eq(produtos.user_id, userId)).orderBy(desc(produtos.created_at));
+    return db.select().from(produtos).where(and(eq(produtos.user_id, userId), eq(produtos.ativo, true))).orderBy(desc(produtos.created_at));
   }
 
   async getProduto(id: string, userId: string): Promise<Produto | undefined> {
@@ -178,7 +178,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProduto(id: string, userId: string): Promise<void> {
-    await db.delete(produtos).where(and(eq(produtos.id, id), eq(produtos.user_id, userId)));
+    // Soft delete - marcar como inativo ao invés de deletar fisicamente
+    await db.update(produtos)
+      .set({ 
+        ativo: false,
+        updated_at: new Date()
+      })
+      .where(and(eq(produtos.id, id), eq(produtos.user_id, userId)));
   }
 
   // Ordens de Serviço

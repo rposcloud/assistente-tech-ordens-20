@@ -34,18 +34,12 @@ export const Produtos = () => {
   };
 
   const handleDeleteProduto = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+    if (window.confirm('Tem certeza que deseja inativar este produto? Ele não aparecerá mais na lista, mas permanecerá vinculado às ordens de serviço existentes.')) {
       try {
         await deleteProduto(id);
       } catch (error: any) {
-        console.error('Erro ao deletar produto:', error);
-        
-        // Verificar se é erro de chave estrangeira (produto em uso)
-        if (error?.message?.includes('foreign key') || error?.message?.includes('produtos_utilizados')) {
-          alert('Este produto não pode ser excluído pois está sendo usado em uma ou mais ordens de serviço. Remova-o das ordens primeiro.');
-        } else {
-          alert('Erro ao deletar produto. Tente novamente.');
-        }
+        console.error('Erro ao inativar produto:', error);
+        alert('Erro ao inativar produto. Tente novamente.');
       }
     }
   };
