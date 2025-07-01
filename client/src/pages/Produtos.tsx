@@ -178,13 +178,90 @@ export const Produtos = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6">
-          <SortableTable
-            data={produtosFiltrados}
-            columns={colunas}
-            keyExtractor={(produto) => produto.id}
-            emptyMessage="Nenhum produto ou serviço encontrado"
-            emptyIcon={<FileText size={48} className="text-gray-300" />}
-          />
+          {/* Versão Desktop - Tabela */}
+          <div className="hidden lg:block">
+            <SortableTable
+              data={produtosFiltrados}
+              columns={colunas}
+              keyExtractor={(produto) => produto.id}
+              emptyMessage="Nenhum produto ou serviço encontrado"
+              emptyIcon={<FileText size={48} className="text-gray-300" />}
+            />
+          </div>
+
+          {/* Versão Mobile - Cards */}
+          <div className="lg:hidden">
+            {produtosFiltrados.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText size={48} className="text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Nenhum produto ou serviço encontrado</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {produtosFiltrados.map((produto) => (
+                  <div key={produto.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    {/* Header do Card */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{produto.nome}</h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            produto.categoria === 'peca' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {produto.categoria === 'peca' ? 'Peça' : 'Serviço'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditProduto(produto)}
+                          className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
+                          title="Editar produto"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduto(produto)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50"
+                          title="Excluir produto"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Informações do Card */}
+                    <div className="grid grid-cols-1 gap-2 text-sm">
+                      {produto.descricao && (
+                        <div>
+                          <span className="text-gray-500">Descrição: </span>
+                          <span className="text-gray-900">{produto.descricao}</span>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-gray-500">Custo: </span>
+                          <span className="text-gray-900">R$ {Number(produto.preco_custo).toFixed(2)}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Venda: </span>
+                          <span className="text-green-600 font-medium">R$ {Number(produto.preco_venda).toFixed(2)}</span>
+                        </div>
+                      </div>
+                      {produto.tipo_equipamento && (
+                        <div>
+                          <span className="text-gray-500">Equipamento: </span>
+                          <span className="text-gray-900 capitalize">{produto.tipo_equipamento}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

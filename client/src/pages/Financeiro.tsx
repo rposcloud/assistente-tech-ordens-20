@@ -619,13 +619,121 @@ export const Financeiro = () => {
           {loading ? (
             <div className="flex justify-center py-8">Carregando...</div>
           ) : (
-            <SortableTable
-              data={entradasFiltradas}
-              columns={columns}
-              keyExtractor={(entrada) => entrada.id!}
-              emptyMessage="Nenhuma movimentação encontrada para os filtros selecionados"
-              emptyIcon={<DollarSign className="h-16 w-16 text-gray-300 mb-4" />}
-            />
+            <>
+              {/* Versão Desktop - Tabela */}
+              <div className="hidden lg:block">
+                <SortableTable
+                  data={entradasFiltradas}
+                  columns={columns}
+                  keyExtractor={(entrada) => entrada.id!}
+                  emptyMessage="Nenhuma movimentação encontrada para os filtros selecionados"
+                  emptyIcon={<DollarSign className="h-16 w-16 text-gray-300 mb-4" />}
+                />
+              </div>
+
+              {/* Versão Mobile - Cards */}
+              <div className="lg:hidden">
+                {entradasFiltradas.length === 0 ? (
+                  <div className="text-center py-8">
+                    <DollarSign className="h-16 w-16 text-gray-300 mb-4 mx-auto" />
+                    <p className="text-gray-500">Nenhuma movimentação encontrada para os filtros selecionados</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {entradasFiltradas.map((entrada) => (
+                      <div key={entrada.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        {/* Header do Card */}
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{entrada.descricao}</h3>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                entrada.tipo === 'receita' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {entrada.tipo === 'receita' ? 'Receita' : 'Despesa'}
+                              </span>
+                              {entrada.ordem_servico_id && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  Vinculado à OS
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex space-x-1">
+                            {(entrada as any).status === 'pendente' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleConcluir(entrada);
+                                }}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 p-2"
+                                title="Marcar como pago"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEdit(entrada);
+                              }}
+                              className="p-2"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            {!entrada.ordem_servico_id && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(entrada);
+                                }}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                                disabled={!!entrada.ordem_servico_id}
+                                title={entrada.ordem_servico_id ? "Não é possível excluir entrada vinculada à OS" : "Excluir entrada"}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Informações do Card */}
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Valor:</span>
+                            <span className={`font-semibold ${
+                              entrada.tipo === 'receita' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {entrada.tipo === 'receita' ? '+' : '-'} R$ {entrada.valor.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Vencimento:</span>
+                            <span className="text-gray-900">
+                              {new Date(entrada.data_vencimento).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Status:</span>
+                            <Badge className={statusColors[(entrada as any).status] || 'bg-gray-100 text-gray-800'}>
+                              {statusLabels[(entrada as any).status] || (entrada as any).status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

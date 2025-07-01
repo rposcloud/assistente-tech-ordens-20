@@ -167,13 +167,74 @@ export const Clientes = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <SortableTable
-          data={clientesFiltrados}
-          columns={colunas}
-          keyExtractor={(cliente) => cliente.id}
-          emptyMessage="Nenhum cliente encontrado"
-          emptyIcon={<FileText size={48} className="text-gray-300" />}
-        />
+        {/* Versão Desktop - Tabela */}
+        <div className="hidden lg:block">
+          <SortableTable
+            data={clientesFiltrados}
+            columns={colunas}
+            keyExtractor={(cliente) => cliente.id}
+            emptyMessage="Nenhum cliente encontrado"
+            emptyIcon={<FileText size={48} className="text-gray-300" />}
+          />
+        </div>
+
+        {/* Versão Mobile - Cards */}
+        <div className="lg:hidden">
+          {clientesFiltrados.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText size={48} className="text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">Nenhum cliente encontrado</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {clientesFiltrados.map((cliente) => (
+                <div key={cliente.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {/* Header do Card */}
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{cliente.nome}</h3>
+                      <p className="text-sm text-gray-600">{cliente.email}</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditCliente(cliente)}
+                        className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
+                        title="Editar cliente"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCliente(cliente)}
+                        className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50"
+                        title="Excluir cliente"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Informações do Card */}
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Telefone: </span>
+                      <span className="text-gray-900">{cliente.telefone || 'Não informado'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">CPF/CNPJ: </span>
+                      <span className="text-gray-900">{cliente.cpf_cnpj}</span>
+                    </div>
+                    {(cliente.cidade || cliente.estado) && (
+                      <div>
+                        <span className="text-gray-500">Cidade: </span>
+                        <span className="text-gray-900">{cliente.cidade || ''}, {cliente.estado || ''}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal de Formulário */}

@@ -180,13 +180,13 @@ export const Empresa = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <Building2 className="h-8 w-8 text-blue-600" />
+    <div className="container mx-auto p-4 sm:p-6 max-w-4xl">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
+          <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
           Dados da Empresa
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 mt-2 text-sm sm:text-base">
           Configure os dados da sua assistência técnica. Essas informações aparecerão nas ordens de serviço.
         </p>
       </div>
