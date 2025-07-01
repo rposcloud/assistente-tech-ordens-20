@@ -34,7 +34,17 @@ const prioridadeColors = {
 };
 
 export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
+  // Verificação de segurança
+  if (!ordem) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-gray-500">Ordem de serviço não encontrada.</p>
+      </div>
+    );
+  }
+
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -60,18 +70,18 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-lg font-bold text-gray-900 print:text-base">
-                TechService - Ordem de Serviço #{ordem.numero}
+                TechService - Ordem de Serviço #{ordem.numero || 'N/A'}
               </h1>
               <p className="text-gray-600 text-sm print:text-xs">
-                {ordem.clientes?.nome} - {ordem.clientes?.telefone} | Data: {formatDate(ordem.data_abertura)}
+                {ordem.clientes?.nome || 'Cliente não informado'} - {ordem.clientes?.telefone || 'N/A'} | Data: {formatDate(ordem.data_abertura)}
               </p>
             </div>
             <div className="flex gap-2 print:gap-1">
               <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {statusLabels[ordem.status] || ordem.status}
+                {statusLabels[ordem.status] || ordem.status || 'Status não informado'}
               </Badge>
               <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {ordem.prioridade?.toUpperCase()}
+                {ordem.prioridade?.toUpperCase() || 'NORMAL'}
               </Badge>
             </div>
           </div>
