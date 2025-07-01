@@ -245,6 +245,13 @@ Changelog:
   * Informações atualizadas automaticamente quando empresa é modificada na página Empresa
   * Sistema totalmente dinâmico: nome, CNPJ, endereço, telefone e email vindos do profile
   * Fallbacks informativos quando dados não estão cadastrados ("Não informado")
+- July 1, 2025. CAMPOS DE ASSINATURA IMPLEMENTADOS NAS ORDENS DE SERVIÇO:
+  * Seção completa de assinaturas adicionada na visualização das OS
+  * Campos para assinatura do cliente e do técnico responsável
+  * Termo de responsabilidade com informações de garantia dinâmicas
+  * Campos de data de entrega para preenchimento manual
+  * Integração em todos os formatos: visualização, impressão e download PDF
+  * Layout profissional com espaços adequados para assinaturas físicas
 
 ## User Preferences
 
