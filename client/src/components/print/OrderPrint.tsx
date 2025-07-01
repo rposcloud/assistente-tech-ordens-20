@@ -25,38 +25,21 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
 
     return (
       <div ref={ref} className="bg-white p-8 max-w-4xl mx-auto">
-        {/* Cabeçalho da Empresa - usando dados dinâmicos */}
-        <div className="border-b-2 border-blue-600 pb-6 mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold text-blue-600 mb-2">
-                {companyProfile?.empresa || 'TechService'}
-              </h1>
-              {companyProfile?.cnpj && (
-                <p className="text-gray-600">CNPJ: {companyProfile.cnpj}</p>
-              )}
-              {companyProfile?.inscricao_estadual && (
-                <p className="text-gray-600">IE: {companyProfile.inscricao_estadual}</p>
-              )}
-            </div>
-            <div className="text-right text-sm text-gray-600">
-              {companyProfile?.endereco && (
-                <p>{companyProfile.endereco}, {companyProfile.numero}</p>
-              )}
-              {companyProfile?.bairro && (
-                <p>{companyProfile.bairro} - {companyProfile.cep}</p>
-              )}
-              {companyProfile?.cidade && (
-                <p>{companyProfile.cidade}/{companyProfile.estado}</p>
-              )}
+        {/* Cabeçalho da Empresa - dados básicos no topo */}
+        <div className="border-b-2 border-blue-600 pb-4 mb-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-blue-600 mb-1">
+              {companyProfile?.empresa || 'TechService'}
+            </h1>
+            <div className="text-sm text-gray-600 space-x-3">
               {companyProfile?.telefone && (
-                <p>Tel: {companyProfile.telefone}</p>
+                <span>Tel: {companyProfile.telefone}</span>
               )}
               {companyProfile?.email_empresa && (
-                <p>Email: {companyProfile.email_empresa}</p>
+                <span>Email: {companyProfile.email_empresa}</span>
               )}
-              {companyProfile?.site && (
-                <p>Site: {companyProfile.site}</p>
+              {companyProfile?.cnpj && (
+                <span>CNPJ: {companyProfile.cnpj}</span>
               )}
             </div>
           </div>
@@ -236,9 +219,6 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
         {/* Rodapé */}
         <div className="mt-8 text-center text-xs text-gray-500">
           <p>Esta ordem de serviço é válida mediante apresentação e conferência dos dados.</p>
-          {companyProfile?.dados_bancarios && (
-            <p className="mt-2">{companyProfile.dados_bancarios}</p>
-          )}
         </div>
       </div>
     );
