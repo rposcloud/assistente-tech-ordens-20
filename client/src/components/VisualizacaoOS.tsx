@@ -140,7 +140,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
+    <div className="visualizacao-os-content w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
       {/* Cabeçalho da Empresa */}
       <div className="bg-gradient-to-r from-blue-50 to-gray-50 border border-gray-200 rounded-lg">
         <div className="p-4 print:p-3">

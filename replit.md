@@ -233,6 +233,12 @@ Changelog:
   * CSS de impressão totalmente otimizado: eliminada barra de rolagem e páginas duplicadas
   * Impressão forçada para página única com overflow hidden em todos os elementos
   * Sistema finalizado e pronto para deploy com todas as funcionalidades operacionais
+- July 1, 2025. SISTEMA DE IMPRESSÃO E DOWNLOAD PDF COMPLETAMENTE IMPLEMENTADO:
+  * Botão "Download PDF" adicionado em modal de visualização de OS usando jsPDF e html2canvas
+  * Funcionalidade de impressão corrigida para abrir página dedicada de impressão
+  * CSS de impressão otimizado para melhor qualidade e eliminação de problemas visuais
+  * Ambas as funcionalidades (impressão e download PDF) totalmente operacionais
+  * Interface moderna com botões coloridos distintos para cada ação
 
 ## User Preferences
 

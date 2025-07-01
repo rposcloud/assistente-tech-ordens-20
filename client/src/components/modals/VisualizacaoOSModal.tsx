@@ -2,7 +2,9 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { VisualizacaoOS } from '@/components/VisualizacaoOS';
-import { Printer } from 'lucide-react';
+import { Printer, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface VisualizacaoOSModalProps {
   isOpen: boolean;
@@ -16,84 +18,50 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
   ordem
 }) => {
   const handlePrint = () => {
-    // Adiciona estilos específicos para impressão
-    const style = document.createElement('style');
-    style.textContent = `
-      @media print {
-        @page {
-          size: A4;
-          margin: 15mm;
-        }
-        body * {
-          visibility: hidden;
-        }
-        .print-area, .print-area * {
-          visibility: visible;
-        }
-        .print-area {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-        }
-        .print\\:hidden {
-          display: none !important;
-        }
-        .print\\:text-xs {
-          font-size: 11px !important;
-        }
-        .print\\:text-sm {
-          font-size: 12px !important;
-        }
-        .print\\:p-1 {
-          padding: 4px !important;
-        }
-        .print\\:p-2 {
-          padding: 8px !important;
-        }
-        .print\\:p-3 {
-          padding: 12px !important;
-        }
-        .print\\:gap-1 {
-          gap: 4px !important;
-        }
-        .print\\:gap-2 {
-          gap: 8px !important;
-        }
-        .print\\:gap-3 {
-          gap: 12px !important;
-        }
-        .print\\:space-y-1 > * + * {
-          margin-top: 4px !important;
-        }
-        .print\\:space-y-2 > * + * {
-          margin-top: 8px !important;
-        }
-        .print\\:space-y-3 > * + * {
-          margin-top: 12px !important;
-        }
-        .print\\:h-3 {
-          height: 12px !important;
-        }
-        .print\\:w-3 {
-          width: 12px !important;
-        }
-        .print\\:text-lg {
-          font-size: 14px !important;
-        }
-        .print\\:text-xl {
-          font-size: 16px !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    window.print();
-    
-    // Remove o estilo após impressão
-    setTimeout(() => {
-      document.head.removeChild(style);
-    }, 1000);
+    // Abre uma nova janela com apenas o conteúdo da OS
+    const url = `/impressao-ordem/${ordem.id}`;
+    window.open(url, '_blank');
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      // Busca o conteúdo da visualização
+      const element = document.querySelector('.visualizacao-os-content');
+      if (!element) return;
+
+      // Configurações para melhor qualidade
+      const canvas = await html2canvas(element as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Calcular dimensões para A4
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const finalWidth = imgWidth * ratio;
+      const finalHeight = imgHeight * ratio;
+
+      // Centralizar na página
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = (pdfHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+      pdf.save(`OS-${ordem.numero}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      // Fallback para impressão
+      handlePrint();
+    }
   };
 
   return (
@@ -104,15 +72,26 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
             <DialogTitle className="text-lg font-semibold">
               Visualização da Ordem de Serviço
             </DialogTitle>
-            <Button
-              onClick={handlePrint}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Imprimir
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleDownloadPDF}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF
+              </Button>
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Imprimir
+              </Button>
+            </div>
           </div>
         </DialogHeader>
         
