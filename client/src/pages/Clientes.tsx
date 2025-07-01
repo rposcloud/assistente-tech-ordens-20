@@ -114,32 +114,31 @@ export const Clientes = () => {
 
       {/* Barra de pesquisa */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center space-x-2">
-          <Search className="text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Pesquisar clientes por nome, email, telefone ou CPF/CNPJ..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 flex-1">
+            <Search className="text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Pesquisar clientes por nome, email, telefone ou CPF/CNPJ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded ml-3">
+            {clientesFiltrados.length} cliente(s)
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold">Lista de Clientes</h3>
-          <p className="text-sm text-gray-600">Total: {clientesFiltrados.length} clientes</p>
-        </div>
-        <div className="p-6">
-          <SortableTable
-            data={clientesFiltrados}
-            columns={colunas}
-            keyExtractor={(cliente) => cliente.id}
-            emptyMessage="Nenhum cliente encontrado"
-            emptyIcon={<FileText size={48} className="text-gray-300" />}
-          />
-        </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <SortableTable
+          data={clientesFiltrados}
+          columns={colunas}
+          keyExtractor={(cliente) => cliente.id}
+          emptyMessage="Nenhum cliente encontrado"
+          emptyIcon={<FileText size={48} className="text-gray-300" />}
+        />
       </div>
 
       {/* Modal */}
