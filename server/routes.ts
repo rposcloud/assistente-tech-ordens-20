@@ -109,7 +109,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, fullName } = req.body;
+      const { 
+        email, 
+        password, 
+        fullName,
+        // Dados opcionais da empresa
+        nomeEmpresa,
+        cnpj,
+        telefone,
+        endereco,
+        cidade,
+        estado,
+        cep
+      } = req.body;
       
       if (!email || !password || !fullName) {
         return res.status(400).json({ error: 'Email, password and full name required' });
@@ -130,10 +142,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createUser(userData);
       
-      // Create profile
+      // Create profile with optional company data
       const profileData = insertProfileSchema.parse({
         id: user.id,
-        nome_completo: fullName
+        nome_completo: fullName,
+        nome_empresa: nomeEmpresa || null,
+        cnpj: cnpj || null,
+        telefone: telefone || null,
+        endereco: endereco || null,
+        cidade: cidade || null,
+        estado: estado || null,
+        cep: cep || null
       });
       
       const profile = await storage.createProfile(profileData);
