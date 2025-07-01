@@ -113,7 +113,6 @@ export const AddressForm: React.FC<AddressFormProps> = ({
             value={bairro}
             onChange={(value) => onAddressChange('bairro', value)}
             placeholder="Bairro"
-            required
           />
         </div>
         <div>
@@ -122,7 +121,6 @@ export const AddressForm: React.FC<AddressFormProps> = ({
             value={cidade}
             onChange={(value) => onAddressChange('cidade', value)}
             placeholder="Cidade"
-            required
           />
         </div>
         <div>
@@ -131,7 +129,6 @@ export const AddressForm: React.FC<AddressFormProps> = ({
             value={estado}
             onChange={(value) => onAddressChange('estado', value)}
             placeholder="SP"
-            required
           />
         </div>
       </div>
