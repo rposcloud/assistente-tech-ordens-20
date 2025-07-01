@@ -1,12 +1,22 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'wouter';
+import { useParams, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { OrdemPrintView } from '@/components/print/OrdemPrintView';
 import { Loader2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const ImpressaoOrdemDedicada: React.FC = () => {
   const { id } = useParams();
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  // Redirecionar para login se não autenticado
+  useEffect(() => {
+    if (!user) {
+      setLocation('/login');
+    }
+  }, [user, setLocation]);
 
   // Buscar dados da ordem para impressão
   const { data: ordem, isLoading: isLoadingOrdem } = useQuery({
@@ -75,9 +85,22 @@ export const ImpressaoOrdemDedicada: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="impressao-ordem-dedicada min-h-screen bg-white p-0 m-0 overflow-x-hidden">
+      <style>{`
+        .impressao-ordem-dedicada {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .impressao-ordem-dedicada .sidebar,
+        .impressao-ordem-dedicada .header,
+        .impressao-ordem-dedicada nav,
+        .impressao-ordem-dedicada .navigation {
+          display: none !important;
+        }
+      `}</style>
+      
       {/* Botão de impressão - visível apenas na tela */}
-      <div className="print:hidden fixed top-4 right-4 z-50">
+      <div className="print:hidden fixed top-4 right-4 z-50 no-print">
         <Button 
           onClick={handlePrint}
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
@@ -87,8 +110,8 @@ export const ImpressaoOrdemDedicada: React.FC = () => {
         </Button>
       </div>
 
-      {/* Conteúdo da impressão */}
-      <div className="print:p-0">
+      {/* Conteúdo da impressão - sem padding ou margin */}
+      <div className="w-full h-full">
         <OrdemPrintView ordem={ordem} profile={profile} />
       </div>
 
