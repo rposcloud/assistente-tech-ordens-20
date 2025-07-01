@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal, CheckSquare } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
@@ -174,6 +174,40 @@ export const Ordens = () => {
     setVisualizacaoModalOpen(true);
   };
 
+  const handleFinalizarOS = async (ordem: OrdemServico) => {
+    if (ordem.status === 'entregue') {
+      toast.warning('Esta OS já foi finalizada');
+      return;
+    }
+
+    try {
+      // Confirmar com o usuário
+      const confirmado = window.confirm(
+        `Deseja finalizar a OS #${ordem.numero}?\n\n` +
+        `Isso irá:\n` +
+        `• Alterar o status para "Entregue"\n` +
+        `• Criar entrada financeira de receita\n` +
+        `• Proteger a OS contra alterações futuras\n\n` +
+        `Valor da OS: R$ ${(parseFloat(ordem.valor_total || '0')).toFixed(2)}`
+      );
+
+      if (!confirmado) return;
+
+      // Atualizar OS para status entregue
+      await updateOrdem(ordem.id!, {
+        ...ordem,
+        status: 'entregue',
+        data_conclusao: new Date().toISOString()
+      });
+
+      toast.success(`OS #${ordem.numero} finalizada com sucesso!`);
+      
+    } catch (error: any) {
+      console.error('Erro ao finalizar OS:', error);
+      toast.error(`Erro ao finalizar OS: ${error.message || 'Erro desconhecido'}`);
+    }
+  };
+
 
 
   const columns: Column<OrdemServico>[] = [
@@ -222,7 +256,7 @@ export const Ordens = () => {
     },
     {
       key: 'actions',
-      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
+      label: 'Ações',
       sortable: false,
       render: (ordem) => (
         <div className="flex space-x-2">
@@ -249,6 +283,20 @@ export const Ordens = () => {
           >
             <Edit className="h-4 w-4" />
           </Button>
+          {ordem.status !== 'entregue' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFinalizarOS(ordem);
+              }}
+              title="Finalizar OS"
+              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+            >
+              <CheckSquare className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
