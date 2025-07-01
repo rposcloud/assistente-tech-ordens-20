@@ -132,6 +132,52 @@ export const Empresa = () => {
     }
   };
 
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tamanho do arquivo (máx. 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: 'Erro',
+        description: 'Arquivo muito grande. Máximo 2MB.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validar tipo do arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Erro',
+        description: 'Apenas arquivos de imagem são aceitos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Converter para base64 para armazenar
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        handleInputChange('logo_url', base64String);
+        toast({
+          title: 'Sucesso',
+          description: 'Logo carregada com sucesso!',
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Erro ao fazer upload da logo:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao fazer upload da logo.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -396,14 +442,46 @@ export const Empresa = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div>
-              <Label htmlFor="logo_url">URL da Logo</Label>
-              <Input
-                id="logo_url"
-                value={empresa.logo_url || ''}
-                onChange={(e) => handleInputChange('logo_url', e.target.value)}
-                placeholder="https://exemplo.com/logo.png"
-              />
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="logo_upload">Upload da Logo</Label>
+                <Input
+                  id="logo_upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Formatos aceitos: JPG, PNG, GIF (máx. 2MB)
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="logo_url">URL da Logo (alternativo)</Label>
+                <Input
+                  id="logo_url"
+                  value={empresa.logo_url || ''}
+                  onChange={(e) => handleInputChange('logo_url', e.target.value)}
+                  placeholder="https://exemplo.com/logo.png"
+                />
+              </div>
+
+              {empresa.logo_url && (
+                <div className="mt-2">
+                  <Label>Preview da Logo</Label>
+                  <div className="mt-1 border rounded-lg p-4 bg-gray-50">
+                    <img
+                      src={empresa.logo_url}
+                      alt="Logo da empresa"
+                      className="max-h-16 max-w-32 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>

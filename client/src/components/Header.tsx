@@ -27,10 +27,26 @@ export const Header = () => {
             <p className="text-sm font-medium text-gray-700">{companyName}</p>
             <p className="text-xs text-gray-500">{user?.email}</p>
           </div>
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">
-              {userInitial}
-            </span>
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+            {companyProfile?.logo_url ? (
+              <img
+                src={companyProfile.logo_url}
+                alt="Logo da empresa"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Se a imagem falhar ao carregar, mostra a inicial
+                  e.currentTarget.style.display = 'none';
+                  const span = document.createElement('span');
+                  span.className = 'text-white text-sm font-medium';
+                  span.textContent = userInitial;
+                  e.currentTarget.parentNode?.appendChild(span);
+                }}
+              />
+            ) : (
+              <span className="text-white text-sm font-medium">
+                {userInitial}
+              </span>
+            )}
           </div>
         </div>
       </div>
