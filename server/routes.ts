@@ -447,6 +447,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const ordem = await storage.updateOrdemServico(id, req.userId!, ordemData);
       
+      // Criar entrada financeira automaticamente quando OS é finalizada
+      if (novoStatus === 'finalizada' && statusAnterior !== 'finalizada') {
+        // Verificar se já não existe entrada financeira para esta OS
+        const entradasExistentes = await storage.getEntradasFinanceiras(req.userId!);
+        const jaTemEntrada = entradasExistentes.some(entrada => entrada.ordem_servico_id === id);
+        
+        if (!jaTemEntrada && ordem.valor_total) {
+          // Buscar categoria padrão de receita
+          const categorias = await storage.getCategoriasFinanceiras(req.userId!);
+          const categoriaReceita = categorias.find(cat => cat.nome.toLowerCase().includes('receita') || cat.nome.toLowerCase().includes('vendas') || cat.nome.toLowerCase().includes('servico'));
+          
+          try {
+            await storage.createEntradaFinanceira({
+              descricao: `Receita da OS #${ordem.numero}`,
+              valor: parseFloat(ordem.valor_total as string),
+              tipo: 'receita',
+              categoria_id: categoriaReceita?.id || categorias[0]?.id,
+              ordem_servico_id: id,
+              data_vencimento: new Date(),
+              status_pagamento: 'pago',
+              forma_pagamento: 'dinheiro',
+              user_id: req.userId!
+            });
+          } catch (error) {
+            console.error('Erro ao criar entrada financeira automática:', error);
+          }
+        }
+      }
+      
       // Processar produtos utilizados se fornecidos
       if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
         // Primeiro, remover todos os produtos existentes
