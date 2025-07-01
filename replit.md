@@ -221,6 +221,13 @@ Changelog:
   * Testado e confirmado funcionamento: OS #000003 gerou entrada financeira ID c343fc36-dffd-43de-8b7d-270c21021ccd
   * Dashboard limpo: removida seção de integridade de dados desnecessária
   * Sistema completo e pronto para deploy em produção
+- July 1, 2025. OTIMIZAÇÃO MOBILE COMPLETA MANTENDO VERSÕES DESKTOP INTACTAS:
+  * Todas as páginas principais otimizadas: Dashboard, Ordens, Clientes, Produtos, Financeiro, Empresa
+  * Navegação mobile: menu hamburger com overlay e transições suaves
+  * Layout responsivo: cards mobile vs tabelas desktop, breakpoints lg (1024px+)
+  * Header responsivo: versão simplificada mobile, informações completas desktop
+  * Sidebar: navegação fixa desktop (lg:static) + overlay mobile (fixed)
+  * Sistema 100% funcional em ambas as versões mantendo todas as funcionalidades
 
 ## User Preferences
 
