@@ -11,17 +11,8 @@ import { VisualizacaoOSModal } from '@/components/modals/VisualizacaoOSModal';
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 const statusColors = {
   aguardando_diagnostico: 'bg-yellow-100 text-yellow-800',
@@ -46,8 +37,15 @@ export const Ordens = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    ordem: OrdemServico | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    ordem: null,
+    loading: false
+  });
   const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
   const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -110,20 +108,37 @@ export const Ordens = () => {
   };
 
   const handleDeleteClick = (ordem: OrdemServico) => {
-    setOrdemToDelete(ordem);
-    setDeleteDialogOpen(true);
+    setDeleteModal({
+      isOpen: true,
+      ordem,
+      loading: false
+    });
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteModal.loading) return;
+    setDeleteModal({
+      isOpen: false,
+      ordem: null,
+      loading: false
+    });
   };
 
 
 
-  const handleDeleteConfirm = async () => {
-    if (!ordemToDelete) return;
+  const confirmDelete = async () => {
+    if (!deleteModal.ordem) return;
+
+    setDeleteModal(prev => ({ ...prev, loading: true }));
     
     try {
-      await deleteOrdem(ordemToDelete.id!);
+      await deleteOrdem(deleteModal.ordem.id!);
       toast.success('Ordem excluída com sucesso!');
-      setDeleteDialogOpen(false);
-      setOrdemToDelete(null);
+      setDeleteModal({
+        isOpen: false,
+        ordem: null,
+        loading: false
+      });
     } catch (error: any) {
       console.error('Error deleting ordem:', error);
       
@@ -147,36 +162,45 @@ export const Ordens = () => {
         )) {
           // Excluir entradas financeiras junto
           try {
-            await fetch(`/api/ordens/${ordemToDelete.id}?force=true&action=delete_financial`, {
+            await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=delete_financial`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' }
             });
             toast.success('Ordem e entradas financeiras excluídas com sucesso!');
-            setDeleteDialogOpen(false);
-            setOrdemToDelete(null);
+            setDeleteModal({
+              isOpen: false,
+              ordem: null,
+              loading: false
+            });
             // Recarregar dados
             window.location.reload();
           } catch (forceError) {
             toast.error('Erro ao excluir forçadamente');
+            setDeleteModal(prev => ({ ...prev, loading: false }));
           }
         } else {
           // Manter entradas, apenas desvincular
           try {
-            await fetch(`/api/ordens/${ordemToDelete.id}?force=true&action=keep_financial`, {
+            await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=keep_financial`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' }
             });
             toast.success('Ordem excluída, entradas financeiras mantidas e desvinculadas');
-            setDeleteDialogOpen(false);
-            setOrdemToDelete(null);
+            setDeleteModal({
+              isOpen: false,
+              ordem: null,
+              loading: false
+            });
             // Recarregar dados
             window.location.reload();
           } catch (forceError) {
             toast.error('Erro ao desvincular entradas');
+            setDeleteModal(prev => ({ ...prev, loading: false }));
           }
         }
       } else {
         toast.error(`Erro ao excluir ordem: ${error.message || 'Erro desconhecido'}`);
+        setDeleteModal(prev => ({ ...prev, loading: false }));
       }
     }
   };
@@ -469,25 +493,18 @@ export const Ordens = () => {
 
 
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir a ordem de serviço {ordemToDelete?.numero}?
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setOrdemToDelete(null)}>
-              Cancelar
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              Excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Excluir Ordem de Serviço"
+        message={`Tem certeza que deseja excluir a ordem de serviço "${deleteModal.ordem?.numero}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        loading={deleteModal.loading}
+      />
     </div>
   );
 };

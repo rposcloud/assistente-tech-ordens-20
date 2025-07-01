@@ -4,6 +4,7 @@ import { FileText, Package, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-re
 import { useProdutos } from '../hooks/useProdutos';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ProductForm } from '../components/forms/ProductForm';
+import { ConfirmationModal } from '../components/ui/confirmation-modal';
 import type { Produto } from '../types/produto';
 
 export const Produtos = () => {
@@ -12,6 +13,15 @@ export const Produtos = () => {
   const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<'todos' | 'peca' | 'servico'>('todos');
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    produto: Produto | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    produto: null,
+    loading: false
+  });
 
   const handleSaveProduto = async (produtoData: Omit<Produto, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
@@ -33,15 +43,40 @@ export const Produtos = () => {
     setShowModal(true);
   };
 
-  const handleDeleteProduto = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja inativar este produto? Ele não aparecerá mais na lista, mas permanecerá vinculado às ordens de serviço existentes.')) {
-      try {
-        await deleteProduto(id);
-      } catch (error: any) {
-        console.error('Erro ao inativar produto:', error);
-        alert('Erro ao inativar produto. Tente novamente.');
-      }
+  const handleDeleteProduto = (produto: Produto) => {
+    setDeleteModal({
+      isOpen: true,
+      produto,
+      loading: false
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.produto) return;
+
+    setDeleteModal(prev => ({ ...prev, loading: true }));
+
+    try {
+      await deleteProduto(deleteModal.produto.id);
+      setDeleteModal({
+        isOpen: false,
+        produto: null,
+        loading: false
+      });
+    } catch (error: any) {
+      console.error('Erro ao inativar produto:', error);
+      alert('Erro ao inativar produto. Tente novamente.');
+      setDeleteModal(prev => ({ ...prev, loading: false }));
     }
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteModal.loading) return;
+    setDeleteModal({
+      isOpen: false,
+      produto: null,
+      loading: false
+    });
   };
 
   const produtosFiltrados = produtos.filter(produto => {
@@ -73,9 +108,9 @@ export const Produtos = () => {
             <Edit className="h-4 w-4" />
           </button>
           <button
-            onClick={() => handleDeleteProduto(produto.id)}
+            onClick={() => handleDeleteProduto(produto)}
             className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-            title="Excluir produto"
+            title="Inativar produto"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -153,7 +188,7 @@ export const Produtos = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal de Formulário */}
       {showModal && (
         <ProductForm
           produto={editingProduto}
@@ -164,6 +199,19 @@ export const Produtos = () => {
           }}
         />
       )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Inativar Produto"
+        message={`Tem certeza que deseja inativar o produto "${deleteModal.produto?.nome}"? Ele não aparecerá mais na lista, mas permanecerá vinculado às ordens de serviço existentes.`}
+        confirmText="Inativar"
+        cancelText="Cancelar"
+        type="warning"
+        loading={deleteModal.loading}
+      />
     </div>
   );
 };

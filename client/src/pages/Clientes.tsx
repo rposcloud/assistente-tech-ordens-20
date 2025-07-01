@@ -4,12 +4,22 @@ import { Users, UserPlus, Search, FileText, Edit, Trash2, MoreHorizontal } from 
 import { useClientes, Cliente } from '../hooks/useClientes';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ClienteForm } from '../components/forms/ClienteForm';
+import { ConfirmationModal } from '../components/ui/confirmation-modal';
 
 export const Clientes = () => {
   const { clientes, loading, createCliente, updateCliente, deleteCliente } = useClientes();
   const [showModal, setShowModal] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    cliente: Cliente | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    cliente: null,
+    loading: false
+  });
 
   const handleSaveCliente = async (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -31,15 +41,40 @@ export const Clientes = () => {
     setShowModal(true);
   };
 
-  const handleDeleteCliente = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
-      try {
-        await deleteCliente(id);
-      } catch (error) {
-        console.error('Erro ao deletar cliente:', error);
-        alert('Erro ao deletar cliente. Tente novamente.');
-      }
+  const handleDeleteCliente = (cliente: Cliente) => {
+    setDeleteModal({
+      isOpen: true,
+      cliente,
+      loading: false
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.cliente) return;
+
+    setDeleteModal(prev => ({ ...prev, loading: true }));
+
+    try {
+      await deleteCliente(deleteModal.cliente.id);
+      setDeleteModal({
+        isOpen: false,
+        cliente: null,
+        loading: false
+      });
+    } catch (error: any) {
+      console.error('Erro ao deletar cliente:', error);
+      alert('Erro ao deletar cliente. Tente novamente.');
+      setDeleteModal(prev => ({ ...prev, loading: false }));
     }
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteModal.loading) return;
+    setDeleteModal({
+      isOpen: false,
+      cliente: null,
+      loading: false
+    });
   };
 
   const clientesFiltrados = clientes.filter(cliente => {
@@ -73,7 +108,7 @@ export const Clientes = () => {
             <Edit className="h-4 w-4" />
           </button>
           <button
-            onClick={() => handleDeleteCliente(cliente.id)}
+            onClick={() => handleDeleteCliente(cliente)}
             className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
             title="Excluir cliente"
           >
@@ -141,7 +176,7 @@ export const Clientes = () => {
         />
       </div>
 
-      {/* Modal */}
+      {/* Modal de Formulário */}
       {showModal && (
         <ClienteForm
           cliente={editingCliente}
@@ -152,6 +187,19 @@ export const Clientes = () => {
           }}
         />
       )}
+
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Excluir Cliente"
+        message={`Tem certeza que deseja excluir o cliente "${deleteModal.cliente?.nome}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        loading={deleteModal.loading}
+      />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { useFinanceiro, EntradaFinanceira } from '@/hooks/useFinanceiro';
 import { EntradaFinanceiraModal } from '@/components/modals/EntradaFinanceiraModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { toast } from 'sonner';
 
 const statusColors: { [key: string]: string } = {
@@ -249,7 +250,17 @@ export const Financeiro = () => {
     setModalOpen(true);
   };
 
-  const handleDelete = async (entrada: EntradaFinanceira) => {
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    entrada: EntradaFinanceira | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    entrada: null,
+    loading: false
+  });
+
+  const handleDelete = (entrada: EntradaFinanceira) => {
     // Verificar se a entrada está vinculada a uma OS
     if (entrada.ordem_servico_id) {
       toast.error('Esta entrada não pode ser excluída pois está vinculada a uma Ordem de Serviço!', {
@@ -258,14 +269,39 @@ export const Financeiro = () => {
       return;
     }
 
-    if (window.confirm(`Tem certeza que deseja excluir a entrada "${entrada.descricao}"?`)) {
-      try {
-        await deleteEntrada(entrada.id);
-        toast.success('Entrada excluída com sucesso!');
-      } catch (error) {
-        toast.error('Erro ao excluir entrada');
-      }
+    setDeleteModal({
+      isOpen: true,
+      entrada,
+      loading: false
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.entrada) return;
+
+    setDeleteModal(prev => ({ ...prev, loading: true }));
+
+    try {
+      await deleteEntrada(deleteModal.entrada.id);
+      toast.success('Entrada excluída com sucesso!');
+      setDeleteModal({
+        isOpen: false,
+        entrada: null,
+        loading: false
+      });
+    } catch (error) {
+      toast.error('Erro ao excluir entrada');
+      setDeleteModal(prev => ({ ...prev, loading: false }));
     }
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteModal.loading) return;
+    setDeleteModal({
+      isOpen: false,
+      entrada: null,
+      loading: false
+    });
   };
 
   const handleConcluir = async (entrada: EntradaFinanceira) => {
@@ -591,6 +627,19 @@ export const Financeiro = () => {
         categorias={categorias}
         initialData={selectedEntrada}
         loading={modalLoading}
+      />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Excluir Entrada Financeira"
+        message={`Tem certeza que deseja excluir a entrada "${deleteModal.entrada?.descricao}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        type="danger"
+        loading={deleteModal.loading}
       />
     </div>
   );
