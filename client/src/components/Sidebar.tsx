@@ -10,11 +10,11 @@ export const Sidebar = () => {
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Building2, label: 'Empresa', path: '/empresa' },
+    { icon: FileText, label: 'Ordens de Serviço', path: '/ordens' },
     { icon: Users, label: 'Clientes', path: '/clientes' },
     { icon: Package, label: 'Produtos & Serviços', path: '/produtos' },
-    { icon: FileText, label: 'Ordens de Serviço', path: '/ordens' },
     { icon: DollarSign, label: 'Financeiro', path: '/financeiro' },
+    { icon: Building2, label: 'Empresa', path: '/empresa' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
