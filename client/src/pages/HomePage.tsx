@@ -75,9 +75,7 @@ export const HomePage = () => {
             
             <nav className="hidden md:flex space-x-8">
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Recursos</a>
-              <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Preços</a>
-              <a href="#testimonials" className="text-gray-600 hover:text-blue-600 transition-colors">Clientes</a>
-              <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">Contato</a>
+              <a href="#testimonials" className="text-gray-600 hover:text-blue-600 transition-colors">Depoimentos</a>
             </nav>
             
             <div className="flex items-center space-x-4">
@@ -116,17 +114,13 @@ export const HomePage = () => {
                 Gerencie ordens, clientes, estoque e financeiro em uma plataforma moderna e intuitiva.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex justify-center">
                 <Link to="/cadastro">
-                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg">
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-8 py-4 text-lg">
                     Começar Gratuitamente
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="w-full sm:w-auto px-8 py-4 text-lg">
-                  <Play className="mr-2 w-5 h-5" />
-                  Ver Demonstração
-                </Button>
               </div>
               
               <div className="flex items-center gap-6 pt-4">
@@ -194,15 +188,15 @@ export const HomePage = () => {
             </p>
           </div>
           
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-6">
             {mainFeatures.map((feature, index) => (
-              <Card key={index} className="p-8 border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <Card key={index} className="p-6 border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
                 <CardContent className="p-0">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl mb-6`}>
-                    <feature.icon className="w-8 h-8 text-white" />
+                  <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r ${feature.gradient} rounded-xl mb-4`}>
+                    <feature.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 text-lg leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -274,57 +268,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-2">
-              <OSCloudLogo size="lg" className="mb-6" />
-              <p className="text-gray-400 mb-6 max-w-md">
-                A plataforma mais completa para gestão de assistência técnica. 
-                Transforme seu negócio com tecnologia de ponta.
-              </p>
-              <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 cursor-pointer">
-                  <Globe className="w-5 h-5" />
-                </div>
-                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 cursor-pointer">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Produto</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Recursos</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Preços</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Segurança</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Suporte</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Documentação</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-gray-400">© 2025 OS Cloud. Todos os direitos reservados.</p>
-            <div className="flex space-x-6 mt-4 sm:mt-0 text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Privacidade</a>
-              <a href="#" className="hover:text-white transition-colors">Termos</a>
-              <a href="#" className="hover:text-white transition-colors">Cookies</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };

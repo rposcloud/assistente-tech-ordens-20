@@ -192,6 +192,12 @@ Changelog:
   * Seção de estatísticas, depoimentos e call-to-action
   * Footer profissional com links organizados
   * Design responsivo otimizado para todos os dispositivos
+- July 1, 2025. Simplificação da landing page conforme solicitado:
+  * Removido footer completo para layout mais limpo
+  * Removido botão "Ver Demonstração" mantendo apenas "Começar Grátis"
+  * Cards de recursos redimensionados para tamanho mais compacto
+  * Menu de navegação simplificado com apenas "Recursos" e "Depoimentos"
+  * Layout focado essencialmente no cadastro de novos usuários
 
 ## User Preferences
 
