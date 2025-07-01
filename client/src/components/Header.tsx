@@ -1,15 +1,13 @@
 
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useProfile } from '../hooks/useProfile';
 import { OSCloudLogo } from './OSCloudLogo';
 
 export const Header = () => {
   const { user, profile } = useAuth();
-  const { profile: companyProfile } = useProfile();
 
   const userName = profile?.nome_completo || user?.email?.split('@')[0] || 'Usuário';
-  const companyName = companyProfile?.empresa || 'Sua Empresa';
+  const companyName = profile?.empresa || 'Sua Empresa';
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
@@ -42,9 +40,9 @@ export const Header = () => {
             <p className="text-xs font-medium text-gray-700 truncate max-w-24">{companyName}</p>
           </div>
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center overflow-hidden">
-            {companyProfile?.logo_url ? (
+            {profile?.logo_url ? (
               <img
-                src={companyProfile.logo_url}
+                src={profile.logo_url}
                 alt="Logo da empresa"
                 className="w-full h-full object-cover"
                 onError={(e) => {

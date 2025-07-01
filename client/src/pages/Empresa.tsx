@@ -33,7 +33,7 @@ interface EmpresaData {
 }
 
 export const Empresa = () => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -139,28 +139,21 @@ export const Empresa = () => {
     try {
       setSaving(true);
       
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify(empresa),
-      });
+      const result = await updateProfile(empresa);
 
-      if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: 'Dados da empresa salvos com sucesso!',
-        });
-      } else {
-        throw new Error('Erro ao salvar dados');
+      if (result.error) {
+        throw new Error(result.error);
       }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Dados da empresa salvos com sucesso!',
+      });
     } catch (error) {
       console.error('Erro ao salvar:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar dados da empresa',
+        description: error instanceof Error ? error.message : 'Erro ao salvar dados da empresa',
         variant: 'destructive',
       });
     } finally {
