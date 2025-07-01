@@ -47,8 +47,14 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   const [formaPagamento, setFormaPagamento] = useState('dinheiro');
   const [dataVencimento, setDataVencimento] = useState(new Date().toISOString().split('T')[0]);
   
+  // Buscar dados do perfil da empresa - hook deve estar no topo
+  const { data: profile } = useQuery({
+    queryKey: ['/api/profile'],
+    enabled: !!ordem // só executa se ordem existir
+  }) as { data: any };
+  
   const abrirDialogoFinalizar = () => {
-    if (ordem.status === 'entregue') {
+    if (ordem?.status === 'entregue') {
       toast({
         title: "Erro",
         description: "Esta OS já foi finalizada",
@@ -96,6 +102,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         });
       }
   };
+  
   // Verificação de segurança
   if (!ordem) {
     return (
@@ -104,12 +111,6 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       </div>
     );
   }
-
-  // Buscar dados do perfil da empresa
-  const { data: profile } = useQuery({
-    queryKey: ['/api/profile'],
-    enabled: true
-  }) as { data: any };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Data não informada';
@@ -177,10 +178,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </p>
             </div>
             <div className="flex gap-2 print:gap-1">
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {statusLabels[ordem.status] || ordem.status}
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                {statusLabels[ordem.status as keyof typeof statusLabels] || ordem.status}
               </Badge>
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade as keyof typeof prioridadeColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                 {ordem.prioridade?.toUpperCase()}
               </Badge>
             </div>

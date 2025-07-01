@@ -1,0 +1,45 @@
+The above error occurred in the <VisualizacaoOS> component:
+
+    at VisualizacaoOS (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/components/VisualizacaoOS.tsx:51:34)
+    at div
+    at div
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PALV7G7K.js?v=de5c1e9c:42:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-33NLKRZK.js?v=de5c1e9c:59:7
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LXTJ4TFU.js?v=de5c1e9c:79:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LXTJ4TFU.js?v=de5c1e9c:56:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PALV7G7K.js?v=de5c1e9c:42:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YFG2WAUQ.js?v=de5c1e9c:57:5
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VO3JAN7P.js?v=de5c1e9c:231:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VO3JAN7P.js?v=de5c1e9c:154:58
+    at Presence (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-I7UGE573.js?v=de5c1e9c:24:11)
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VO3JAN7P.js?v=de5c1e9c:145:64
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LXTJ4TFU.js?v=de5c1e9c:79:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LXTJ4TFU.js?v=de5c1e9c:56:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PALV7G7K.js?v=de5c1e9c:42:13
+    at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-33NLKRZK.js?v=de5c1e9c:258:22
+    at Presence (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-I7UGE573.js?v=de5c1e9c:24:11)
+    at Provider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-K7TZL7XT.js?v=de5c1e9c:48:15)
+    at DialogPortal (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VO3JAN7P.js?v=de5c1e9c:107:11)
+    at _c3 (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/components/ui/dialog.tsx:51:12)
+    at Provider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-K7TZL7XT.js?v=de5c1e9c:48:15)
+    at Dialog (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VO3JAN7P.js?v=de5c1e9c:48:5)
+    at VisualizacaoOSModal (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/components/modals/VisualizacaoOSModal.tsx:22:3)
+    at div
+    at Ordens (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/pages/Ordens.tsx:56:70)
+    at main
+    at div
+    at div
+    at Layout (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/components/Layout.tsx:19:26)
+    at ProtectedRoute (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/components/ProtectedRoute.tsx:20:34)
+    at RenderedRoute (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=de5c1e9c:5455:26)
+    at Routes (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=de5c1e9c:6188:3)
+    at Router (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=de5c1e9c:6131:13)
+    at BrowserRouter (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=de5c1e9c:9149:3)
+    at AuthProvider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at Provider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-K7TZL7XT.js?v=de5c1e9c:48:15)
+    at TooltipProvider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=de5c1e9c:58:5)
+    at QueryClientProvider (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=de5c1e9c:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
