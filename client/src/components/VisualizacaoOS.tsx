@@ -150,15 +150,15 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
                 <Building className="h-6 w-6 text-white print:h-4 print:w-4" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 print:text-sm">
+                <h2 className="text-lg font-bold text-gray-900 print:text-base">
                   {profile?.empresa || 'Nome da Empresa'}
                 </h2>
-                <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-xs">
+                <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-sm">
                   <p>CNPJ: {profile?.cnpj || 'Não informado'}</p>
                 </div>
               </div>
             </div>
-            <div className="text-right text-sm text-gray-600 print:text-xs max-w-xs">
+            <div className="text-right text-sm text-gray-600 print:text-sm max-w-xs">
               <div className="space-y-1">
                 <p className="font-medium">Endereço:</p>
                 <p>{profile?.endereco || 'Endereço não informado'}</p>
@@ -181,10 +181,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         <div className="p-4 print:p-3">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 print:text-lg">
+              <h1 className="text-xl font-bold text-gray-900 print:text-xl">
                 Ordem de Serviço #{ordem.numero}
               </h1>
-              <p className="text-gray-600 text-sm print:text-xs">
+              <p className="text-gray-600 text-sm print:text-sm">
                 {ordem.clientes?.nome} - {ordem.clientes?.telefone}
               </p>
             </div>
@@ -211,7 +211,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             </h3>
           </div>
           <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Nome:</p>
                 <p className="text-gray-900">{ordem.clientes?.nome}</p>
@@ -246,7 +246,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             </h3>
           </div>
           <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Tipo:</p>
                 <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
@@ -322,12 +322,12 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               {ordem.produtos_utilizados?.map((produto: any, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900">{produto.produto?.nome}</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs font-medium text-gray-900 print:text-sm">{produto.produto?.nome}</p>
+                    <p className="text-xs text-gray-600 print:text-sm">
                       {produto.quantidade}x - {formatCurrency(produto.valor_unitario)} cada
                     </p>
                   </div>
-                  <p className="text-xs font-semibold text-gray-900">
+                  <p className="text-xs font-semibold text-gray-900 print:text-sm">
                     {formatCurrency(produto.valor_total)}
                   </p>
                 </div>
@@ -336,12 +336,12 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               {ordem.pecas_utilizadas?.map((peca: any, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900">{peca.nome}</p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs font-medium text-gray-900 print:text-sm">{peca.nome}</p>
+                    <p className="text-xs text-gray-600 print:text-sm">
                       {peca.quantidade}x - {formatCurrency(peca.valor_unitario)} cada
                     </p>
                   </div>
-                  <p className="text-xs font-semibold text-gray-900">
+                  <p className="text-xs font-semibold text-gray-900 print:text-sm">
                     {formatCurrency(peca.valor_total)}
                   </p>
                 </div>
@@ -362,7 +362,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             </h3>
           </div>
           <div className="p-3 print:p-2">
-            <div className="space-y-2 print:space-y-1 text-xs print:text-xs">
+            <div className="space-y-2 print:space-y-1 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Data Abertura:</p>
                 <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
@@ -453,9 +453,9 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           <div className="grid grid-cols-2 gap-6 print:gap-4 mb-4 print:mb-3">
             {/* Assinatura do Cliente */}
             <div className="text-center">
-              <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1">Assinatura do Cliente</p>
+              <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1 print:text-sm">Assinatura do Cliente</p>
               <div className="border-b-2 border-gray-300 h-10 print:h-8 mb-2 print:mb-1"></div>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 print:text-sm">
                 <p className="font-medium">{ordem.clientes?.nome}</p>
                 <p>CPF/CNPJ: {ordem.clientes?.cpf_cnpj || 'Não informado'}</p>
                 <p>Data: ___/___/______</p>
@@ -464,9 +464,9 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
             {/* Assinatura do Técnico */}
             <div className="text-center">
-              <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1">Assinatura do Técnico</p>
+              <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1 print:text-sm">Assinatura do Técnico</p>
               <div className="border-b-2 border-gray-300 h-10 print:h-8 mb-2 print:mb-1"></div>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 print:text-sm">
                 <p className="font-medium">{ordem.tecnico_responsavel || 'Técnico Responsável'}</p>
                 <p>Empresa: {profile?.empresa || 'Nome da Empresa'}</p>
                 <p>Data: ___/___/______</p>
@@ -476,12 +476,12 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
           {/* Termo de Responsabilidade */}
           <div className="pt-3 print:pt-2 border-t border-gray-200">
-            <div className="text-xs text-gray-600 print:text-xs space-y-1">
+            <div className="text-xs text-gray-600 print:text-sm space-y-1">
               <p className="font-medium text-center">TERMO DE RESPONSABILIDADE</p>
               <p className="text-justify leading-tight">
                 Declaro que recebi o equipamento descrito nesta ordem de serviço em perfeitas condições de funcionamento e que todos os serviços foram executados conforme solicitado. Estou ciente da garantia oferecida e das condições de uso.{ordem.garantia && ` A garantia dos serviços prestados é de ${ordem.garantia} dias a partir da data de entrega.`}
               </p>
-              <p className="text-center mt-2 print:mt-1 text-xs">
+              <p className="text-center mt-2 print:mt-1 text-xs print:text-sm">
                 <strong>Data de entrega:</strong> ___/___/______ às ___:___ h
               </p>
             </div>

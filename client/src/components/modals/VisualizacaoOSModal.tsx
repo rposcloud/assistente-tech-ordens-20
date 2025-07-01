@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { VisualizacaoOS } from '@/components/VisualizacaoOS';
-import { Printer, Download } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -17,10 +17,47 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
   onClose,
   ordem
 }) => {
-  const handlePrint = () => {
-    // Abre uma nova janela com apenas o conteúdo da OS
-    const url = `/impressao-ordem/${ordem.id}`;
-    window.open(url, '_blank');
+  const handleGenerateDocument = async () => {
+    try {
+      // Busca o conteúdo da visualização
+      const element = document.querySelector('.visualizacao-os-content');
+      if (!element) return;
+
+      // Configurações otimizadas para documento
+      const canvas = await html2canvas(element as HTMLElement, {
+        scale: 3, // Maior escala para melhor qualidade de texto
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Calcular dimensões para A4 com margens
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10; // Margem de 10mm
+      const maxWidth = pdfWidth - (margin * 2);
+      const maxHeight = pdfHeight - (margin * 2);
+      
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+      const finalWidth = imgWidth * ratio;
+      const finalHeight = imgHeight * ratio;
+
+      // Centralizar na página
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = margin;
+
+      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+      pdf.save(`Ordem-Servico-${ordem.numero}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar documento:', error);
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -59,8 +96,6 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
       pdf.save(`OS-${ordem.numero}.pdf`);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      // Fallback para impressão
-      handlePrint();
     }
   };
 
@@ -83,13 +118,13 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
                 Download PDF
               </Button>
               <Button
-                onClick={handlePrint}
+                onClick={handleGenerateDocument}
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
               >
-                <Printer className="h-4 w-4" />
-                Imprimir
+                <FileText className="h-4 w-4" />
+                Gerar Documento
               </Button>
             </div>
           </div>
