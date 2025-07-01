@@ -481,7 +481,7 @@ export const Financeiro = () => {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">R$ {estatisticas.receitas.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-green-600">R$ {Number(estatisticas.receitas).toFixed(2)}</div>
             <p className="text-xs text-gray-500 mt-1">Valores recebidos no período</p>
           </CardContent>
         </Card>
@@ -494,7 +494,7 @@ export const Financeiro = () => {
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">R$ {estatisticas.despesas.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-red-600">R$ {Number(estatisticas.despesas).toFixed(2)}</div>
             <p className="text-xs text-gray-500 mt-1">Valores pagos no período</p>
           </CardContent>
         </Card>
@@ -507,8 +507,8 @@ export const Financeiro = () => {
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${estatisticas.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              R$ {estatisticas.saldo.toFixed(2)}
+            <div className={`text-2xl font-bold ${Number(estatisticas.saldo) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              R$ {Number(estatisticas.saldo).toFixed(2)}
             </div>
             <p className="text-xs text-gray-500 mt-1">Receitas - Despesas</p>
           </CardContent>
@@ -522,7 +522,7 @@ export const Financeiro = () => {
             <Calendar className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">R$ {estatisticas.aReceber.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-yellow-600">R$ {Number(estatisticas.aReceber).toFixed(2)}</div>
             <p className="text-xs text-gray-500 mt-1">Receitas pendentes</p>
           </CardContent>
         </Card>
@@ -535,7 +535,7 @@ export const Financeiro = () => {
             <Calendar className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">R$ {estatisticas.aPagar.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-orange-600">R$ {Number(estatisticas.aPagar).toFixed(2)}</div>
             <p className="text-xs text-gray-500 mt-1">Despesas pendentes</p>
           </CardContent>
         </Card>
@@ -712,7 +712,7 @@ export const Financeiro = () => {
                             <span className={`font-semibold ${
                               entrada.tipo === 'receita' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {entrada.tipo === 'receita' ? '+' : '-'} R$ {entrada.valor.toFixed(2)}
+                              {entrada.tipo === 'receita' ? '+' : '-'} R$ {Number(entrada.valor).toFixed(2)}
                             </span>
                           </div>
                           <div className="flex justify-between">
