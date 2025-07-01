@@ -13,23 +13,33 @@ export const Header = () => {
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+    <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <OSCloudLogo size="sm" />
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800">
+          <div className="hidden sm:block">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
               Bem-vindo ao OS Cloud
             </h2>
             <p className="text-sm text-gray-500">
               Sistema completo de gestão para assistência técnica
             </p>
           </div>
+          {/* Versão Mobile - Apenas logo e nome simplificado */}
+          <div className="block sm:hidden">
+            <h2 className="text-lg font-semibold text-gray-800">
+              OS Cloud
+            </h2>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-right">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="text-right hidden sm:block">
             <p className="text-sm font-medium text-gray-700">{companyName}</p>
             <p className="text-xs text-gray-500">{user?.email}</p>
+          </div>
+          {/* Versão Mobile - Apenas avatar */}
+          <div className="text-right block sm:hidden">
+            <p className="text-xs font-medium text-gray-700 truncate max-w-24">{companyName}</p>
           </div>
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center overflow-hidden">
             {companyProfile?.logo_url ? (

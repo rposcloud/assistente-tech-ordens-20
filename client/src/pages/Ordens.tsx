@@ -532,13 +532,161 @@ export const Ordens = () => {
               </Button>
             </div>
           ) : (
-            <SortableTable
-              data={filteredOrdens}
-              columns={columns}
-              keyExtractor={(ordem) => ordem.id!}
-              emptyMessage={searchTerm ? `Nenhuma ordem encontrada para "${searchTerm}"` : "Nenhuma ordem de serviço encontrada"}
-              emptyIcon={<FileText className="h-16 w-16 text-gray-300 mb-4" />}
-            />
+            <>
+              {/* Versão Desktop - Tabela */}
+              <div className="hidden lg:block">
+                <SortableTable
+                  data={filteredOrdens}
+                  columns={columns}
+                  keyExtractor={(ordem) => ordem.id!}
+                  emptyMessage={searchTerm ? `Nenhuma ordem encontrada para "${searchTerm}"` : "Nenhuma ordem de serviço encontrada"}
+                  emptyIcon={<FileText className="h-16 w-16 text-gray-300 mb-4" />}
+                />
+              </div>
+
+              {/* Versão Mobile/Tablet - Cards */}
+              <div className="lg:hidden space-y-4">
+                {filteredOrdens.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">
+                      {searchTerm ? `Nenhuma ordem encontrada para "${searchTerm}"` : "Nenhuma ordem de serviço encontrada"}
+                    </p>
+                  </div>
+                ) : (
+                  filteredOrdens.map((ordem: any) => (
+                    <div key={ordem.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                      {/* Header do Card */}
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="font-bold text-lg">#{ordem.numero}</div>
+                          <div className="text-gray-600 text-sm">{ordem.clientes?.nome || 'Cliente não encontrado'}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {ordem.marca} {ordem.modelo}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {ordem.status !== 'finalizada' && (
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFinalizarOS(ordem);
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-auto"
+                            >
+                              Finalizar
+                            </Button>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVisualizarOrdem(ordem);
+                                }}
+                                className="flex items-center gap-2"
+                              >
+                                <Eye className="h-4 w-4" />
+                                Visualizar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(ordem);
+                                }}
+                                className="flex items-center gap-2"
+                              >
+                                <Edit className="h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteClick(ordem);
+                                }}
+                                className="flex items-center gap-2 text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Conteúdo do Card */}
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <div className="text-gray-500 text-xs">Status</div>
+                          {ordem.status === 'finalizada' ? (
+                            <Badge className={statusColors[ordem.status]}>
+                              {statusLabels[ordem.status]}
+                            </Badge>
+                          ) : (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <span className="text-sm cursor-pointer hover:underline">
+                                  {statusLabels[ordem.status] || 'Aberta'}
+                                </span>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="min-w-48">
+                                {statusOptions.map((option) => (
+                                  <DropdownMenuItem
+                                    key={option.value}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (option.value !== ordem.status) {
+                                        handleChangeStatus(ordem, option.value);
+                                      }
+                                    }}
+                                    className={`${ordem.status === option.value ? 'bg-gray-100 font-medium' : ''} cursor-pointer`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-2 h-2 rounded-full ${statusColors[option.value]?.split(' ')[0] || 'bg-gray-400'}`} />
+                                      {option.label}
+                                      {ordem.status === option.value && (
+                                        <span className="ml-auto text-xs text-gray-500">(atual)</span>
+                                      )}
+                                    </div>
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <div className="text-gray-500 text-xs">Valor</div>
+                          <div className="font-semibold text-green-600">
+                            {(() => {
+                              const valor = ordem.valor_final || ordem.valor_total || '0';
+                              const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
+                              return `R$ ${(valorNumerico || 0).toFixed(2)}`;
+                            })()}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-gray-500 text-xs">Data Abertura</div>
+                          <div>{ordem.data_abertura ? new Date(ordem.data_abertura).toLocaleDateString('pt-BR') : 'N/A'}</div>
+                        </div>
+
+                        <div>
+                          <div className="text-gray-500 text-xs">Equipamento</div>
+                          <div className="capitalize">{ordem.tipo_equipamento}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
