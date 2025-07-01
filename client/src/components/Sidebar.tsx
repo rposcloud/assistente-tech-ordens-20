@@ -46,7 +46,7 @@ export const Sidebar = () => {
       {/* Sidebar Desktop + Mobile */}
       <div className={`
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full
         transition-transform duration-300 ease-in-out lg:transition-none
       `}>
         <div className="p-4 lg:p-6 border-b border-gray-200">
