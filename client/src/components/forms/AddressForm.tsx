@@ -31,7 +31,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
 
   useEffect(() => {
     cepMask.setValue(cep);
-  }, [cep]);
+  }, [cep, cepMask]);
 
   useEffect(() => {
     if (enderecoEncontrado) {
@@ -40,7 +40,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
       onAddressChange('cidade', enderecoEncontrado.localidade || '');
       onAddressChange('estado', enderecoEncontrado.uf || '');
     }
-  }, [enderecoEncontrado]);
+  }, [enderecoEncontrado, onAddressChange]);
 
   const handleCepChange = (value: string) => {
     cepMask.handleChange(value);

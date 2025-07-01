@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useClientes } from '@/hooks/useClientes';
 import { OrdemServico } from '@/types';
 import { ProdutosOrdemSection } from './ProdutosOrdemSection';
+import { Trash2 } from 'lucide-react';
 
 interface ProdutoUtilizado {
   id?: string;
@@ -62,7 +63,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
 
   // Calculate final value automatically
   useEffect(() => {
-    const valorProdutos = produtosSelecionados.reduce((total, produto) => total + produto.valorTotal, 0);
+    const valorProdutos = produtosUtilizados.reduce((total, produto) => total + produto.valor_total, 0);
     const valorMaoObra = typeof formData.valor_mao_obra === 'string' ? parseFloat(formData.valor_mao_obra) || 0 : (formData.valor_mao_obra || 0);
     const valorBase = valorMaoObra + valorProdutos;
     const desconto = typeof formData.desconto === 'string' ? parseFloat(formData.desconto) || 0 : (formData.desconto || 0);
@@ -75,7 +76,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       valor_total: valorTotal,
       valor_final: valorFinal 
     }));
-  }, [formData.valor_mao_obra, formData.desconto, formData.acrescimo, produtosSelecionados]);
+  }, [formData.valor_mao_obra, formData.desconto, formData.acrescimo, produtosUtilizados]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,50 +156,18 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const adicionarProduto = (produtoId: string) => {
-    if (!produtoId) return;
-
-    const produto = produtos.find(p => p.id === produtoId);
-    if (!produto) return;
-
-    // Check if product is already added
-    const produtoExistente = produtosSelecionados.find(p => p.id === produtoId);
-    if (produtoExistente) {
-      // Increase quantity if already exists
-      const index = produtosSelecionados.findIndex(p => p.id === produtoId);
-      atualizarQuantidadeProduto(index, produtoExistente.quantidade + 1);
-    } else {
-      // Add new product
-      const novoProduto: ProdutoSelecionado = {
-        id: produto.id,
-        nome: produto.nome,
-        quantidade: 1,
-        valorUnitario: Number(produto.preco_venda),
-        valorTotal: Number(produto.preco_venda)
-      };
-
-      setProdutosSelecionados(prev => [...prev, novoProduto]);
-    }
-
-    // Reset selector
-    setProdutoSelecionado('');
+  const adicionarProduto = (produtoData: ProdutoUtilizado) => {
+    setProdutosUtilizados(prev => [...prev, produtoData]);
   };
 
   const removerProduto = (index: number) => {
-    setProdutosSelecionados(prev => prev.filter((_, i) => i !== index));
+    setProdutosUtilizados(prev => prev.filter((_, i) => i !== index));
   };
 
-  const atualizarQuantidadeProduto = (index: number, quantidade: number) => {
-    if (quantidade <= 0) {
-      removerProduto(index);
-      return;
-    }
-
-    setProdutosSelecionados(prev => 
+  const atualizarProduto = (index: number, produtoAtualizado: ProdutoUtilizado) => {
+    setProdutosUtilizados(prev => 
       prev.map((produto, i) => 
-        i === index 
-          ? { ...produto, quantidade, valorTotal: quantidade * produto.valorUnitario }
-          : produto
+        i === index ? produtoAtualizado : produto
       )
     );
   };
@@ -355,45 +324,22 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
       {/* Products and Services */}
       <Card>
         <CardHeader>
-          <CardTitle>Produtos e Serviços</CardTitle>
+          <CardTitle>Produtos e Serviços Utilizados</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Adicionar Produto/Serviço</Label>
-            <Select value={produtoSelecionado} onValueChange={adicionarProduto}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um produto ou serviço" />
-              </SelectTrigger>
-              <SelectContent>
-                {produtos.map((produto) => (
-                  <SelectItem key={produto.id} value={produto.id}>
-                    {produto.nome} - R$ {Number(produto.preco_venda).toFixed(2)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {produtosSelecionados.length > 0 && (
+          {produtosUtilizados.length > 0 && (
             <div className="space-y-2">
-              <Label>Produtos/Serviços Selecionados</Label>
+              <Label>Produtos/Serviços Utilizados</Label>
               <div className="space-y-2">
-                {produtosSelecionados.map((produto, index) => (
+                {produtosUtilizados.map((produto, index) => (
                   <div key={`${produto.id}-${index}`} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium">{produto.nome}</p>
                       <p className="text-sm text-gray-600">
-                        R$ {produto.valorUnitario.toFixed(2)} x {produto.quantidade} = R$ {produto.valorTotal.toFixed(2)}
+                        {produto.categoria} - R$ {produto.valor_unitario.toFixed(2)} x {produto.quantidade} = R$ {produto.valor_total.toFixed(2)}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Input
-                        type="number"
-                        min="1"
-                        value={produto.quantidade}
-                        onChange={(e) => atualizarQuantidadeProduto(index, parseInt(e.target.value) || 1)}
-                        className="w-20"
-                      />
                       <Button
                         type="button"
                         variant="outline"
