@@ -273,35 +273,10 @@ export const Ordens = () => {
     try {
       console.log('Finalizando OS com ID:', ordemParaPagamento.id);
       
-      // 1. Atualizar OS para status "finalizada" - simplificado
+      // Atualizar OS para status "finalizada" - a entrada financeira será criada automaticamente pelo backend
       await updateOrdem(ordemParaPagamento.id, {
         status: 'finalizada'
       });
-
-      // 2. Criar entrada financeira - simplificado
-      const valorTotal = parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0');
-
-      if (valorTotal > 0) {
-        const response = await fetch('/api/financeiro', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            descricao: `OS #${ordemParaPagamento.numero} - Finalização`,
-            valor: valorTotal,
-            tipo: 'receita',
-            data_vencimento: dadosPagamento.data_pagamento || new Date().toISOString().split('T')[0],
-            ordem_servico_id: ordemParaPagamento.id
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erro ao criar entrada financeira');
-        }
-      }
 
       toast.success('OS finalizada com sucesso!');
       setPagamentoModalOpen(false);
