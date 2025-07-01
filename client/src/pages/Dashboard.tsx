@@ -6,7 +6,7 @@ import { useProdutos } from '../hooks/useProdutos';
 import { useOrdens } from '../hooks/useOrdens';
 import { useFinanceiro } from '../hooks/useFinanceiro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Package, FileText, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, Package, FileText, DollarSign, TrendingUp, AlertCircle, Calculator } from 'lucide-react';
 
 export const Dashboard = () => {
   const { profile } = useAuth();
@@ -90,6 +90,13 @@ export const Dashboard = () => {
   // Estatísticas de ordens
   const ordensAbertas = ordens?.filter(o => o.status !== 'entregue')?.length || 0;
   const ordensEntregues = ordens?.filter(o => o.status === 'entregue')?.length || 0;
+  
+  // Valor total das OS em aberto
+  const valorTotalOSAbertas = ordens?.filter(o => o.status !== 'entregue')
+    .reduce((acc, ordem) => {
+      const valor = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : ordem.valor_total;
+      return acc + (valor || 0);
+    }, 0) || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -147,6 +154,13 @@ export const Dashboard = () => {
       icon: FileText,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
+    },
+    {
+      title: 'Valor OS Abertas',
+      value: loadingOrdens ? '...' : formatCurrency(valorTotalOSAbertas),
+      icon: DollarSign,
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50'
     },
     {
       title: 'Ordens Entregues',

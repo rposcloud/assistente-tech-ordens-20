@@ -2,8 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building } from 'lucide-react';
+import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface VisualizacaoOSProps {
   ordem: any;
@@ -35,6 +37,76 @@ const prioridadeColors = {
 };
 
 export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
+  const { toast } = useToast();
+  
+  const finalizarOS = async () => {
+    if (ordem.status === 'entregue') {
+      toast({
+        title: "Erro",
+        description: "Esta OS já foi finalizada",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (window.confirm('Finalizar esta Ordem de Serviço? Isso irá:\n- Alterar status para "Entregue"\n- Criar entrada financeira de receita')) {
+      try {
+        // Atualizar status da OS para entregue
+        const response = await fetch(`/api/ordens/${ordem.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...ordem,
+            status: 'entregue'
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro ao finalizar OS');
+        }
+
+        // Criar entrada financeira
+        const entradaResponse = await fetch('/api/financeiro', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tipo: 'receita',
+            descricao: `OS #${ordem.id.slice(-8)} - ${ordem.cliente?.nome || 'Cliente'}`,
+            valor: ordem.valor_total || 0,
+            categoria: 'Serviços de Reparo',
+            forma_pagamento: ordem.forma_pagamento || 'dinheiro',
+            data_vencimento: new Date().toISOString().split('T')[0],
+            status: ordem.forma_pagamento === 'dinheiro' ? 'pago' : 'pendente',
+            observacoes: `Finalização da OS ${ordem.id}`
+          }),
+        });
+
+        if (!entradaResponse.ok) {
+          throw new Error('Erro ao criar entrada financeira');
+        }
+
+        toast({
+          title: "Sucesso",
+          description: "OS finalizada com sucesso! Entrada financeira criada."
+        });
+        
+        // Recarregar a página para atualizar os dados
+        window.location.reload();
+        
+      } catch (error) {
+        console.error('Erro:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao finalizar OS",
+          variant: "destructive"
+        });
+      }
+    }
+  };
   // Verificação de segurança
   if (!ordem) {
     return (
@@ -364,6 +436,19 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               {ordem.observacoes_internas}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Botão Finalizar OS */}
+      {ordem.status !== 'entregue' && (
+        <div className="flex justify-end print:hidden">
+          <Button 
+            onClick={finalizarOS}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Finalizar OS
+          </Button>
         </div>
       )}
     </div>

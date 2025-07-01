@@ -35,7 +35,7 @@ export const Financeiro = () => {
   const [modalLoading, setModalLoading] = useState(false);
   
   // Estados dos filtros
-  const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>('este_mes');
+  const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>('todos');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'receita' | 'despesa'>('todos');
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'pago' | 'pendente'>('todos');
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todas');
