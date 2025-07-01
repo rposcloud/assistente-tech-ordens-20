@@ -467,11 +467,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Categoria selecionada:', categoriaReceita?.nome || categorias[0]?.nome);
           
           try {
+            const categoriaSelecionada = categoriaReceita || categorias[0];
             const entradaData = {
               descricao: `Receita da OS #${ordem.numero}`,
               valor: ordem.valor_total as string,
               tipo: 'receita' as const,
-              categoria_id: categoriaReceita?.id || categorias[0]?.id,
+              categoria_id: categoriaSelecionada?.id,
+              categoria: categoriaSelecionada?.nome || 'Serviços de Reparo',
               ordem_servico_id: id,
               data_vencimento: new Date().toISOString().split('T')[0],
               status_pagamento: 'pago' as const,
