@@ -58,7 +58,7 @@ export const HomePage = () => {
                 <div className="bg-blue-500 p-2 rounded-lg">
                   <Monitor className="text-white" size={20} />
                 </div>
-                <span className="text-xl font-bold text-gray-900">TechService</span>
+                <span className="text-xl font-bold text-gray-900">OS Cloud</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -82,7 +82,7 @@ export const HomePage = () => {
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Gerencie clientes, ordens de serviço, produtos e financeiro tudo em um só lugar. 
-            Aumente sua produtividade e organize seu negócio com o TechService.
+            Aumente sua produtividade e organize seu negócio com o OS Cloud.
           </p>
           <div className="flex justify-center space-x-4">
             <Link to="/cadastro">
@@ -132,7 +132,7 @@ export const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Por que escolher o TechService?
+              Por que escolher o OS Cloud?
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

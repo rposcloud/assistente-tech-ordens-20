@@ -30,7 +30,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-blue-600 mb-3">
-                {companyProfile?.empresa || 'TechService'}
+                {companyProfile?.empresa || 'OS Cloud'}
               </h1>
               <div className="text-base text-gray-700 space-y-1">
                 {companyProfile?.nome_completo && (

@@ -2,6 +2,7 @@
 import React from 'react';
 import { AuthForm } from '../components/AuthForm';
 import { FeatureSection } from '../components/FeatureSection';
+import { OSCloudLogo } from '../components/OSCloudLogo';
 
 export const LandingPage = () => {
   return (
@@ -25,9 +26,11 @@ export const LandingPage = () => {
         <div className="lg:hidden bg-gray-50 p-8">
           <div className="max-w-md mx-auto">
             <div className="text-center space-y-4 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">TechService</h2>
+              <div className="flex justify-center">
+                <OSCloudLogo size="lg" />
+              </div>
               <p className="text-gray-600">
-                Sistema completo para assistência técnica
+                Sistema completo de gestão para assistência técnica na nuvem
               </p>
             </div>
             

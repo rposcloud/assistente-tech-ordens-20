@@ -1,8 +1,8 @@
-# TechService - Sistema de Gestão para Assistência Técnica
+# OS Cloud - Sistema de Gestão para Assistência Técnica
 
 ## Overview
 
-TechService is a comprehensive web application designed for technical service management, built with a modern full-stack architecture. The system enables businesses to manage clients, service orders, products/services, and financial operations through an intuitive interface. It includes a customer portal feature for order tracking and supports various equipment types (smartphones, notebooks, desktops, tablets).
+OS Cloud é um sistema completo de gestão para assistência técnica, construído com arquitetura moderna full-stack. O sistema permite que empresas gerenciem clientes, ordens de serviço, produtos/serviços e operações financeiras através de uma interface intuitiva na nuvem. Inclui portal do cliente para acompanhamento de ordens e suporte a vários tipos de equipamentos (smartphones, notebooks, desktops, tablets).
 
 ## System Architecture
 
@@ -164,6 +164,12 @@ Changelog:
   * Ícones Edit e Trash2 padronizados em todas as páginas (Clientes, Produtos, Ordens, Financeiro)
   * Interface visual mais limpa e moderna com botões de ação consistentes
   * Mantida funcionalidade de tooltips para acessibilidade
+- July 1, 2025. Rebranding completo do sistema para "OS Cloud":
+  * Sistema rebatizado de TechService para OS Cloud em toda a aplicação
+  * Novo logo SVG criado e implementado no componente OSCloudLogo
+  * Atualização de todas as referências em Header, Sidebar, Landing Page, Home Page
+  * Documentação e descrição do sistema atualizadas para refletir novo nome
+  * Identidade visual unificada com novo nome e logo em todas as páginas
 
 ## User Preferences
 

@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Users, FileText, Home, LogOut, Package, DollarSign, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { OSCloudLogo } from './OSCloudLogo';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -22,8 +23,7 @@ export const Sidebar = () => {
   return (
     <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-blue-600">TechService</h1>
-        <p className="text-sm text-gray-500">Sistema de Gestão</p>
+        <OSCloudLogo size="md" />
       </div>
       
       <nav className="mt-6 flex-1">

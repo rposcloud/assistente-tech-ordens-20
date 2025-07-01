@@ -48,9 +48,9 @@ export const FeatureSection = () => {
   return (
     <div className="flex flex-col justify-center h-full space-y-8">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900">TechService</h1>
+        <h1 className="text-4xl font-bold text-gray-900">OS Cloud</h1>
         <p className="text-xl text-gray-600">
-          O sistema completo para gerenciar sua assistência técnica
+          O sistema completo para gerenciar sua assistência técnica na nuvem
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export const FeatureSection = () => {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-gray-800 text-center">
-          Por que escolher o TechService?
+          Por que escolher o OS Cloud?
         </h2>
         <div className="space-y-3">
           {benefits.map((benefit, index) => {
