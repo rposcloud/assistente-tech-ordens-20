@@ -449,27 +449,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Criar entrada financeira automaticamente quando OS é finalizada
       if (novoStatus === 'finalizada' && statusAnterior !== 'finalizada') {
+        console.log('OS sendo finalizada! Status anterior:', statusAnterior, 'Novo status:', novoStatus);
+        console.log('Valor total da OS:', ordem.valor_total);
+        
         // Verificar se já não existe entrada financeira para esta OS
         const entradasExistentes = await storage.getEntradasFinanceiras(req.userId!);
         const jaTemEntrada = entradasExistentes.some(entrada => entrada.ordem_servico_id === id);
+        
+        console.log('Já tem entrada financeira?', jaTemEntrada);
         
         if (!jaTemEntrada && ordem.valor_total) {
           // Buscar categoria padrão de receita
           const categorias = await storage.getCategoriasFinanceiras(req.userId!);
           const categoriaReceita = categorias.find(cat => cat.nome.toLowerCase().includes('receita') || cat.nome.toLowerCase().includes('vendas') || cat.nome.toLowerCase().includes('servico'));
           
+          console.log('Categorias encontradas:', categorias.length);
+          console.log('Categoria selecionada:', categoriaReceita?.nome || categorias[0]?.nome);
+          
           try {
-            await storage.createEntradaFinanceira({
+            const entradaData = {
               descricao: `Receita da OS #${ordem.numero}`,
-              valor: parseFloat(ordem.valor_total as string),
-              tipo: 'receita',
+              valor: ordem.valor_total as string,
+              tipo: 'receita' as const,
               categoria_id: categoriaReceita?.id || categorias[0]?.id,
               ordem_servico_id: id,
-              data_vencimento: new Date(),
-              status_pagamento: 'pago',
-              forma_pagamento: 'dinheiro',
+              data_vencimento: new Date().toISOString().split('T')[0],
+              status_pagamento: 'pago' as const,
+              forma_pagamento: 'dinheiro' as const,
               user_id: req.userId!
-            });
+            };
+            
+            console.log('Criando entrada financeira:', entradaData);
+            const entradaCriada = await storage.createEntradaFinanceira(entradaData);
+            console.log('Entrada financeira criada com sucesso:', entradaCriada.id);
           } catch (error) {
             console.error('Erro ao criar entrada financeira automática:', error);
           }
