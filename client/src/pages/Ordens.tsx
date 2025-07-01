@@ -121,12 +121,13 @@ export const Ordens = () => {
   const handleVisualizarOrdem = async (ordem: OrdemServico) => {
     try {
       // Buscar dados completos da ordem incluindo cliente
-      const response = await fetch(`/api/ordens/${ordem.id}/print`);
+      const response = await fetch(`/api/ordens/${ordem.id}`);
+      
       if (response.ok) {
-        const data = await response.json();
-        setOrdemParaVisualizacao(data.ordem);
+        const ordemCompleta = await response.json();
+        setOrdemParaVisualizacao(ordemCompleta);
       } else {
-        // Fallback para a ordem atual se não conseguir buscar dados completos
+        // Fallback para a ordem atual
         setOrdemParaVisualizacao(ordem);
       }
       setVisualizacaoModalOpen(true);
