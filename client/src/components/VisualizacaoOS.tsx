@@ -63,17 +63,27 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-3 print:p-2 print:space-y-2">
-      {/* Cabeçalho */}
-      <div className="bg-white border border-gray-200 rounded-lg">
-        <div className="p-3 print:p-2">
+    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
+      {/* Cabeçalho da Empresa */}
+      <div className="text-center border-b border-gray-200 pb-3 print:pb-2">
+        <h1 className="text-xl font-bold text-gray-900 print:text-lg">
+          TechService - Assistência Técnica
+        </h1>
+        <p className="text-gray-600 text-sm print:text-xs">
+          (11) 99999-9999 | contato@techservice.com.br
+        </p>
+      </div>
+
+      {/* Cabeçalho da OS */}
+      <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
+        <div className="p-4 print:p-3">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-lg font-bold text-gray-900 print:text-base">
-                TechService - Ordem de Serviço #{ordem.numero || 'N/A'}
-              </h1>
+              <h2 className="text-xl font-bold text-gray-900 print:text-lg">
+                Ordem de Serviço #{ordem.numero || 'N/A'}
+              </h2>
               <p className="text-gray-600 text-sm print:text-xs">
-                {ordem.clientes?.nome || 'Cliente não informado'} - {ordem.clientes?.telefone || 'N/A'} | Data: {formatDate(ordem.data_abertura)}
+                {ordem.clientes?.nome || 'Cliente não informado'} - {ordem.clientes?.telefone || 'N/A'}
               </p>
             </div>
             <div className="flex gap-2 print:gap-1">
@@ -88,32 +98,32 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         </div>
       </div>
 
-      {/* Linha 1: Cliente e Equipamento em layout horizontal */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 print:gap-2">
-        {/* Informações do Cliente - ocupa 3 colunas */}
-        <div className="lg:col-span-3 bg-white border border-gray-200 rounded-lg">
-          <div className="p-2 border-b border-gray-100">
+      {/* Linha 1: Cliente e Equipamento */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
+        {/* Informações do Cliente */}
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
               <User className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
-              Dados do Cliente
+              Cliente
             </h3>
           </div>
-          <div className="p-2 print:p-1">
-            <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="p-3 print:p-2">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
               <div>
-                <p className="font-medium text-gray-700 mb-1">Nome:</p>
-                <p className="text-gray-900 font-medium">{ordem.clientes?.nome}</p>
+                <p className="font-medium text-gray-700">Nome:</p>
+                <p className="text-gray-900">{ordem.clientes?.nome}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700 mb-1">Telefone:</p>
+                <p className="font-medium text-gray-700">Telefone:</p>
                 <p className="text-gray-900">{ordem.clientes?.telefone}</p>
               </div>
-              <div>
-                <p className="font-medium text-gray-700 mb-1">E-mail:</p>
-                <p className="text-gray-900 truncate">{ordem.clientes?.email || 'Não informado'}</p>
+              <div className="col-span-2">
+                <p className="font-medium text-gray-700">E-mail:</p>
+                <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
               </div>
-              <div className="col-span-3">
-                <p className="font-medium text-gray-700 mb-1">Endereço:</p>
+              <div className="col-span-2">
+                <p className="font-medium text-gray-700">Endereço:</p>
                 <p className="text-gray-900 text-xs">
                   {ordem.clientes?.endereco ? 
                     `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
@@ -125,34 +135,34 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           </div>
         </div>
 
-        {/* Informações do Equipamento - ocupa 2 colunas */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
-          <div className="p-2 border-b border-gray-100">
+        {/* Informações do Equipamento */}
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-3 border-b border-gray-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
               <Package className="h-4 w-4 text-green-600 print:h-3 print:w-3" />
               Equipamento
             </h3>
           </div>
-          <div className="p-2 print:p-1">
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-3 print:p-2">
+            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
               <div>
-                <p className="font-medium text-gray-700 mb-1">Tipo:</p>
+                <p className="font-medium text-gray-700">Tipo:</p>
                 <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700 mb-1">Marca:</p>
-                <p className="text-gray-900 font-medium">{ordem.marca}</p>
+                <p className="font-medium text-gray-700">Marca:</p>
+                <p className="text-gray-900">{ordem.marca}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700 mb-1">Modelo:</p>
-                <p className="text-gray-900 font-medium">{ordem.modelo}</p>
+                <p className="font-medium text-gray-700">Modelo:</p>
+                <p className="text-gray-900">{ordem.modelo}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700 mb-1">N° Série:</p>
+                <p className="font-medium text-gray-700">N° Série:</p>
                 <p className="text-gray-900">{ordem.numero_serie || 'N/A'}</p>
               </div>
               <div className="col-span-2">
-                <p className="font-medium text-gray-700 mb-1">Senha:</p>
+                <p className="font-medium text-gray-700">Senha:</p>
                 <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
               </div>
             </div>
@@ -328,66 +338,34 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         </div>
       )}
 
-      {/* Assinaturas e Termo de Garantia */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 print:gap-2">
-        {/* Assinaturas */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold print:text-xs">Assinaturas</h3>
-          </div>
-          <div className="p-3 print:p-2 space-y-4 print:space-y-3">
+      {/* Assinaturas */}
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="p-3 border-b border-gray-100">
+          <h3 className="text-sm font-semibold print:text-xs">Assinaturas e Termo de Garantia</h3>
+        </div>
+        <div className="p-3 print:p-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
             <div>
               <p className="text-xs font-medium text-gray-700 mb-2">Cliente:</p>
-              <div className="border-b border-gray-300 pb-1 mb-1">
-                <p className="text-xs text-gray-500">Assinatura</p>
-              </div>
+              <div className="border-b border-gray-300 h-8 mb-1"></div>
               <p className="text-xs text-gray-600">{ordem.clientes?.nome}</p>
             </div>
             <div>
               <p className="text-xs font-medium text-gray-700 mb-2">Técnico Responsável:</p>
-              <div className="border-b border-gray-300 pb-1 mb-1">
-                <p className="text-xs text-gray-500">Assinatura</p>
-              </div>
+              <div className="border-b border-gray-300 h-8 mb-1"></div>
               <p className="text-xs text-gray-600">{ordem.tecnico_responsavel || 'Técnico'}</p>
             </div>
           </div>
-        </div>
-
-        {/* Termo de Garantia */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-2 border-b border-gray-100">
-            <h3 className="text-sm font-semibold print:text-xs">Termos de Garantia</h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="text-xs text-gray-700 space-y-2 print:space-y-1">
-              <p className="font-medium">
-                ✓ Garantia: {ordem.garantia} dias para o serviço realizado
-              </p>
-              <div className="space-y-1 text-xs">
-                <p>• A garantia cobre apenas o serviço executado</p>
-                <p>• Não cobre danos por mau uso ou acidente</p>
-                <p>• Válida mediante apresentação desta OS</p>
-                <p>• Equipamento deve retornar nas mesmas condições</p>
-                <p>• Garantia não cobre peças substituídas por desgaste natural</p>
-              </div>
-              <div className="border-t border-gray-200 pt-2 print:pt-1">
-                <p className="text-xs font-medium text-center">
-                  TechService - Assistência Técnica
-                </p>
-                <p className="text-xs text-center text-gray-600">
-                  Contato: (11) 99999-9999 | contato@techservice.com.br
-                </p>
-              </div>
-            </div>
+          <div className="mt-4 print:mt-3 pt-3 border-t border-gray-200">
+            <p className="text-xs font-medium text-gray-700 mb-2">
+              Garantia: {ordem.garantia} dias para o serviço realizado
+            </p>
+            <p className="text-xs text-gray-600">
+              A garantia cobre apenas o serviço executado. Não cobre danos por mau uso ou acidente. 
+              Válida mediante apresentação desta OS.
+            </p>
           </div>
         </div>
-      </div>
-
-      {/* Rodapé */}
-      <div className="text-center py-2 print:py-1">
-        <p className="text-xs text-gray-500">
-          Documento gerado em {formatDate(new Date().toISOString())} • OS #{ordem.numero}
-        </p>
       </div>
     </div>
   );
