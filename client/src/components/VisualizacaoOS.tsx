@@ -75,13 +75,14 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         // 2. Criar entrada financeira
         await api.financeiro.create({
           tipo: 'receita',
-          descricao: `OS #${ordem.id.slice(-8)} - ${ordem.cliente?.nome || 'Cliente'}`,
+          descricao: `OS #${ordem.numero} - ${ordem.cliente?.nome || 'Cliente'}`,
           valor: ordem.valor_total || 0,
           categoria: 'Serviços de Reparo',
           forma_pagamento: formaPagamento,
           data_vencimento: dataVencimento,
           status: formaPagamento === 'dinheiro' ? 'pago' : 'pendente',
-          observacoes: `Finalização da OS ${ordem.id}`
+          observacoes: `Finalização da OS ${ordem.numero}`,
+          ordem_servico_id: ordem.id
         });
 
         toast({

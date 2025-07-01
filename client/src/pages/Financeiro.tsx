@@ -251,6 +251,14 @@ export const Financeiro = () => {
   };
 
   const handleDelete = async (entrada: EntradaFinanceira) => {
+    // Verificar se a entrada está vinculada a uma OS
+    if (entrada.ordem_servico_id) {
+      toast.error('Esta entrada não pode ser excluída pois está vinculada a uma Ordem de Serviço!', {
+        description: `Esta receita foi gerada automaticamente quando a OS foi finalizada. Para excluir, você deve reabrir a OS correspondente.`
+      });
+      return;
+    }
+
     if (window.confirm(`Tem certeza que deseja excluir a entrada "${entrada.descricao}"?`)) {
       try {
         await deleteEntrada(entrada.id);
@@ -296,7 +304,17 @@ export const Financeiro = () => {
     {
       key: 'descricao',
       label: 'Descrição',
-      sortable: true
+      sortable: true,
+      render: (entrada) => (
+        <div className="flex flex-col">
+          <span>{entrada.descricao}</span>
+          {entrada.ordem_servico_id && (
+            <Badge variant="outline" className="mt-1 text-xs bg-blue-50 text-blue-700 border-blue-200 w-fit">
+              Vinculado à OS
+            </Badge>
+          )}
+        </div>
+      )
     },
     {
       key: 'categoria',

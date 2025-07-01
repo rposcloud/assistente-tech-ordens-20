@@ -177,6 +177,12 @@ Changelog:
   * Tabela de "Últimas Ordens de Serviço" com status coloridos e botões de ação
   * Menu dropdown com ícones para visualizar/editar ordens diretamente do Dashboard
   * Layout otimizado focado em funcionalidades práticas e navegação eficiente
+- July 1, 2025. Proteção de entradas financeiras vinculadas a OS:
+  * Sistema agora impede exclusão de receitas geradas automaticamente por OS
+  * Adicionado campo ordem_servico_id nas entradas financeiras
+  * Badge "Vinculado à OS" exibido na tabela para identificar origem
+  * Mensagem explicativa quando usuário tenta excluir entrada protegida
+  * Integração completa entre módulos de OS e financeiro com rastreabilidade
 
 ## User Preferences
 

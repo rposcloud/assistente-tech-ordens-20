@@ -8,6 +8,7 @@ export interface EntradaFinanceira {
   valor: number;
   tipo: 'receita' | 'despesa';
   categoria_id?: string;
+  ordem_servico_id?: string;
   data_vencimento: string;
   data_pagamento?: string;
   forma_pagamento?: 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'pix' | 'transferencia' | 'parcelado';
