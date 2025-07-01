@@ -214,6 +214,13 @@ Changelog:
   * Interface atualizada com mensagem explicativa sobre inativação vs exclusão
   * Elimina erros de chave estrangeira ao tentar excluir produtos em uso
   * Solução robusta que mantém consistência dos dados em todas as operações
+- July 1, 2025. INTEGRAÇÃO FINANCEIRA FINALIZADA E TESTADA COM SUCESSO:
+  * Corrigido problema crítico do campo 'categoria' obrigatório no banco de dados
+  * Removida chamada HTTP duplicada que causava erro 401 na criação de entradas
+  * Sistema automatizado 100% funcional: OS finalizada → entrada financeira criada automaticamente
+  * Testado e confirmado funcionamento: OS #000003 gerou entrada financeira ID c343fc36-dffd-43de-8b7d-270c21021ccd
+  * Dashboard limpo: removida seção de integridade de dados desnecessária
+  * Sistema completo e pronto para deploy em produção
 
 ## User Preferences
 
