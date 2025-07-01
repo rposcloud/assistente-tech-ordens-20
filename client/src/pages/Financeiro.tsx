@@ -35,7 +35,7 @@ export const Financeiro = () => {
   const [modalLoading, setModalLoading] = useState(false);
   
   // Estados dos filtros
-  const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>('todos');
+  const [filtroRapido, setFiltroRapido] = useState<FiltroRapido>('este_mes');
   const [filtroTipo, setFiltroTipo] = useState<'todos' | 'receita' | 'despesa'>('todos');
   const [filtroStatus, setFiltroStatus] = useState<'todos' | 'pago' | 'pendente'>('todos');
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todas');
@@ -511,91 +511,90 @@ export const Financeiro = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Filtros Rápidos */}
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Período Rápido:</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {[
-                  { key: 'hoje', label: 'Hoje' },
-                  { key: 'ontem', label: 'Ontem' },
-                  { key: 'esta_semana', label: 'Esta Semana' },
-                  { key: 'mes_passado', label: 'Mês Passado' },
-                  { key: 'este_mes', label: 'Este Mês' },
-                  { key: 'ultimos_3_meses', label: 'Últimos 3 Meses' },
-                  { key: 'este_ano', label: 'Este Ano' },
-                  { key: 'todos', label: 'Todos' }
-                ].map((filtro) => (
-                  <Button
-                    key={filtro.key}
-                    variant={filtroRapido === filtro.key ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFiltroRapido(filtro.key as FiltroRapido)}
-                  >
-                    {filtro.label}
-                  </Button>
-                ))}
-              </div>
+          {/* Filtros Compactos */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Dropdown de Período */}
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium text-gray-600">Período:</Label>
+              <Select value={filtroRapido} onValueChange={(value: any) => setFiltroRapido(value)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="este_mes">Este Mês</SelectItem>
+                  <SelectItem value="hoje">Hoje</SelectItem>
+                  <SelectItem value="ontem">Ontem</SelectItem>
+                  <SelectItem value="esta_semana">Esta Semana</SelectItem>
+                  <SelectItem value="mes_passado">Mês Passado</SelectItem>
+                  <SelectItem value="ultimos_3_meses">Últimos 3 Meses</SelectItem>
+                  <SelectItem value="este_ano">Este Ano</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filtro de Tipo */}
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium text-gray-600">Tipo:</Label>
+              <Select value={filtroTipo} onValueChange={(value: any) => setFiltroTipo(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="receita">Receitas</SelectItem>
+                  <SelectItem value="despesa">Despesas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filtro de Status */}
+            <div className="flex items-center gap-2">
+              <Label className="text-sm font-medium text-gray-600">Status:</Label>
+              <Select value={filtroStatus} onValueChange={(value: any) => setFiltroStatus(value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Filtros Avançados - Expandível */}
             {mostrarFiltros && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
-                <div>
-                  <Label htmlFor="data-inicio">Data Início:</Label>
+              <>
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium text-gray-600">De:</Label>
                   <Input
-                    id="data-inicio"
                     type="date"
                     value={dataInicio}
                     onChange={(e) => setDataInicio(e.target.value)}
+                    className="w-36"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="data-fim">Data Fim:</Label>
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm font-medium text-gray-600">Até:</Label>
                   <Input
-                    id="data-fim"
                     type="date"
                     value={dataFim}
                     onChange={(e) => setDataFim(e.target.value)}
+                    className="w-36"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="filtro-tipo">Tipo:</Label>
-                  <Select value={filtroTipo} onValueChange={(value: any) => setFiltroTipo(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      <SelectItem value="receita">Receitas</SelectItem>
-                      <SelectItem value="despesa">Despesas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="filtro-status">Status:</Label>
-                  <Select value={filtroStatus} onValueChange={(value: any) => setFiltroStatus(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      <SelectItem value="pago">Pago</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              </>
             )}
 
-            {/* Botões de ação dos filtros */}
-            <div className="flex items-center gap-2 pt-2">
+            {/* Botões de ação */}
+            <div className="flex items-center gap-2 ml-auto">
               <Button variant="outline" size="sm" onClick={limparFiltros}>
-                <X className="h-4 w-4 mr-2" />
-                Limpar Filtros
+                <X className="h-4 w-4 mr-1" />
+                Limpar
               </Button>
-              <div className="text-sm text-gray-500">
-                {entradasFiltradas.length} entrada(s) encontrada(s)
+              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {entradasFiltradas.length} registro(s)
               </div>
             </div>
           </div>
