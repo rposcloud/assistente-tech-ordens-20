@@ -252,6 +252,8 @@ Changelog:
   * Campos de data de entrega para preenchimento manual
   * Integração em todos os formatos: visualização, impressão e download PDF
   * Layout profissional com espaços adequados para assinaturas físicas
+  * Layout otimizado: assinaturas lado a lado horizontalmente, mais compacto
+  * Alturas reduzidas (h-10) para melhor aproveitamento de espaço na impressão
 
 ## User Preferences
 

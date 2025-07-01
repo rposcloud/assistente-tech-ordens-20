@@ -359,44 +359,40 @@ export const OrdemPrintView: React.FC<OrdemPrintViewProps> = ({ ordem, profile }
             Assinaturas
           </h3>
         </div>
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="p-4">
+          {/* Assinaturas lado a lado */}
+          <div className="grid grid-cols-2 gap-6 mb-4">
             {/* Assinatura do Cliente */}
-            <div className="space-y-3">
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-700 mb-4">Assinatura do Cliente</p>
-                <div className="border-b-2 border-gray-300 h-16 mb-3"></div>
-                <div className="space-y-1 text-xs text-gray-600">
-                  <p className="font-medium">{ordem.clientes?.nome}</p>
-                  <p>CPF/CNPJ: {ordem.clientes?.cpf_cnpj || 'Não informado'}</p>
-                  <p>Data: ___/___/______</p>
-                </div>
+            <div className="text-center">
+              <p className="text-xs font-medium text-gray-700 mb-2">Assinatura do Cliente</p>
+              <div className="border-b-2 border-gray-300 h-10 mb-2"></div>
+              <div className="text-xs text-gray-600">
+                <p className="font-medium">{ordem.clientes?.nome}</p>
+                <p>CPF/CNPJ: {ordem.clientes?.cpf_cnpj || 'Não informado'}</p>
+                <p>Data: ___/___/______</p>
               </div>
             </div>
 
             {/* Assinatura do Técnico */}
-            <div className="space-y-3">
-              <div className="text-center">
-                <p className="text-sm font-medium text-gray-700 mb-4">Assinatura do Técnico</p>
-                <div className="border-b-2 border-gray-300 h-16 mb-3"></div>
-                <div className="space-y-1 text-xs text-gray-600">
-                  <p className="font-medium">{ordem.tecnico_responsavel || 'Técnico Responsável'}</p>
-                  <p>Empresa: {profile?.empresa || 'Nome da Empresa'}</p>
-                  <p>Data: ___/___/______</p>
-                </div>
+            <div className="text-center">
+              <p className="text-xs font-medium text-gray-700 mb-2">Assinatura do Técnico</p>
+              <div className="border-b-2 border-gray-300 h-10 mb-2"></div>
+              <div className="text-xs text-gray-600">
+                <p className="font-medium">{ordem.tecnico_responsavel || 'Técnico Responsável'}</p>
+                <p>Empresa: {profile?.empresa || 'Nome da Empresa'}</p>
+                <p>Data: ___/___/______</p>
               </div>
             </div>
           </div>
 
           {/* Termo de Responsabilidade */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="text-xs text-gray-600 space-y-2">
+          <div className="pt-3 border-t border-gray-200">
+            <div className="text-xs text-gray-600 space-y-1">
               <p className="font-medium text-center">TERMO DE RESPONSABILIDADE</p>
-              <p className="text-justify leading-relaxed">
-                Declaro que recebi o equipamento descrito nesta ordem de serviço em perfeitas condições de funcionamento e que todos os serviços foram executados conforme solicitado. Estou ciente da garantia oferecida e das condições de uso. 
-                {ordem.garantia && ` A garantia dos serviços prestados é de ${ordem.garantia} dias a partir da data de entrega.`}
+              <p className="text-justify leading-tight">
+                Declaro que recebi o equipamento descrito nesta ordem de serviço em perfeitas condições de funcionamento e que todos os serviços foram executados conforme solicitado. Estou ciente da garantia oferecida e das condições de uso.{ordem.garantia && ` A garantia dos serviços prestados é de ${ordem.garantia} dias a partir da data de entrega.`}
               </p>
-              <p className="text-center mt-3 text-xs">
+              <p className="text-center mt-2 text-xs">
                 <strong>Data de entrega:</strong> ___/___/______ às ___:___ h
               </p>
             </div>
