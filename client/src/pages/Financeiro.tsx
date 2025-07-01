@@ -41,7 +41,6 @@ export const Financeiro = () => {
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todas');
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
-  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   // Função para obter datas com base no filtro rápido
   const obterRangeDatas = (filtro: FiltroRapido) => {
@@ -495,29 +494,14 @@ export const Financeiro = () => {
 
       {/* Filtros */}
       <Card className="mb-6">
-        <CardHeader>
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              <CardTitle>Filtros de Movimentação</CardTitle>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setMostrarFiltros(!mostrarFiltros)}
-            >
-              {mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {/* Filtros Compactos */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Dropdown de Período */}
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium text-gray-600">Período:</Label>
+              <Label className="text-xs font-medium text-gray-600">Período:</Label>
               <Select value={filtroRapido} onValueChange={(value: any) => setFiltroRapido(value)}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-36 h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -535,9 +519,9 @@ export const Financeiro = () => {
 
             {/* Filtro de Tipo */}
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium text-gray-600">Tipo:</Label>
+              <Label className="text-xs font-medium text-gray-600">Tipo:</Label>
               <Select value={filtroTipo} onValueChange={(value: any) => setFiltroTipo(value)}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28 h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -550,9 +534,9 @@ export const Financeiro = () => {
 
             {/* Filtro de Status */}
             <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium text-gray-600">Status:</Label>
+              <Label className="text-xs font-medium text-gray-600">Status:</Label>
               <Select value={filtroStatus} onValueChange={(value: any) => setFiltroStatus(value)}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28 h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -563,39 +547,15 @@ export const Financeiro = () => {
               </Select>
             </div>
 
-            {/* Filtros Avançados - Expandível */}
-            {mostrarFiltros && (
-              <>
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-gray-600">De:</Label>
-                  <Input
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    className="w-36"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium text-gray-600">Até:</Label>
-                  <Input
-                    type="date"
-                    value={dataFim}
-                    onChange={(e) => setDataFim(e.target.value)}
-                    className="w-36"
-                  />
-                </div>
-              </>
-            )}
+            {/* Botão Limpar integrado */}
+            <Button variant="ghost" size="sm" onClick={limparFiltros} className="h-8 px-2">
+              <X className="h-3 w-3 mr-1" />
+              <span className="text-xs">Limpar</span>
+            </Button>
 
-            {/* Botões de ação */}
-            <div className="flex items-center gap-2 ml-auto">
-              <Button variant="outline" size="sm" onClick={limparFiltros}>
-                <X className="h-4 w-4 mr-1" />
-                Limpar
-              </Button>
-              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {entradasFiltradas.length} registro(s)
-              </div>
+            {/* Contador de registros */}
+            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded ml-auto">
+              {entradasFiltradas.length} registro(s)
             </div>
           </div>
         </CardContent>
