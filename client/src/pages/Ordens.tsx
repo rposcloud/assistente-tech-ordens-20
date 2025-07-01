@@ -7,6 +7,7 @@ import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
 import { VisualizacaoOSModal } from '@/components/modals/VisualizacaoOSModal';
+import { PagamentoOSModal } from '@/components/modals/PagamentoOSModal';
 
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
@@ -64,6 +65,11 @@ export const Ordens = () => {
   const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
   const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  
+  // Estados para modal de pagamento
+  const [pagamentoModalOpen, setPagamentoModalOpen] = useState(false);
+  const [ordemParaPagamento, setOrdemParaPagamento] = useState<OrdemServico | null>(null);
+  const [loadingPagamento, setLoadingPagamento] = useState(false);
 
 
 
@@ -270,10 +276,63 @@ export const Ordens = () => {
         ...ordem,
         status: newStatus
       });
+      
+      // Se o status foi alterado para "entregue", abrir modal de pagamento
+      if (newStatus === 'entregue') {
+        // Buscar a ordem atualizada com todos os dados
+        const ordemCompleta = await fetch(`/api/ordens/${ordem.id}/print`);
+        const dadosCompletos = await ordemCompleta.json();
+        
+        setOrdemParaPagamento(dadosCompletos);
+        setPagamentoModalOpen(true);
+      }
+      
       toast.success(`Status alterado para: ${statusLabels[newStatus as keyof typeof statusLabels]}`);
     } catch (error: any) {
       console.error('Erro ao alterar status:', error);
       toast.error('Erro ao alterar status');
+    }
+  };
+
+  // Função para confirmar pagamento e criar entrada financeira
+  const handleConfirmarPagamento = async (dadosPagamento: any) => {
+    if (!ordemParaPagamento) return;
+    
+    setLoadingPagamento(true);
+    try {
+      // Atualizar dados de pagamento na OS
+      await updateOrdem(ordemParaPagamento.id, {
+        ...ordemParaPagamento,
+        forma_pagamento: dadosPagamento.forma_pagamento,
+        status_pagamento: dadosPagamento.status_pagamento,
+        data_pagamento: dadosPagamento.data_pagamento,
+        observacoes_pagamento: dadosPagamento.observacoes_pagamento
+      });
+
+      // Criar entrada financeira (receita)
+      await fetch('/api/financeiro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          descricao: `Receita OS #${ordemParaPagamento.numero} - ${(ordemParaPagamento as any).clientes?.nome || 'Cliente não identificado'}`,
+          valor: parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0'),
+          tipo: 'receita',
+          data_movimento: dadosPagamento.data_pagamento,
+          forma_pagamento: dadosPagamento.forma_pagamento,
+          status_pagamento: dadosPagamento.status_pagamento,
+          observacoes: dadosPagamento.observacoes_pagamento,
+          ordem_servico_id: ordemParaPagamento.id
+        })
+      });
+
+      toast.success('Pagamento registrado e entrada financeira criada com sucesso!');
+      setPagamentoModalOpen(false);
+      setOrdemParaPagamento(null);
+    } catch (error) {
+      console.error('Erro ao confirmar pagamento:', error);
+      toast.error('Erro ao registrar pagamento');
+    } finally {
+      setLoadingPagamento(false);
     }
   };
 
@@ -551,8 +610,17 @@ export const Ordens = () => {
         ordem={ordemParaVisualizacao}
       />
 
-
-
+      {/* Modal de Pagamento */}
+      <PagamentoOSModal
+        isOpen={pagamentoModalOpen}
+        onClose={() => {
+          setPagamentoModalOpen(false);
+          setOrdemParaPagamento(null);
+        }}
+        ordem={ordemParaPagamento}
+        onConfirm={handleConfirmarPagamento}
+        loading={loadingPagamento}
+      />
 
       {/* Modal de Confirmação de Exclusão */}
       <ConfirmationModal

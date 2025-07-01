@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, integer, boolean, decimal, date, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, boolean, decimal, date, timestamp, jsonb, pgEnum, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -193,6 +193,8 @@ export const tiposDefeito = pgTable("tipos_defeito", {
   ativo: boolean("ativo").default(true).notNull(),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+
 
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({

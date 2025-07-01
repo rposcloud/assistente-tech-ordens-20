@@ -9,7 +9,7 @@ import {
   type Profile, type InsertProfile
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 export interface IStorage {
@@ -322,17 +322,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrdemServico(ordem: InsertOrdemServico, userId: string): Promise<OrdemServico> {
-    // Gerar número sequencial
-    const lastOrder = await db
+    // Gerar número sequencial que nunca se repete, mesmo após exclusões
+    const allNumbers = await db
       .select({ numero: ordensServico.numero })
       .from(ordensServico)
       .where(eq(ordensServico.user_id, userId))
-      .orderBy(desc(ordensServico.created_at))
-      .limit(1);
+      .orderBy(ordensServico.numero);
 
-    const nextNumber = lastOrder.length > 0 && lastOrder[0].numero
-      ? String(parseInt(lastOrder[0].numero) + 1).padStart(6, '0')
-      : '000001';
+    // Encontrar o maior número existente
+    let maxNumber = 0;
+    if (allNumbers.length > 0) {
+      maxNumber = Math.max(...allNumbers.map(order => parseInt(order.numero || '0')));
+    }
+
+    // Próximo número sempre será maior que o maior existente
+    const nextNumber = String(maxNumber + 1).padStart(6, '0');
 
     const ordemComDados = {
       ...ordem,
