@@ -134,15 +134,14 @@
     color: black !important;
   }
   
-  /* Ocultar elementos desnecessários */
+  /* Ocultar apenas elementos específicos de navegação */
   .print\:hidden,
   .no-print,
-  button,
-  .bg-gradient-to-r,
-  .shadow-lg,
-  .border,
-  header,
-  nav,
+  button:not(.print-button),
+  .bg-gradient-to-r:not(.print-content),
+  .shadow-lg:not(.print-content),
+  header:not(.print-header),
+  nav:not(.print-nav),
   .sidebar,
   .menu-toggle {
     display: none !important;
@@ -158,16 +157,42 @@
     page-break-inside: avoid;
   }
   
+  /* Mostrar conteúdo principal */
+  .print\:block {
+    display: block !important;
+  }
+  
   /* Otimizar tabelas para impressão */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
+    border: 1px solid #000 !important;
   }
   
   th, td {
-    border: 1px solid #ddd !important;
+    border: 1px solid #000 !important;
     padding: 4px 6px !important;
     font-size: 10pt !important;
+    background: white !important;
+    color: black !important;
+  }
+  
+  /* Garantir que texto e dados apareçam */
+  p, div, span, h1, h2, h3, h4, h5, h6, td, th, li, ul, ol {
+    color: black !important;
+    background: transparent !important;
+  }
+  
+  /* Forçar visibilidade do conteúdo principal */
+  .content, .main-content, main, article, section {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Cards e containers */
+  .card, .card-content, .table-container {
+    border: 1px solid #ddd !important;
+    background: white !important;
   }
   
   /* Cards para impressão */
