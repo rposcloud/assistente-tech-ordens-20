@@ -267,10 +267,14 @@ export const Ordens = () => {
 
   // Função para confirmar pagamento e finalizar OS
   const handleConfirmarPagamento = async (dadosPagamento: any) => {
-    if (!ordemParaPagamento) return;
+    if (!ordemParaPagamento || !ordemParaPagamento.id) {
+      toast.error('Erro: ID da ordem não encontrado');
+      return;
+    }
     
     setLoadingPagamento(true);
     try {
+      console.log('Finalizando OS com ID:', ordemParaPagamento.id);
       // 1. Atualizar OS para status "finalizada" com dados de pagamento
       await updateOrdem(ordemParaPagamento.id, {
         ...ordemParaPagamento,
