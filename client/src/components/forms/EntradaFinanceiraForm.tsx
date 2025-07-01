@@ -230,65 +230,16 @@ export const EntradaFinanceiraForm: React.FC<EntradaFinanceiraFormProps> = ({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Informações Adicionais</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="centro_custo">Centro de Custo</Label>
-              <Input
-                id="centro_custo"
-                value={formData.centro_custo}
-                onChange={(e) => updateField('centro_custo', e.target.value)}
-                placeholder="Ex: Vendas, Administrativo"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="conta_bancaria">Conta Bancária</Label>
-              <Input
-                id="conta_bancaria"
-                value={formData.conta_bancaria}
-                onChange={(e) => updateField('conta_bancaria', e.target.value)}
-                placeholder="Ex: Conta Corrente, Poupança"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="numero_documento">Número do Documento</Label>
-              <Input
-                id="numero_documento"
-                value={formData.numero_documento}
-                onChange={(e) => updateField('numero_documento', e.target.value)}
-                placeholder="Ex: Nota fiscal, recibo"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pessoa_responsavel">Pessoa Responsável</Label>
-              <Input
-                id="pessoa_responsavel"
-                value={formData.pessoa_responsavel}
-                onChange={(e) => updateField('pessoa_responsavel', e.target.value)}
-                placeholder="Nome do responsável"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="observacoes">Observações</Label>
-            <Textarea
-              id="observacoes"
-              value={formData.observacoes}
-              onChange={(e) => updateField('observacoes', e.target.value)}
-              placeholder="Observações adicionais"
-              rows={3}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <Label htmlFor="observacoes">Observações</Label>
+        <Textarea
+          id="observacoes"
+          value={formData.observacoes}
+          onChange={(e) => updateField('observacoes', e.target.value)}
+          placeholder="Observações adicionais (opcional)"
+          rows={3}
+        />
+      </div>
 
       <div className="flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onCancel}>

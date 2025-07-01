@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar, Edit, Trash2, Filter, X } from 'lucide-react';
+import { Plus, DollarSign, TrendingUp, TrendingDown, Calendar, Edit, Trash2, Filter, X, Check } from 'lucide-react';
 import { useFinanceiro, EntradaFinanceira } from '@/hooks/useFinanceiro';
 import { EntradaFinanceiraModal } from '@/components/modals/EntradaFinanceiraModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
@@ -261,6 +261,22 @@ export const Financeiro = () => {
     }
   };
 
+  const handleConcluir = async (entrada: EntradaFinanceira) => {
+    if (window.confirm('Marcar esta entrada como paga?')) {
+      try {
+        const entradaAtualizada = {
+          ...entrada,
+          status: 'pago' as const,
+          data_pagamento: new Date().toISOString().split('T')[0]
+        };
+        await updateEntrada(entrada.id, entradaAtualizada);
+        toast.success('Entrada marcada como paga!');
+      } catch (error) {
+        toast.error('Erro ao concluir entrada');
+      }
+    }
+  };
+
   const handleNewEntrada = () => {
     setSelectedEntrada(undefined);
     setModalOpen(true);
@@ -313,12 +329,12 @@ export const Financeiro = () => {
       }
     },
     {
-      key: 'status_pagamento',
+      key: 'status',
       label: 'Status',
       sortable: true,
       render: (entrada) => (
-        <Badge className={statusColors[entrada.status_pagamento] || 'bg-gray-100 text-gray-800'}>
-          {statusLabels[entrada.status_pagamento] || entrada.status_pagamento}
+        <Badge className={statusColors[(entrada as any).status] || 'bg-gray-100 text-gray-800'}>
+          {statusLabels[(entrada as any).status] || (entrada as any).status}
         </Badge>
       )
     },
@@ -334,6 +350,20 @@ export const Financeiro = () => {
       sortable: false,
       render: (entrada) => (
         <div className="flex gap-2">
+          {(entrada as any).status === 'pendente' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleConcluir(entrada);
+              }}
+              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              title="Marcar como pago"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
