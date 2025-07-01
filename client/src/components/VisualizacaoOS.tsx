@@ -53,57 +53,70 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
-      {/* Cabeçalho Compacto */}
-      <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
+    <div className="w-full max-w-none p-4 space-y-3 print:p-2 print:space-y-2">
+      {/* Cabeçalho da Empresa */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg print:bg-gray-800">
         <div className="p-4 print:p-3">
-          <div className="flex justify-between items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 print:text-lg">
-                Ordem de Serviço #{ordem.numero}
+              <h1 className="text-2xl font-bold print:text-lg">
+                {ordem.empresa?.nome_completo || ordem.empresa?.empresa || 'TechService'}
               </h1>
-              <p className="text-gray-600 text-sm print:text-xs">
-                {ordem.clientes?.nome} - {ordem.clientes?.telefone}
+              <p className="text-blue-100 text-sm print:text-xs">
+                Assistência Técnica Especializada
               </p>
             </div>
-            <div className="flex gap-2 print:gap-1">
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {statusLabels[ordem.status] || ordem.status}
-              </Badge>
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {ordem.prioridade?.toUpperCase()}
-              </Badge>
+            <div className="text-center">
+              <h2 className="text-xl font-bold print:text-lg">
+                ORDEM DE SERVIÇO
+              </h2>
+              <p className="text-blue-100 text-lg font-semibold print:text-base">
+                #{ordem.numero}
+              </p>
+            </div>
+            <div className="text-right print:text-left">
+              <p className="text-sm print:text-xs text-blue-100">
+                Data: {formatDate(ordem.data_abertura)}
+              </p>
+              <div className="flex gap-2 justify-end print:justify-start mt-1">
+                <Badge className={`px-2 py-1 text-xs bg-white text-gray-800 border`}>
+                  {statusLabels[ordem.status] || ordem.status}
+                </Badge>
+                <Badge className={`px-2 py-1 text-xs bg-white text-gray-800 border`}>
+                  {ordem.prioridade?.toUpperCase()}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Linha 1: Cliente e Equipamento */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
-        {/* Informações do Cliente */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
+      {/* Linha 1: Cliente e Equipamento em layout horizontal */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 print:gap-2">
+        {/* Informações do Cliente - ocupa 3 colunas */}
+        <div className="lg:col-span-3 bg-white border border-gray-200 rounded-lg">
+          <div className="p-2 border-b border-gray-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
               <User className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
-              Cliente
+              Dados do Cliente
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+          <div className="p-2 print:p-1">
+            <div className="grid grid-cols-3 gap-2 text-xs">
               <div>
-                <p className="font-medium text-gray-700">Nome:</p>
-                <p className="text-gray-900">{ordem.clientes?.nome}</p>
+                <p className="font-medium text-gray-700 mb-1">Nome:</p>
+                <p className="text-gray-900 font-medium">{ordem.clientes?.nome}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700">Telefone:</p>
+                <p className="font-medium text-gray-700 mb-1">Telefone:</p>
                 <p className="text-gray-900">{ordem.clientes?.telefone}</p>
               </div>
-              <div className="col-span-2">
-                <p className="font-medium text-gray-700">E-mail:</p>
-                <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
+              <div>
+                <p className="font-medium text-gray-700 mb-1">E-mail:</p>
+                <p className="text-gray-900 truncate">{ordem.clientes?.email || 'Não informado'}</p>
               </div>
-              <div className="col-span-2">
-                <p className="font-medium text-gray-700">Endereço:</p>
+              <div className="col-span-3">
+                <p className="font-medium text-gray-700 mb-1">Endereço:</p>
                 <p className="text-gray-900 text-xs">
                   {ordem.clientes?.endereco ? 
                     `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
@@ -115,34 +128,34 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           </div>
         </div>
 
-        {/* Informações do Equipamento */}
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
+        {/* Informações do Equipamento - ocupa 2 colunas */}
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
+          <div className="p-2 border-b border-gray-100">
             <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
               <Package className="h-4 w-4 text-green-600 print:h-3 print:w-3" />
               Equipamento
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+          <div className="p-2 print:p-1">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
-                <p className="font-medium text-gray-700">Tipo:</p>
+                <p className="font-medium text-gray-700 mb-1">Tipo:</p>
                 <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700">Marca:</p>
-                <p className="text-gray-900">{ordem.marca}</p>
+                <p className="font-medium text-gray-700 mb-1">Marca:</p>
+                <p className="text-gray-900 font-medium">{ordem.marca}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700">Modelo:</p>
-                <p className="text-gray-900">{ordem.modelo}</p>
+                <p className="font-medium text-gray-700 mb-1">Modelo:</p>
+                <p className="text-gray-900 font-medium">{ordem.modelo}</p>
               </div>
               <div>
-                <p className="font-medium text-gray-700">N° Série:</p>
+                <p className="font-medium text-gray-700 mb-1">N° Série:</p>
                 <p className="text-gray-900">{ordem.numero_serie || 'N/A'}</p>
               </div>
               <div className="col-span-2">
-                <p className="font-medium text-gray-700">Senha:</p>
+                <p className="font-medium text-gray-700 mb-1">Senha:</p>
                 <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
               </div>
             </div>
@@ -307,16 +320,78 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       {/* Observações Internas */}
       {ordem.observacoes_internas && (
         <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
+          <div className="p-2 border-b border-gray-100">
             <h3 className="text-sm font-semibold print:text-xs">Observações Internas</h3>
           </div>
-          <div className="p-3 print:p-2">
+          <div className="p-2 print:p-1">
             <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200 print:p-1">
               {ordem.observacoes_internas}
             </p>
           </div>
         </div>
       )}
+
+      {/* Assinaturas e Termo de Garantia */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 print:gap-2">
+        {/* Assinaturas */}
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-2 border-b border-gray-100">
+            <h3 className="text-sm font-semibold print:text-xs">Assinaturas</h3>
+          </div>
+          <div className="p-3 print:p-2 space-y-4 print:space-y-3">
+            <div>
+              <p className="text-xs font-medium text-gray-700 mb-2">Cliente:</p>
+              <div className="border-b border-gray-300 pb-1 mb-1">
+                <p className="text-xs text-gray-500">Assinatura</p>
+              </div>
+              <p className="text-xs text-gray-600">{ordem.clientes?.nome}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-700 mb-2">Técnico Responsável:</p>
+              <div className="border-b border-gray-300 pb-1 mb-1">
+                <p className="text-xs text-gray-500">Assinatura</p>
+              </div>
+              <p className="text-xs text-gray-600">{ordem.tecnico_responsavel || 'Técnico'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Termo de Garantia */}
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="p-2 border-b border-gray-100">
+            <h3 className="text-sm font-semibold print:text-xs">Termos de Garantia</h3>
+          </div>
+          <div className="p-3 print:p-2">
+            <div className="text-xs text-gray-700 space-y-2 print:space-y-1">
+              <p className="font-medium">
+                ✓ Garantia: {ordem.garantia} dias para o serviço realizado
+              </p>
+              <div className="space-y-1 text-xs">
+                <p>• A garantia cobre apenas o serviço executado</p>
+                <p>• Não cobre danos por mau uso ou acidente</p>
+                <p>• Válida mediante apresentação desta OS</p>
+                <p>• Equipamento deve retornar nas mesmas condições</p>
+                <p>• Garantia não cobre peças substituídas por desgaste natural</p>
+              </div>
+              <div className="border-t border-gray-200 pt-2 print:pt-1">
+                <p className="text-xs font-medium text-center">
+                  {ordem.empresa?.nome_completo || 'TechService'} - Assistência Técnica
+                </p>
+                <p className="text-xs text-center text-gray-600">
+                  {ordem.empresa?.telefone || ''} | {ordem.empresa?.email || ''}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Rodapé */}
+      <div className="text-center py-2 print:py-1">
+        <p className="text-xs text-gray-500">
+          Documento gerado em {formatDate(new Date().toISOString())} • OS #{ordem.numero}
+        </p>
+      </div>
     </div>
   );
 };
