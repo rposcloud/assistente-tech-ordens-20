@@ -185,22 +185,22 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Cards Principais - Menores */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Cards Principais - Responsivos */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {cards.map((card, index) => {
           const Icon = card.icon;
           return (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs font-medium text-gray-600">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 leading-tight">
                   {card.title}
                 </CardTitle>
                 <div className={`p-1.5 rounded-lg ${card.bgColor}`}>
-                  <Icon className={`h-3 w-3 ${card.color}`} />
+                  <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${card.color}`} />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-lg font-bold text-gray-900">
+              <CardContent className="pt-1">
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
                   {card.value}
                 </div>
               </CardContent>
@@ -213,21 +213,21 @@ export const Dashboard = () => {
 
       {/* Ações Rápidas */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
             Ações Rápidas
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <Link key={index} to={action.link}>
-                  <Button className={`w-full h-16 ${action.color} text-white flex flex-col gap-2`}>
-                    <Icon className="h-5 w-5" />
-                    <span className="text-xs">{action.title}</span>
+                  <Button className={`w-full h-14 sm:h-16 ${action.color} text-white flex flex-col gap-1 sm:gap-2 transition-all hover:scale-105`}>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-xs leading-tight text-center">{action.title}</span>
                   </Button>
                 </Link>
               );
@@ -266,64 +266,118 @@ export const Dashboard = () => {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Número</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Equipamento</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {ultimasOrdens.map((ordem: any) => (
-                    <TableRow key={ordem.id}>
-                      <TableCell className="font-medium">
-                        #{ordem.numero}
-                      </TableCell>
-                      <TableCell>{ordem.cliente_nome}</TableCell>
-                      <TableCell className="capitalize">
-                        {ordem.tipo_equipamento}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ordem.status)}`}>
+            <>
+              {/* Versão Desktop - Tabela */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Equipamento</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ultimasOrdens.map((ordem: any) => (
+                      <TableRow key={ordem.id}>
+                        <TableCell className="font-medium">
+                          #{ordem.numero}
+                        </TableCell>
+                        <TableCell>{ordem.cliente_nome}</TableCell>
+                        <TableCell className="capitalize">
+                          {ordem.tipo_equipamento}
+                        </TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ordem.status)}`}>
+                            {formatStatus(ordem.status)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {formatCurrency(parseFloat(ordem.valor_total || '0'))}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/ordens?view=${ordem.id}`} className="cursor-pointer">
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Visualizar
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to={`/ordens?edit=${ordem.id}`} className="cursor-pointer">
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </Link>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Versão Mobile - Cards */}
+              <div className="md:hidden space-y-3">
+                {ultimasOrdens.map((ordem: any) => (
+                  <div key={ordem.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="font-semibold text-sm">#{ordem.numero}</div>
+                        <div className="text-gray-600 text-sm">{ordem.cliente_nome}</div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/ordens?view=${ordem.id}`} className="cursor-pointer">
+                              <Eye className="mr-2 h-4 w-4" />
+                              Visualizar
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/ordens?edit=${ordem.id}`} className="cursor-pointer">
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-1">
+                        <div className="text-xs text-gray-500 capitalize">
+                          {ordem.tipo_equipamento}
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(ordem.status)} inline-block w-fit`}>
                           {formatStatus(ordem.status)}
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(parseFloat(ordem.valor_total || '0'))}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/ordens?view=${ordem.id}`} className="cursor-pointer">
-                                <Eye className="mr-2 h-4 w-4" />
-                                Visualizar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link to={`/ordens?edit=${ordem.id}`} className="cursor-pointer">
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-green-600">
+                          {formatCurrency(parseFloat(ordem.valor_total || '0'))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
