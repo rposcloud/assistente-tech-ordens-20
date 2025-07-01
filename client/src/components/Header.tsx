@@ -1,11 +1,14 @@
 
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfile } from '../hooks/useProfile';
 
 export const Header = () => {
   const { user, profile } = useAuth();
+  const { profile: companyProfile } = useProfile();
 
   const userName = profile?.nome_completo || user?.email?.split('@')[0] || 'Usuário';
+  const companyName = companyProfile?.empresa || 'TechService';
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
@@ -21,7 +24,7 @@ export const Header = () => {
         </div>
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <p className="text-sm font-medium text-gray-700">{userName}</p>
+            <p className="text-sm font-medium text-gray-700">{companyName}</p>
             <p className="text-xs text-gray-500">{user?.email}</p>
           </div>
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
