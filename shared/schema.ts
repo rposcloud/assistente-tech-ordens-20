@@ -154,6 +154,7 @@ export const produtosUtilizados = pgTable("produtos_utilizados", {
 export const entradasFinanceiras = pgTable("entradas_financeiras", {
   id: uuid("id").defaultRandom().primaryKey(),
   user_id: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ordem_servico_id: uuid("ordem_servico_id").references(() => ordensServico.id, { onDelete: "cascade" }),
   tipo: tipoEntradaFinanceiraEnum("tipo").notNull(),
   descricao: text("descricao").notNull(),
   valor: decimal("valor", { precision: 10, scale: 2 }).default("0").notNull(),
@@ -264,6 +265,10 @@ export const entradasFinanceirasRelations = relations(entradasFinanceiras, ({ on
   user: one(users, {
     fields: [entradasFinanceiras.user_id],
     references: [users.id],
+  }),
+  ordemServico: one(ordensServico, {
+    fields: [entradasFinanceiras.ordem_servico_id],
+    references: [ordensServico.id],
   }),
 }));
 

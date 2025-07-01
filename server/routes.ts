@@ -450,6 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
           const entradaFinanceira = {
             user_id: req.userId!,
+            ordem_servico_id: ordem.id,
             tipo: 'receita' as const,
             descricao: `Serviço realizado - OS #${ordem.numero || ordem.id.slice(0, 8)}`,
             valor: ordem.valor_total.toString(),
