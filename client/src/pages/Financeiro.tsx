@@ -46,31 +46,42 @@ export const Financeiro = () => {
   // Função para obter datas com base no filtro rápido
   const obterRangeDatas = (filtro: FiltroRapido) => {
     const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0); // Zerar horário para comparação correta
+    
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    fimMes.setHours(23, 59, 59, 999); // Incluir todo o último dia do mês
     
     switch (filtro) {
       case 'hoje':
-        return { inicio: hoje, fim: hoje };
+        const fimHoje = new Date(hoje);
+        fimHoje.setHours(23, 59, 59, 999);
+        return { inicio: hoje, fim: fimHoje };
       case 'ontem':
         const ontem = new Date(hoje);
         ontem.setDate(ontem.getDate() - 1);
-        return { inicio: ontem, fim: ontem };
+        const fimOntem = new Date(ontem);
+        fimOntem.setHours(23, 59, 59, 999);
+        return { inicio: ontem, fim: fimOntem };
       case 'esta_semana':
         const inicioSemana = new Date(hoje);
         inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-        return { inicio: inicioSemana, fim: hoje };
+        const fimSemana = new Date(hoje);
+        fimSemana.setHours(23, 59, 59, 999);
+        return { inicio: inicioSemana, fim: fimSemana };
       case 'semana_passada':
         const inicioSemanaPassada = new Date(hoje);
         inicioSemanaPassada.setDate(hoje.getDate() - hoje.getDay() - 7);
         const fimSemanaPassada = new Date(inicioSemanaPassada);
         fimSemanaPassada.setDate(inicioSemanaPassada.getDate() + 6);
+        fimSemanaPassada.setHours(23, 59, 59, 999);
         return { inicio: inicioSemanaPassada, fim: fimSemanaPassada };
       case 'este_mes':
         return { inicio: inicioMes, fim: fimMes };
       case 'mes_passado':
         const inicioMesPassado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
         const fimMesPassado = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+        fimMesPassado.setHours(23, 59, 59, 999);
         return { inicio: inicioMesPassado, fim: fimMesPassado };
       case 'ultimos_3_meses':
         const inicio3Meses = new Date(hoje.getFullYear(), hoje.getMonth() - 2, 1);
@@ -78,10 +89,12 @@ export const Financeiro = () => {
       case 'este_ano':
         const inicioAno = new Date(hoje.getFullYear(), 0, 1);
         const fimAno = new Date(hoje.getFullYear(), 11, 31);
+        fimAno.setHours(23, 59, 59, 999);
         return { inicio: inicioAno, fim: fimAno };
       case 'ano_passado':
         const inicioAnoPassado = new Date(hoje.getFullYear() - 1, 0, 1);
         const fimAnoPassado = new Date(hoje.getFullYear() - 1, 11, 31);
+        fimAnoPassado.setHours(23, 59, 59, 999);
         return { inicio: inicioAnoPassado, fim: fimAnoPassado };
       case 'todos':
       default:
@@ -122,7 +135,7 @@ export const Financeiro = () => {
     if (rangeDatas) {
       receitas = entradas
         .filter((entrada: any) => {
-          const data = new Date(entrada.data_vencimento);
+          const data = new Date(entrada.data_vencimento + 'T00:00:00');
           return entrada.tipo === 'receita' && 
                  entrada.status === 'pago' &&
                  data >= rangeDatas.inicio && data <= rangeDatas.fim;
@@ -140,7 +153,7 @@ export const Financeiro = () => {
     if (rangeDatas) {
       despesas = entradas
         .filter((entrada: any) => {
-          const data = new Date(entrada.data_vencimento);
+          const data = new Date(entrada.data_vencimento + 'T00:00:00');
           return entrada.tipo === 'despesa' && 
                  entrada.status === 'pago' &&
                  data >= rangeDatas.inicio && data <= rangeDatas.fim;
@@ -181,17 +194,17 @@ export const Financeiro = () => {
 
     // Aplicar filtro de data
     if (dataInicio && dataFim) {
-      const inicio = new Date(dataInicio);
-      const fim = new Date(dataFim);
+      const inicio = new Date(dataInicio + 'T00:00:00');
+      const fim = new Date(dataFim + 'T23:59:59'); 
       resultado = resultado.filter(entrada => {
-        const data = new Date(entrada.data_vencimento);
+        const data = new Date(entrada.data_vencimento + 'T00:00:00');
         return data >= inicio && data <= fim;
       });
     } else {
       const rangeDatas = obterRangeDatas(filtroRapido);
       if (rangeDatas) {
         resultado = resultado.filter(entrada => {
-          const data = new Date(entrada.data_vencimento);
+          const data = new Date(entrada.data_vencimento + 'T00:00:00');
           return data >= rangeDatas.inicio && data <= rangeDatas.fim;
         });
       }
