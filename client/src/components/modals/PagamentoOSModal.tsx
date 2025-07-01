@@ -75,7 +75,7 @@ export const PagamentoOSModal: React.FC<PagamentoOSModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="w-[95vw] max-w-sm sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-green-600" />

@@ -253,15 +253,12 @@ export const Ordens = () => {
   // Função para abrir modal de finalização/pagamento
   const handleFinalizarOS = async (ordem: OrdemServico) => {
     try {
-      // Buscar dados completos da OS
-      const response = await fetch(`/api/ordens/${ordem.id}/print`);
-      const dadosCompletos = await response.json();
-      
-      setOrdemParaPagamento(dadosCompletos);
+      console.log('Abrindo modal para ordem:', ordem);
+      setOrdemParaPagamento(ordem);
       setPagamentoModalOpen(true);
     } catch (error) {
-      console.error('Erro ao buscar dados da OS:', error);
-      toast.error('Erro ao carregar dados da OS');
+      console.error('Erro ao abrir modal:', error);
+      toast.error('Erro ao abrir modal de pagamento');
     }
   };
 
@@ -287,7 +284,7 @@ export const Ordens = () => {
 
       // 2. Criar entrada financeira
       const valorTotal = parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0');
-      const cliente = ordemParaPagamento.cliente || null;
+      const cliente = clientes.find(c => c.id === ordemParaPagamento.cliente_id);
 
       await fetch('/api/financeiro', {
         method: 'POST',
