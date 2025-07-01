@@ -423,15 +423,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
       const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
       
-      // Proteção: Se alterar valor total e houver entradas financeiras
-      if (entradasDaOS.length > 0 && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
+      // Proteção: Se alterar valor total e houver entradas financeiras E a OS já foi entregue
+      if (entradasDaOS.length > 0 && statusAnterior === 'entregue' && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
         return res.status(400).json({
-          error: 'Não é possível alterar o valor total desta OS',
-          motivo: 'Esta OS possui entradas financeiras vinculadas',
+          error: 'Não é possível alterar o valor total desta OS finalizada',
+          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi entregue',
           entradas_vinculadas: entradasDaOS.length,
           valor_atual: ordemAnterior.valor_total,
           valor_tentativa: ordemData.valor_total,
-          sugestao: 'Para alterar o valor, primeiro desvincule ou ajuste as entradas financeiras relacionadas'
+          sugestao: 'Para alterar o valor, primeiro trate as entradas financeiras associadas'
         });
       }
 
@@ -484,16 +484,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!jaExisteEntrada) {
             const cliente = await storage.getCliente(ordem.cliente_id, req.userId!);
             
+            // Buscar categoria padrão ou criar uma
+            const categorias = await storage.getCategoriasFinanceiras(req.userId!);
+            let categoriaReceita = categorias.find(cat => cat.nome.toLowerCase().includes('receita') || cat.nome.toLowerCase().includes('serviço'));
+            
+            if (!categoriaReceita) {
+              // Criar categoria padrão se não existir
+              categoriaReceita = await storage.createCategoriaFinanceira({
+                user_id: req.userId!,
+                nome: 'Receitas de Serviços',
+                tipo: 'receita'
+              });
+            }
+            
             const entradaFinanceira = {
               user_id: req.userId!,
               ordem_servico_id: ordem.id,
               tipo: 'receita' as 'receita',
               descricao: `OS #${ordem.numero || ordem.id.slice(0, 8)} - ${cliente?.nome || 'Cliente'}`,
               valor: valorTotal.toString(),
-              categoria: 'Serviços de Reparo',
+              categoria_id: categoriaReceita.id,
               forma_pagamento: (ordemData.forma_pagamento || 'dinheiro') as 'dinheiro',
               data_vencimento: ordemData.data_pagamento ? ordemData.data_pagamento.toString().split('T')[0] : new Date().toISOString().split('T')[0],
-              status_pagamento: (ordemData.forma_pagamento === 'dinheiro' ? 'pago' : 'pendente') as 'pago' | 'pendente',
+              status_pagamento: (ordemData.status_pagamento || 'pago') as 'pago' | 'pendente',
               observacoes: `Finalização automática - Equipamento: ${ordem.tipo_equipamento || ''} ${ordem.marca || ''} ${ordem.modelo || ''}`.trim()
             };
             

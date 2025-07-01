@@ -309,23 +309,7 @@ export const Ordens = () => {
         observacoes_pagamento: dadosPagamento.observacoes_pagamento
       });
 
-      // Criar entrada financeira (receita)
-      await fetch('/api/financeiro', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          descricao: `Receita OS #${ordemParaPagamento.numero} - ${(ordemParaPagamento as any).clientes?.nome || 'Cliente não identificado'}`,
-          valor: parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0'),
-          tipo: 'receita',
-          data_movimento: dadosPagamento.data_pagamento,
-          forma_pagamento: dadosPagamento.forma_pagamento,
-          status_pagamento: dadosPagamento.status_pagamento,
-          observacoes: dadosPagamento.observacoes_pagamento,
-          ordem_servico_id: ordemParaPagamento.id
-        })
-      });
-
-      toast.success('Pagamento registrado e entrada financeira criada com sucesso!');
+      toast.success('Dados de pagamento atualizados com sucesso!');
       setPagamentoModalOpen(false);
       setOrdemParaPagamento(null);
     } catch (error) {
