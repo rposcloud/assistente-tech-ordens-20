@@ -5,17 +5,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2 } from 'lucide-react';
 import { useClientes } from '@/hooks/useClientes';
-import { useProdutos } from '@/hooks/useProdutos';
 import { OrdemServico } from '@/types';
+import { ProdutosOrdemSection } from './ProdutosOrdemSection';
 
-interface ProdutoSelecionado {
-  id: string;
+interface ProdutoUtilizado {
+  id?: string;
+  produto_id?: string;
   nome: string;
+  categoria: 'peca' | 'servico';
   quantidade: number;
-  valorUnitario: number;
-  valorTotal: number;
+  valor_unitario: number;
+  valor_total: number;
+  tipo: 'produto' | 'peca_avulsa';
 }
 
 interface OrdemServicoFormProps {
@@ -32,9 +34,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
   loading = false
 }) => {
   const { clientes } = useClientes();
-  const { produtos } = useProdutos();
-  const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
-  const [produtoSelecionado, setProdutoSelecionado] = useState<string>('');
+  const [produtosUtilizados, setProdutosUtilizados] = useState<ProdutoUtilizado[]>([]);
 
   // Initialize form data using snake_case to match database
   const [formData, setFormData] = useState({

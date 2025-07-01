@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { OrdemServicoForm } from '@/components/forms/OrdemServicoForm';
+import { OrdemServicoFormNovo } from '@/components/forms/OrdemServicoFormNovo';
 import { OrdemServico } from '@/types';
 
 interface OrdemServicoModalProps {
@@ -27,7 +27,7 @@ export const OrdemServicoModal: React.FC<OrdemServicoModalProps> = ({
             {initialData ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço'}
           </DialogTitle>
         </DialogHeader>
-        <OrdemServicoForm
+        <OrdemServicoFormNovo
           onSubmit={onSubmit}
           onCancel={onClose}
           initialData={initialData}

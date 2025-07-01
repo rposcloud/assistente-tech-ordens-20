@@ -3,8 +3,11 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertUserSchema, insertProfileSchema, insertClienteSchema, 
-  insertProdutoSchema, insertOrdemServicoSchema, insertEntradaFinanceiraSchema 
+  insertProdutoSchema, insertOrdemServicoSchema, insertEntradaFinanceiraSchema,
+  produtosUtilizados, pecasUtilizadas 
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
@@ -273,7 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      const ordemData = insertOrdemServicoSchema.partial().parse(req.body);
+      const { produtos_utilizados, ...dadosOrdem } = req.body;
+      const ordemData = insertOrdemServicoSchema.partial().parse(dadosOrdem);
       
       // Verificar se o status está sendo alterado para "entregue"
       const ordemAnterior = await storage.getOrdemServico(id, req.userId!);
@@ -281,6 +285,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const novoStatus = ordemData.status;
       
       const ordem = await storage.updateOrdemServico(id, req.userId!, ordemData);
+      
+      // Processar produtos utilizados se fornecidos
+      if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
+        // Primeiro, remover todos os produtos existentes
+        await db.delete(produtosUtilizados).where(eq(produtosUtilizados.ordem_servico_id, id));
+        await db.delete(pecasUtilizadas).where(eq(pecasUtilizadas.ordem_servico_id, id));
+        
+        // Inserir novos produtos
+        for (const produto of produtos_utilizados) {
+          if (produto.tipo === 'produto' && produto.produto_id) {
+            await storage.addProdutoUtilizado(
+              id, 
+              produto.produto_id, 
+              produto.quantidade, 
+              produto.valor_unitario
+            );
+          } else if (produto.tipo === 'peca_avulsa') {
+            await storage.addPecaUtilizada(
+              id, 
+              produto.nome, 
+              produto.quantidade, 
+              produto.valor_unitario
+            );
+          }
+        }
+      }
       
       // Se a ordem foi marcada como entregue, criar entrada financeira automaticamente
       const valorTotal = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : Number(ordem.valor_total);
