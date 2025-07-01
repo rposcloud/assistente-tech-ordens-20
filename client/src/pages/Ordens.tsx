@@ -118,25 +118,9 @@ export const Ordens = () => {
     setModalOpen(true);
   };
 
-  const handleVisualizarOrdem = async (ordem: OrdemServico) => {
-    try {
-      // Buscar dados completos da ordem incluindo cliente
-      const response = await fetch(`/api/ordens/${ordem.id}`);
-      
-      if (response.ok) {
-        const ordemCompleta = await response.json();
-        setOrdemParaVisualizacao(ordemCompleta);
-      } else {
-        // Fallback para a ordem atual
-        setOrdemParaVisualizacao(ordem);
-      }
-      setVisualizacaoModalOpen(true);
-    } catch (error) {
-      console.error('Erro ao buscar dados da ordem:', error);
-      // Fallback para a ordem atual
-      setOrdemParaVisualizacao(ordem);
-      setVisualizacaoModalOpen(true);
-    }
+  const handleVisualizarOrdem = (ordem: OrdemServico) => {
+    setOrdemParaVisualizacao(ordem);
+    setVisualizacaoModalOpen(true);
   };
 
 
