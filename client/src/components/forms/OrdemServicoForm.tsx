@@ -51,7 +51,7 @@ export const OrdemServicoForm: React.FC<OrdemServicoFormProps> = ({
     valor_orcamento: initialData?.valor_orcamento || 0,
     valor_total: initialData?.valor_total || 0,
     valor_final: initialData?.valor_final || 0,
-    status: initialData?.status || 'aguardando_diagnostico' as const,
+    status: initialData?.status || 'aberta' as const,
     garantia: initialData?.garantia || 90,
     observacoes_internas: initialData?.observacoes_internas || '',
     senha_equipamento: initialData?.senha_equipamento || '',
