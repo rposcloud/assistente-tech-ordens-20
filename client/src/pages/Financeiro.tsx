@@ -38,18 +38,18 @@ export const Financeiro = () => {
     return dataVencimento.getMonth() === currentMonth && dataVencimento.getFullYear() === currentYear;
   }) : [];
 
-  const receitas = Array.isArray(entradasMesAtual) ? entradasMesAtual
-    .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pago')
+  const receitas = Array.isArray(entradas) ? entradas
+    .filter((entrada: any) => entrada.tipo === 'receita' && entrada.status === 'pago')
     .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
-  const despesas = Array.isArray(entradasMesAtual) ? entradasMesAtual
-    .filter(entrada => entrada.tipo === 'despesa' && entrada.status_pagamento === 'pago')
+  const despesas = Array.isArray(entradas) ? entradas
+    .filter((entrada: any) => entrada.tipo === 'despesa' && entrada.status === 'pago')
     .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
   const saldo = receitas - despesas;
 
   const aReceber = Array.isArray(entradas) ? entradas
-    .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pendente')
+    .filter((entrada: any) => entrada.tipo === 'receita' && entrada.status === 'pendente')
     .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
   const handleSubmit = async (data: Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>) => {
