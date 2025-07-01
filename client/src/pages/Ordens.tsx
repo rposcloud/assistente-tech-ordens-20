@@ -284,7 +284,7 @@ export const Ordens = () => {
 
       // 2. Criar entrada financeira
       const valorTotal = parseFloat(ordemParaPagamento.valor_final || ordemParaPagamento.valor_total || '0');
-      const cliente = ordemParaPagamento.clientes;
+      const cliente = ordemParaPagamento.cliente || null;
 
       await fetch('/api/financeiro', {
         method: 'POST',
@@ -411,8 +411,8 @@ export const Ordens = () => {
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreHorizontal className="h-4 w-4" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
