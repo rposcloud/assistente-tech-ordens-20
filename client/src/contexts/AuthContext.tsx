@@ -11,6 +11,7 @@ interface Profile {
   nome_completo: string;
   empresa?: string;
   telefone?: string;
+  logo_url?: string;
 }
 
 interface AuthContextType {

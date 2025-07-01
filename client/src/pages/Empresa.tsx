@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, Building2, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { Save, Building2, MapPin, Phone, Mail, Globe, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { LogoUpload } from '@/components/LogoUpload';
 
 interface EmpresaData {
   id?: string;
@@ -132,51 +133,7 @@ export const Empresa = () => {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    // Validar tamanho do arquivo (máx. 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: 'Erro',
-        description: 'Arquivo muito grande. Máximo 2MB.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Validar tipo do arquivo
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Erro',
-        description: 'Apenas arquivos de imagem são aceitos.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    try {
-      // Converter para base64 para armazenar
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64String = e.target?.result as string;
-        handleInputChange('logo_url', base64String);
-        toast({
-          title: 'Sucesso',
-          description: 'Logo carregada com sucesso!',
-        });
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Erro ao fazer upload da logo:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao fazer upload da logo.',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -433,6 +390,9 @@ export const Empresa = () => {
           </CardContent>
         </Card>
 
+        {/* Logo da Empresa */}
+        <LogoUpload />
+
         {/* Dados Adicionais */}
         <Card>
           <CardHeader>
@@ -442,47 +402,6 @@ export const Empresa = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="logo_upload">Upload da Logo</Label>
-                <Input
-                  id="logo_upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="cursor-pointer"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Formatos aceitos: JPG, PNG, GIF (máx. 2MB)
-                </p>
-              </div>
-              
-              <div>
-                <Label htmlFor="logo_url">URL da Logo (alternativo)</Label>
-                <Input
-                  id="logo_url"
-                  value={empresa.logo_url || ''}
-                  onChange={(e) => handleInputChange('logo_url', e.target.value)}
-                  placeholder="https://exemplo.com/logo.png"
-                />
-              </div>
-
-              {empresa.logo_url && (
-                <div className="mt-2">
-                  <Label>Preview da Logo</Label>
-                  <div className="mt-1 border rounded-lg p-4 bg-gray-50">
-                    <img
-                      src={empresa.logo_url}
-                      alt="Logo da empresa"
-                      className="max-h-24 max-w-48 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
 
             <div>
               <Label htmlFor="dados_bancarios">Dados Bancários</Label>

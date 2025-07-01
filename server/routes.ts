@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
@@ -10,8 +11,42 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+// Criar diretório de uploads se não existir
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuração do multer para upload de arquivos
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'logo-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos de imagem são permitidos'));
+    }
+  }
+});
 
 // Middleware for authentication
 interface AuthRequest extends Request {
@@ -36,6 +71,9 @@ const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunc
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Servir arquivos estáticos da pasta uploads
+  app.use('/uploads', express.static(uploadDir));
+
   // Auth routes
   app.post('/api/auth/login', async (req, res) => {
     try {
@@ -142,6 +180,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Update profile error:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Upload de logo da empresa
+  app.post('/api/profile/upload-logo', authenticateToken, upload.single('logo'), async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+      }
+
+      // Deletar logo anterior se existir
+      const currentProfile = await storage.getProfile(req.userId!);
+      if (currentProfile?.logo_url) {
+        const oldLogoPath = path.join(uploadDir, path.basename(currentProfile.logo_url));
+        if (fs.existsSync(oldLogoPath)) {
+          fs.unlinkSync(oldLogoPath);
+        }
+      }
+
+      // Atualizar profile com nova URL da logo
+      const logoUrl = `/uploads/${req.file.filename}`;
+      const profile = await storage.updateProfile(req.userId!, { logo_url: logoUrl });
+
+      res.json({ 
+        message: 'Logo enviada com sucesso',
+        logo_url: logoUrl,
+        profile 
+      });
+    } catch (error) {
+      console.error('Upload logo error:', error);
+      
+      // Deletar arquivo se houver erro
+      if (req.file) {
+        const filePath = path.join(uploadDir, req.file.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  // Deletar logo da empresa
+  app.delete('/api/profile/logo', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const currentProfile = await storage.getProfile(req.userId!);
+      if (currentProfile?.logo_url) {
+        // Deletar arquivo físico
+        const logoPath = path.join(uploadDir, path.basename(currentProfile.logo_url));
+        if (fs.existsSync(logoPath)) {
+          fs.unlinkSync(logoPath);
+        }
+
+        // Remover URL do banco
+        const profile = await storage.updateProfile(req.userId!, { logo_url: undefined });
+        res.json({ 
+          message: 'Logo removida com sucesso',
+          profile 
+        });
+      } else {
+        res.json({ message: 'Nenhuma logo para remover' });
+      }
+    } catch (error) {
+      console.error('Delete logo error:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
     }
   });
 
@@ -562,6 +666,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Remove peca utilizada error:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Servir arquivos estáticos da pasta uploads
+  app.use('/uploads', (req, res, next) => {
+    const filePath = path.join(uploadDir, req.path);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).json({ error: 'Arquivo não encontrado' });
     }
   });
 
