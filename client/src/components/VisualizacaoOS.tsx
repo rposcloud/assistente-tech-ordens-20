@@ -151,7 +151,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 print:text-base">
-                  {profile?.empresa || 'Nome da Empresa'}
+                  {profile?.empresa || 'OS Cloud - Sistema de Gestão'}
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-sm">
                   <p>CNPJ: {profile?.cnpj || 'Não informado'}</p>
@@ -161,14 +161,14 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="text-right text-sm text-gray-600 print:text-sm max-w-xs">
               <div className="space-y-1">
                 <p className="font-medium">Endereço:</p>
-                <p>{profile?.endereco || 'Endereço não informado'}</p>
+                <p>{profile?.endereco || 'Configure o endereço da empresa'}</p>
                 <p>{profile?.bairro ? `${profile.bairro} - ` : ''}CEP: {profile?.cep || 'Não informado'}</p>
-                <p>{profile?.cidade ? `${profile.cidade}/${profile.estado}` : 'Cidade/Estado não informado'}</p>
+                <p>{profile?.cidade ? `${profile.cidade}/${profile.estado}` : 'Configure cidade/estado'}</p>
               </div>
               <div className="mt-2 space-y-1">
-                <p><span className="font-medium">Tel:</span> {profile?.telefone || 'Não informado'}</p>
-                {profile?.email && (
-                  <p><span className="font-medium">Email:</span> {profile.email}</p>
+                <p><span className="font-medium">Tel:</span> {profile?.telefone || 'Configure telefone'}</p>
+                {profile?.email_empresa && (
+                  <p><span className="font-medium">Email:</span> {profile.email_empresa}</p>
                 )}
               </div>
             </div>
