@@ -249,21 +249,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Endpoint para buscar uma ordem específica com dados completos
-  app.get('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
-    try {
-      const { id } = req.params;
-      const ordem = await storage.getOrdemServico(id, req.userId!);
-      if (!ordem) {
-        return res.status(404).json({ error: 'Ordem not found' });
-      }
-      res.json(ordem);
-    } catch (error) {
-      console.error('Get ordem by id error:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-
   app.post('/api/ordens', authenticateToken, async (req: AuthRequest, res) => {
     try {
       console.log('Dados recebidos para ordem:', req.body);
