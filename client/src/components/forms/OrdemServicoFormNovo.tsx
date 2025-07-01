@@ -53,7 +53,7 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
     desconto: initialData?.desconto || '0',
     acrescimo: initialData?.acrescimo || '0',
     garantia: initialData?.garantia || 90,
-    status: initialData?.status || 'aberta',
+    status: initialData?.status || 'aguardando_diagnostico',
     prioridade: initialData?.prioridade || 'normal',
     observacoes_internas: initialData?.observacoes_internas || ''
   });
@@ -343,11 +343,15 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="aberta">Aberta</SelectItem>
-                <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                <SelectItem value="aguardando_diagnostico">Aguardando Diagnóstico</SelectItem>
+                <SelectItem value="aguardando_aprovacao">Aguardando Aprovação</SelectItem>
                 <SelectItem value="aguardando_pecas">Aguardando Peças</SelectItem>
-                <SelectItem value="pronta">Pronta</SelectItem>
+                <SelectItem value="em_reparo">Em Reparo</SelectItem>
+                <SelectItem value="pronto_entrega">Pronto para Entrega</SelectItem>
+                <SelectItem value="entregue">Entregue</SelectItem>
                 <SelectItem value="finalizada">Finalizada</SelectItem>
+                <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                <SelectItem value="pronta">Pronta</SelectItem>
               </SelectContent>
             </Select>
           </div>
