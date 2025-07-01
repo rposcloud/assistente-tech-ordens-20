@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal, CheckSquare } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal, CheckSquare, Search } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
@@ -49,17 +50,33 @@ export const Ordens = () => {
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
   const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
   const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
 
 
   console.log('Ordens disponíveis:', ordens.length);
   console.log('Loading:', loading);
 
+  // Filtrar ordens baseado na busca
+  const filteredOrdens = ordens.filter(ordem => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      ordem.numero?.toLowerCase().includes(searchLower) ||
+      ordem.equipamento?.toLowerCase().includes(searchLower) ||
+      ordem.marca?.toLowerCase().includes(searchLower) ||
+      ordem.modelo?.toLowerCase().includes(searchLower) ||
+      ordem.problema?.toLowerCase().includes(searchLower) ||
+      ordem.cliente?.nome?.toLowerCase().includes(searchLower)
+    );
+  });
+
   const stats = {
-    aguardando_diagnostico: ordens.filter(o => o.status === 'aguardando_diagnostico').length,
-    em_reparo: ordens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
-    pronto_entrega: ordens.filter(o => o.status === 'pronto_entrega').length,
-    total: ordens.length
+    aguardando_diagnostico: filteredOrdens.filter(o => o.status === 'aguardando_diagnostico').length,
+    em_reparo: filteredOrdens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
+    pronto_entrega: filteredOrdens.filter(o => o.status === 'pronto_entrega').length,
+    total: filteredOrdens.length
   };
 
   const handleSubmit = async (data: any) => {
@@ -328,52 +345,75 @@ export const Ordens = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Busca simples e compacta */}
+      <div className="flex items-center gap-2 max-w-md">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Buscar por número, cliente, equipamento..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 h-9"
+          />
+        </div>
+        {searchTerm && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSearchTerm('')}
+            className="h-9 px-2"
+          >
+            Limpar
+          </Button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-xs font-medium text-gray-600">
               Em Análise
             </CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <Clock className="h-3 w-3 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.aguardando_diagnostico}</div>
+          <CardContent className="pt-1">
+            <div className="text-lg font-bold">{stats.aguardando_diagnostico}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-xs font-medium text-gray-600">
               Em Reparo
             </CardTitle>
-            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertCircle className="h-3 w-3 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.em_reparo}</div>
+          <CardContent className="pt-1">
+            <div className="text-lg font-bold">{stats.em_reparo}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-xs font-medium text-gray-600">
               Prontas
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-3 w-3 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pronto_entrega}</div>
+          <CardContent className="pt-1">
+            <div className="text-lg font-bold">{stats.pronto_entrega}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+            <CardTitle className="text-xs font-medium text-gray-600">
               Total
             </CardTitle>
-            <FileText className="h-4 w-4 text-gray-600" />
+            <FileText className="h-3 w-3 text-gray-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+          <CardContent className="pt-1">
+            <div className="text-lg font-bold">{stats.total}</div>
           </CardContent>
         </Card>
       </div>
@@ -396,12 +436,11 @@ export const Ordens = () => {
             </div>
           ) : (
             <SortableTable
-              data={ordens}
+              data={filteredOrdens}
               columns={columns}
               keyExtractor={(ordem) => ordem.id!}
-              emptyMessage="Nenhuma ordem de serviço encontrada"
+              emptyMessage={searchTerm ? `Nenhuma ordem encontrada para "${searchTerm}"` : "Nenhuma ordem de serviço encontrada"}
               emptyIcon={<FileText className="h-16 w-16 text-gray-300 mb-4" />}
-
             />
           )}
         </CardContent>
