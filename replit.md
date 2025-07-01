@@ -153,6 +153,12 @@ Changelog:
   * Removidas todas referências ao Supabase, sistema 100% PostgreSQL
   * Interface moderna para adicionar produtos cadastrados ou peças avulsas
   * Visualização de OS atualizada com produtos/serviços e botões funcionais
+- July 1, 2025. Dashboard redesenhado com foco em informações relevantes:
+  * Removidas seções "Próximos Passos" e "Status Operacional" desnecessárias
+  * Mantida apenas grid de cards com métricas importantes do negócio
+  * Adicionado card "Valor OS Abertas" mostrando soma total das ordens em aberto
+  * Layout simplificado com todos os cards principais em uma única seção
+  * Alertas de estoque baixo mantidos quando aplicáveis
 
 ## User Preferences
 

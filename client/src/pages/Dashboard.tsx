@@ -182,58 +182,28 @@ export const Dashboard = () => {
         </p>
       </div>
 
-      {/* Cards Financeiros - Primeira Linha */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Visão Financeira</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {cards.slice(1, 5).map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">
-                    {card.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${card.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${card.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {card.value}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Cards Operacionais - Segunda Linha */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Visão Operacional</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[cards[0], ...cards.slice(5)].map((card, index) => {
-            const Icon = card.icon;
-            return (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">
-                    {card.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${card.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${card.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {card.value}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+      {/* Cards Principais - Informações Relevantes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {cards.map((card, index) => {
+          const Icon = card.icon;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  {card.title}
+                </CardTitle>
+                <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${card.color}`} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">
+                  {card.value}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Alertas e Notificações */}
@@ -254,103 +224,7 @@ export const Dashboard = () => {
         </Card>
       )}
 
-      {/* Resumo Detalhado */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5 text-green-600" />
-              Resumo Financeiro do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Receitas Total:</span>
-                <span className="font-semibold text-green-600">{formatCurrency(totalReceitaMes)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Receitas Pagas:</span>
-                <span className="font-semibold text-emerald-600">{formatCurrency(totalReceitaPaga)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">A Receber:</span>
-                <span className="font-semibold text-orange-600">{formatCurrency(totalReceitaPendente)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Despesas:</span>
-                <span className="font-semibold text-red-600">{formatCurrency(totalDespesaMes)}</span>
-              </div>
-              <div className="border-t pt-2">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-900">Lucro Líquido:</span>
-                  <span className={`font-bold ${lucroMes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(lucroMes)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5 text-blue-600" />
-              Status Operacional
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="text-sm text-gray-600">
-                Sistema PostgreSQL funcionando perfeitamente
-              </div>
-              <div className="text-sm text-gray-600">
-                {totalClientes > 0 ? `${totalClientes} clientes cadastrados` : 'Nenhum cliente cadastrado ainda'}
-              </div>
-              <div className="text-sm text-gray-600">
-                {totalProdutos > 0 ? `${totalProdutos} produtos no catálogo` : 'Nenhum produto cadastrado ainda'}
-              </div>
-              <div className="text-sm text-gray-600">
-                {ordensAbertas > 0 ? `${ordensAbertas} ordens em andamento` : 'Nenhuma ordem em andamento'}
-              </div>
-              <div className="text-sm text-gray-600">
-                {ordensEntregues > 0 ? `${ordensEntregues} ordens finalizadas` : 'Nenhuma ordem finalizada ainda'}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Próximos Passos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              {totalClientes === 0 && (
-                <div className="flex items-center text-blue-600">
-                  <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                  Cadastre seus primeiros clientes
-                </div>
-              )}
-              {totalProdutos === 0 && (
-                <div className="flex items-center text-green-600">
-                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                  Adicione produtos e serviços
-                </div>
-              )}
-              <div className="flex items-center text-purple-600">
-                <span className="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
-                Crie ordens de serviço
-              </div>
-              <div className="flex items-center text-yellow-600">
-                <span className="w-2 h-2 bg-yellow-600 rounded-full mr-2"></span>
-                Configure o controle financeiro
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
