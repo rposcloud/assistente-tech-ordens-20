@@ -52,7 +52,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   }) as { data: any };
   
   const abrirDialogoFinalizar = () => {
-    if (ordem?.status === 'entregue') {
+    if (ordem?.status === 'finalizada') {
       toast({
         title: "Erro",
         description: "Esta OS já foi finalizada",
@@ -65,9 +65,9 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   const finalizarOS = async () => {
       try {
-        // Atualizar status da OS para 'entregue' com dados de pagamento
+        // Atualizar status da OS para 'finalizada' com dados de pagamento
         await api.ordens.update(ordem.id, {
-          status: 'entregue',
+          status: 'finalizada',
           forma_pagamento: formaPagamento,
           data_pagamento: dataVencimento
         });
@@ -421,7 +421,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       )}
 
       {/* Botão Finalizar OS */}
-      {ordem.status !== 'entregue' && (
+      {ordem.status !== 'finalizada' && (
         <div className="flex justify-end print:hidden">
           <Button 
             onClick={abrirDialogoFinalizar}

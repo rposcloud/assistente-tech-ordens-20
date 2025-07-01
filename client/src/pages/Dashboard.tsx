@@ -49,7 +49,7 @@ export const Dashboard = () => {
   // Cálculos básicos
   const totalClientes = clientes?.length || 0;
   const totalProdutos = produtos?.length || 0;
-  const ordensAbertas = ordens?.filter(o => o.status !== 'entregue')?.length || 0;
+  const ordensAbertas = ordens?.filter(o => o.status !== 'finalizada')?.length || 0;
   
   // Cálculos financeiros
   const hoje = new Date();
@@ -71,7 +71,7 @@ export const Dashboard = () => {
   }, 0);
 
   // Valor total das OS em aberto
-  const valorTotalOSAbertas = ordens?.filter(o => o.status !== 'entregue')
+  const valorTotalOSAbertas = ordens?.filter(o => o.status !== 'finalizada')
     .reduce((acc, ordem) => {
       const valor = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : ordem.valor_total;
       return acc + (valor || 0);
@@ -82,8 +82,8 @@ export const Dashboard = () => {
     return Array.isArray(entradas) && entradas.some((entrada: any) => entrada.ordem_servico_id === ordem.id);
   }) || [];
 
-  const ordensEntreguesComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status === 'entregue');
-  const ordensAbertasComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status !== 'entregue');
+  const ordensEntreguesComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status === 'finalizada');
+  const ordensAbertasComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status !== 'finalizada');
 
   // Cálculos de receitas já vinculadas a OS
   const receitasVinculadasOS = Array.isArray(entradas) ? entradas.filter((e: any) => {
@@ -115,12 +115,11 @@ export const Dashboard = () => {
 
   const getStatusColor = (status: string) => {
     const statusColors = {
-      'aguardando_diagnostico': 'bg-yellow-100 text-yellow-800',
-      'aguardando_aprovacao': 'bg-orange-100 text-orange-800',
-      'aguardando_pecas': 'bg-purple-100 text-purple-800',
-      'em_reparo': 'bg-blue-100 text-blue-800',
-      'pronto_entrega': 'bg-green-100 text-green-800',
-      'entregue': 'bg-gray-100 text-gray-800'
+      'aberta': 'bg-blue-100 text-blue-800',
+      'em_andamento': 'bg-yellow-100 text-yellow-800',
+      'aguardando_pecas': 'bg-orange-100 text-orange-800',
+      'pronta': 'bg-green-100 text-green-800',
+      'finalizada': 'bg-gray-100 text-gray-800'
     };
     return statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800';
   };

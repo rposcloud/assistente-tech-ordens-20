@@ -72,14 +72,16 @@ export const PortalCliente = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'entregue':
+      case 'finalizada':
         return 'text-green-600 bg-green-100';
-      case 'pronto_entrega':
+      case 'pronta':
         return 'text-blue-600 bg-blue-100';
-      case 'em_reparo':
+      case 'em_andamento':
         return 'text-orange-600 bg-orange-100';
-      case 'aguardando_aprovacao':
+      case 'aguardando_pecas':
         return 'text-yellow-600 bg-yellow-100';
+      case 'aberta':
+        return 'text-gray-600 bg-gray-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }

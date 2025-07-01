@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   aberta: 'bg-blue-100 text-blue-800',
   em_andamento: 'bg-yellow-100 text-yellow-800',
   aguardando_pecas: 'bg-orange-100 text-orange-800',
@@ -29,7 +29,7 @@ const statusColors = {
   finalizada: 'bg-gray-100 text-gray-800'
 };
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
   aberta: 'Aberta',
   em_andamento: 'Em Andamento',
   aguardando_pecas: 'Aguardando Peças',
@@ -88,9 +88,9 @@ export const Ordens = () => {
   });
 
   const stats = {
-    aguardando_diagnostico: filteredOrdens.filter(o => o.status === 'aguardando_diagnostico').length,
-    em_reparo: filteredOrdens.filter(o => ['aguardando_aprovacao', 'aguardando_pecas', 'em_reparo'].includes(o.status)).length,
-    pronto_entrega: filteredOrdens.filter(o => o.status === 'pronto_entrega').length,
+    aberta: filteredOrdens.filter(o => o.status === 'aberta').length,
+    em_andamento: filteredOrdens.filter(o => ['em_andamento', 'aguardando_pecas'].includes(o.status)).length,
+    pronta: filteredOrdens.filter(o => o.status === 'pronta').length,
     total: filteredOrdens.length
   };
 
@@ -499,7 +499,7 @@ export const Ordens = () => {
             <Clock className="h-3 w-3 text-yellow-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.aguardando_diagnostico}</div>
+            <div className="text-lg font-bold">{stats.aberta}</div>
           </CardContent>
         </Card>
 
@@ -511,7 +511,7 @@ export const Ordens = () => {
             <AlertCircle className="h-3 w-3 text-blue-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.em_reparo}</div>
+            <div className="text-lg font-bold">{stats.em_andamento}</div>
           </CardContent>
         </Card>
 
@@ -523,7 +523,7 @@ export const Ordens = () => {
             <CheckCircle className="h-3 w-3 text-green-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.pronto_entrega}</div>
+            <div className="text-lg font-bold">{stats.pronta}</div>
           </CardContent>
         </Card>
 

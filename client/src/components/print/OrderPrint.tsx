@@ -13,12 +13,11 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
   ({ ordem, cliente, companyProfile }, ref) => {
     const getStatusText = (status: string) => {
       const statusTexts = {
-        aguardando_diagnostico: 'Aguardando Diagnóstico',
-        aguardando_aprovacao: 'Aguardando Aprovação',
+        aberta: 'Aberta',
+        em_andamento: 'Em Andamento',
         aguardando_pecas: 'Aguardando Peças',
-        em_reparo: 'Em Reparo',
-        pronto_entrega: 'Pronto para Entrega',
-        entregue: 'Entregue'
+        pronta: 'Pronta',
+        finalizada: 'Finalizada'
       };
       return statusTexts[status as keyof typeof statusTexts] || status;
     };

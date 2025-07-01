@@ -172,7 +172,7 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
             .status-pecas { background: #ffeaa7; color: #6c5ce7; }
             .status-reparo { background: #e1d5f7; color: #6f42c1; }
             .status-pronto { background: #d4edda; color: #155724; }
-            .status-entregue { background: #f8f9fa; color: #6c757d; }
+            .status-finalizada { background: #f8f9fa; color: #6c757d; }
             
             .footer {
               margin-top: 30px;
