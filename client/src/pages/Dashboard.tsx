@@ -24,18 +24,26 @@ export const Dashboard = () => {
   
   // Cálculos financeiros detalhados
   const hoje = new Date();
-  const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+  console.log('Dados financeiros recebidos:', entradas);
+  console.log('Loading financeiro:', loadingFinanceiro);
   
-  // Separar receitas e despesas
-  const todasReceitas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'receita') : [];
-  const todasDespesas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'despesa') : [];
+  // Separar receitas e despesas pagas
+  const todasReceitas = Array.isArray(entradas) ? entradas.filter((e: any) => e.tipo === 'receita' && e.status === 'pago') : [];
+  const todasDespesas = Array.isArray(entradas) ? entradas.filter((e: any) => e.tipo === 'despesa' && e.status === 'pago') : [];
   
-  // Para demonstração, vou mostrar todas as receitas (últimos 12 meses)
-  const receitasDoMes = todasReceitas; // Mostrar todas para teste
+  // Filtrar entradas do mês atual
+  const mesAtual = hoje.getMonth();
+  const anoAtual = hoje.getFullYear();
   
-  // Para demonstração, vou mostrar todas as despesas (últimos 12 meses)  
-  const despesasDoMes = todasDespesas; // Mostrar todas para teste
+  const receitasDoMes = todasReceitas.filter(entrada => {
+    const dataVencimento = new Date(entrada.data_vencimento);
+    return dataVencimento.getMonth() === mesAtual && dataVencimento.getFullYear() === anoAtual;
+  });
+  
+  const despesasDoMes = todasDespesas.filter(entrada => {
+    const dataVencimento = new Date(entrada.data_vencimento);
+    return dataVencimento.getMonth() === mesAtual && dataVencimento.getFullYear() === anoAtual;
+  });
   
   // Calcular totais
   const totalReceitaMes = receitasDoMes.reduce((acc, entrada) => {
@@ -47,6 +55,16 @@ export const Dashboard = () => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
   }, 0);
+
+  console.log('Total receita mês:', totalReceitaMes);
+  console.log('Total despesa mês:', totalDespesaMes);
+  console.log('Receitas do mês:', receitasDoMes);
+  console.log('Despesas do mês:', despesasDoMes);
+
+  // Debug das datas
+  console.log('Data atual:', hoje);
+  console.log('Primeiro dia do mês:', new Date(anoAtual, mesAtual, 1));
+  console.log('Último dia do mês:', new Date(anoAtual, mesAtual + 1, 0));
   
   const lucroMes = totalReceitaMes - totalDespesaMes;
   
