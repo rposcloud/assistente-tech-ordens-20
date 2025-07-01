@@ -314,7 +314,7 @@ export const insertClienteSchema = createInsertSchema(clientes).omit({
   email: z.string().optional().or(z.literal('')),
   telefone: z.string().optional(),
   cpf_cnpj: z.string().optional(),
-  data_nascimento: z.string().optional(),
+  data_nascimento: z.string().optional().transform(val => val === '' ? undefined : val),
   cep: z.string().optional(),
   endereco: z.string().optional(),
   numero: z.string().optional(),

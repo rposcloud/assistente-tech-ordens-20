@@ -281,7 +281,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/clientes', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const clienteData = insertClienteSchema.parse(req.body);
+      // Filtrar campos vazios antes da validação
+      const cleanedData = Object.fromEntries(
+        Object.entries(req.body).filter(([key, value]) => {
+          // Remover campos vazios ou apenas com espaços
+          if (typeof value === 'string' && value.trim() === '') {
+            return false;
+          }
+          return true;
+        })
+      );
+
+      const clienteData = insertClienteSchema.parse(cleanedData);
       const cliente = await storage.createCliente(clienteData, req.userId!);
       res.json(cliente);
     } catch (error) {
@@ -293,7 +304,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/clientes/:id', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      const clienteData = insertClienteSchema.partial().parse(req.body);
+      
+      // Filtrar campos vazios antes da validação
+      const cleanedData = Object.fromEntries(
+        Object.entries(req.body).filter(([key, value]) => {
+          // Remover campos vazios ou apenas com espaços
+          if (typeof value === 'string' && value.trim() === '') {
+            return false;
+          }
+          return true;
+        })
+      );
+
+      const clienteData = insertClienteSchema.partial().parse(cleanedData);
       const cliente = await storage.updateCliente(id, req.userId!, clienteData);
       res.json(cliente);
     } catch (error) {
