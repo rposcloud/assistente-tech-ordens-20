@@ -458,21 +458,21 @@ export const Financeiro = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Controle Financeiro</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Controle Financeiro</h1>
+          <p className="text-gray-600 mt-2 text-sm lg:text-base">
             Acompanhe receitas, despesas e fluxo de caixa do seu negócio
           </p>
         </div>
-        <Button onClick={handleNewEntrada} className="flex items-center">
+        <Button onClick={handleNewEntrada} className="flex items-center whitespace-nowrap">
           <Plus className="mr-2 h-4 w-4" />
           Nova Entrada
         </Button>
       </div>
 
       {/* Cards de Resumo Financeiro */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
