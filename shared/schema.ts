@@ -7,6 +7,7 @@ import { relations } from "drizzle-orm";
 export const tipoDocumentoEnum = pgEnum("tipo_documento", ["cpf", "cnpj"]);
 export const categoriaProdutoEnum = pgEnum("categoria_produto", ["peca", "servico"]);
 export const tipoEquipamentoEnum = pgEnum("tipo_equipamento", ["smartphone", "notebook", "desktop", "tablet", "outros", "todos"]);
+export const tipo_equipamento_values = ["smartphone", "notebook", "desktop", "tablet", "outros", "todos"] as const;
 export const statusOrdemEnum = pgEnum("status_ordem", ["aberta", "em_andamento", "aguardando_pecas", "pronta", "finalizada"]);
 export const formaPagamentoEnum = pgEnum("forma_pagamento", ["dinheiro", "cartao_credito", "cartao_debito", "pix", "transferencia", "parcelado"]);
 export const statusPagamentoEnum = pgEnum("status_pagamento", ["pendente", "pago", "parcial", "cancelado"]);
@@ -163,6 +164,7 @@ export const entradasFinanceiras = pgTable("entradas_financeiras", {
   forma_pagamento: formaPagamentoEnum("forma_pagamento").notNull(),
   data_vencimento: date("data_vencimento").notNull(),
   status_pagamento: statusPagamentoEnum("status_pagamento").default("pendente").notNull(),
+  status: statusPagamentoEnum("status").default("pendente").notNull(),
   observacoes: text("observacoes"),
   parcelas: integer("parcelas").default(1),
   parcela_atual: integer("parcela_atual").default(1),
