@@ -173,11 +173,10 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {formData.tipo_documento === 'cpf' ? 'CPF' : 'CNPJ'} *
+                  {formData.tipo_documento === 'cpf' ? 'CPF' : 'CNPJ'}
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.tipo_documento === 'cpf' ? cpfMask.value : cnpjMask.value}
                   onChange={(e) => handleDocumentoChange(e.target.value)}
                   placeholder={formData.tipo_documento === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}

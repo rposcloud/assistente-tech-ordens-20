@@ -51,7 +51,7 @@ export const clientes = pgTable("clientes", {
   nome: text("nome").notNull(),
   email: text("email"),
   telefone: text("telefone"),
-  cpf_cnpj: text("cpf_cnpj").notNull(),
+  cpf_cnpj: text("cpf_cnpj"),
   tipo_documento: tipoDocumentoEnum("tipo_documento").default("cpf").notNull(),
   data_nascimento: date("data_nascimento"),
   cep: text("cep"),
