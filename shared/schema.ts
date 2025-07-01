@@ -291,6 +291,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertProfileSchema = createInsertSchema(profiles).omit({
   created_at: true,
   updated_at: true,
+}).extend({
+  logo_url: z.string().optional(),
 });
 
 export const insertClienteSchema = createInsertSchema(clientes).omit({
