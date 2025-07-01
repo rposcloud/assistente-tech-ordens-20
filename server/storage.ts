@@ -19,26 +19,26 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   verifyPassword(password: string, hash: string): Promise<boolean>;
   hashPassword(password: string): Promise<string>;
-  
+
   // Profiles
   getProfile(userId: string): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(userId: string, profile: Partial<InsertProfile>): Promise<Profile>;
-  
+
   // Clientes
   getClientes(userId: string): Promise<Cliente[]>;
   getCliente(id: string, userId: string): Promise<Cliente | undefined>;
   createCliente(cliente: InsertCliente, userId: string): Promise<Cliente>;
   updateCliente(id: string, userId: string, cliente: Partial<InsertCliente>): Promise<Cliente>;
   deleteCliente(id: string, userId: string): Promise<void>;
-  
+
   // Produtos
   getProdutos(userId: string): Promise<Produto[]>;
   getProduto(id: string, userId: string): Promise<Produto | undefined>;
   createProduto(produto: InsertProduto): Promise<Produto>;
   updateProduto(id: string, userId: string, produto: Partial<InsertProduto>): Promise<Produto>;
   deleteProduto(id: string, userId: string): Promise<void>;
-  
+
   // Ordens de Serviço
   getOrdensServico(userId: string): Promise<OrdemServico[]>;
   getOrdemServico(id: string, userId: string): Promise<OrdemServico | undefined>;
@@ -46,26 +46,26 @@ export interface IStorage {
   createOrdemServico(ordem: InsertOrdemServico, userId: string): Promise<OrdemServico>;
   updateOrdemServico(id: string, userId: string, ordem: Partial<InsertOrdemServico>): Promise<OrdemServico>;
   deleteOrdemServico(id: string, userId: string): Promise<void>;
-  
+
   // Entradas Financeiras
   getEntradasFinanceiras(userId: string): Promise<EntradaFinanceira[]>;
   getEntradaFinanceira(id: string, userId: string): Promise<EntradaFinanceira | undefined>;
   createEntradaFinanceira(entrada: InsertEntradaFinanceira): Promise<EntradaFinanceira>;
   updateEntradaFinanceira(id: string, userId: string, entrada: Partial<InsertEntradaFinanceira>): Promise<EntradaFinanceira>;
   deleteEntradaFinanceira(id: string, userId: string): Promise<void>;
-  
+
   // Categorias Financeiras
   getCategoriasFinanceiras(userId: string): Promise<CategoriaFinanceira[]>;
   createCategoriaFinanceira(categoria: InsertCategoriaFinanceira): Promise<CategoriaFinanceira>;
-  
+
   // Tipos de Defeito
   getTiposDefeito(userId: string): Promise<TipoDefeito[]>;
   createTipoDefeito(tipo: InsertTipoDefeito): Promise<TipoDefeito>;
-  
+
   // Produtos Utilizados
   addProdutoUtilizado(ordemId: string, produtoId: string, quantidade: number, valorUnitario: number): Promise<any>;
   removeProdutoUtilizado(id: string): Promise<void>;
-  
+
   // Peças Utilizadas  
   addPecaUtilizada(ordemId: string, nome: string, quantidade: number, valorUnitario: number): Promise<any>;
   removePecaUtilizada(id: string): Promise<void>;
@@ -187,26 +187,26 @@ export class DatabaseStorage implements IStorage {
     const ordens = await db.select().from(ordensServico)
       .where(eq(ordensServico.user_id, userId))
       .orderBy(desc(ordensServico.created_at));
-    
+
     // Buscar dados da empresa
     const empresa = await db
       .select()
       .from(profiles)
       .where(eq(profiles.id, userId))
       .limit(1);
-    
+
     // Buscar todos os clientes para fazer o mapeamento
     const clientesMap = new Map();
     if (ordens.length > 0) {
       const clienteIds = Array.from(new Set(ordens.map(o => o.cliente_id)));
       const todosClientes = await db.select().from(clientes)
         .where(eq(clientes.user_id, userId));
-      
+
       todosClientes.forEach(cliente => {
         clientesMap.set(cliente.id, cliente);
       });
     }
-    
+
     // Para cada ordem, buscar produtos e peças utilizadas
     const ordensCompletas = await Promise.all(ordens.map(async (ordem) => {
       // Buscar produtos utilizados
@@ -253,7 +253,7 @@ export class DatabaseStorage implements IStorage {
       .from(ordensServico)
       .where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)))
       .limit(1);
-    
+
     if (result[0]) {
       // Buscar dados do cliente
       const cliente = await db
@@ -261,7 +261,7 @@ export class DatabaseStorage implements IStorage {
         .from(clientes)
         .where(eq(clientes.id, result[0].cliente_id))
         .limit(1);
-      
+
       // Buscar produtos utilizados com detalhes do produto
       const produtosUtilizadosData = await db
         .select({
@@ -281,20 +281,20 @@ export class DatabaseStorage implements IStorage {
         .from(produtosUtilizados)
         .leftJoin(produtos, eq(produtosUtilizados.produto_id, produtos.id))
         .where(eq(produtosUtilizados.ordem_servico_id, result[0].id));
-      
+
       // Buscar peças utilizadas
       const pecasUtilizadasData = await db
         .select()
         .from(pecasUtilizadas)
         .where(eq(pecasUtilizadas.ordem_servico_id, result[0].id));
-      
+
       // Buscar dados da empresa (perfil do usuário)
       const empresa = await db
         .select()
         .from(profiles)
         .where(eq(profiles.id, userId))
         .limit(1);
-        
+
       return { 
         ...result[0], 
         clientes: cliente[0],
@@ -323,17 +323,17 @@ export class DatabaseStorage implements IStorage {
       .where(eq(ordensServico.user_id, userId))
       .orderBy(desc(ordensServico.created_at))
       .limit(1);
-    
+
     const nextNumber = lastOrder.length > 0 && lastOrder[0].numero
       ? String(parseInt(lastOrder[0].numero) + 1).padStart(6, '0')
       : '000001';
-    
+
     const ordemComDados = {
       ...ordem,
       user_id: userId,
       numero: nextNumber
     };
-    
+
     const result = await db.insert(ordensServico).values(ordemComDados as any).returning();
     return result[0];
   }

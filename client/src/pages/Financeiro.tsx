@@ -33,24 +33,24 @@ export const Financeiro = () => {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
-  const entradasMesAtual = entradas.filter(entrada => {
+  const entradasMesAtual = Array.isArray(entradas) ? entradas.filter(entrada => {
     const dataVencimento = new Date(entrada.data_vencimento);
     return dataVencimento.getMonth() === currentMonth && dataVencimento.getFullYear() === currentYear;
-  });
+  }) : [];
 
-  const receitas = entradasMesAtual
+  const receitas = Array.isArray(entradasMesAtual) ? entradasMesAtual
     .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pago')
-    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
-  const despesas = entradasMesAtual
+  const despesas = Array.isArray(entradasMesAtual) ? entradasMesAtual
     .filter(entrada => entrada.tipo === 'despesa' && entrada.status_pagamento === 'pago')
-    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
   const saldo = receitas - despesas;
 
-  const aReceber = entradas
+  const aReceber = Array.isArray(entradas) ? entradas
     .filter(entrada => entrada.tipo === 'receita' && entrada.status_pagamento === 'pendente')
-    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0) : 0;
 
   const handleSubmit = async (data: Omit<EntradaFinanceira, 'id' | 'created_at' | 'updated_at'>) => {
     try {
@@ -269,7 +269,7 @@ export const Financeiro = () => {
             <div className="flex justify-center py-8">Carregando...</div>
           ) : (
             <SortableTable
-              data={entradas}
+              data={Array.isArray(entradas) ? entradas : []}
               columns={columns}
               keyExtractor={(entrada) => entrada.id!}
               emptyMessage="Nenhuma movimentação encontrada"

@@ -1,4 +1,3 @@
-
 import React, { forwardRef } from 'react';
 import { OrdemServico, Cliente } from '../../types';
 import { formatCurrency } from '../../utils/masks';
@@ -130,7 +129,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
             <h4 className="font-bold text-gray-800 mb-2">DEFEITO RELATADO</h4>
             <p className="text-sm">{ordem.defeito_relatado}</p>
           </div>
-          
+
           {ordem.diagnostico_tecnico && (
             <div className="border rounded-lg p-4">
               <h4 className="font-bold text-gray-800 mb-2">DIAGNÓSTICO TÉCNICO</h4>
@@ -167,7 +166,7 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
                   </div>
                 </div>
               ))}
-              
+
               {/* Peças */}
               {(ordem as any).pecas_utilizadas?.map((item: any, index: number) => (
                 <div key={index} className="flex justify-between items-start bg-orange-50 p-3 rounded">

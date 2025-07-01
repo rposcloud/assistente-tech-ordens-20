@@ -30,8 +30,8 @@ export const Dashboard = () => {
   const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
   
   // Separar receitas e despesas
-  const todasReceitas = entradas?.filter(e => e.tipo === 'receita') || [];
-  const todasDespesas = entradas?.filter(e => e.tipo === 'despesa') || [];
+  const todasReceitas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'receita') : [];
+  const todasDespesas = Array.isArray(entradas) ? entradas.filter(e => e.tipo === 'despesa') : [];
   
   // Receitas do mês atual
   const receitasDoMes = todasReceitas.filter(e => {

@@ -33,7 +33,7 @@ const prioridadeLabels = {
 
 export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: VisualizacaoOSProps) => {
   const [produtosModalOpen, setProdutosModalOpen] = useState(false);
-  
+
   if (!ordem) return null;
 
   const formatCurrency = (value: any) => {
@@ -363,11 +363,11 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: Visualizaca
     try {
       const endpoint = tipo === 'produto' ? `/api/produtos-utilizados/${id}` : `/api/pecas-utilizadas/${id}`;
       const response = await fetch(endpoint, { method: 'DELETE' });
-      
+
       if (!response.ok) {
         throw new Error('Erro ao remover item');
       }
-      
+
       toast.success(`${tipo === 'produto' ? 'Produto' : 'Peça'} removido com sucesso`);
       onUpdate?.();
     } catch (error) {
@@ -602,7 +602,7 @@ export const VisualizacaoOS = ({ isOpen, onClose, ordem, onUpdate }: Visualizaca
           </div>
         </div>
       </DialogContent>
-      
+
       <GerenciarProdutosModal
         isOpen={produtosModalOpen}
         onClose={() => setProdutosModalOpen(false)}
