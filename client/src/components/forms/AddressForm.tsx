@@ -27,7 +27,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({
   onAddressChange
 }) => {
   const cepMask = useMask('cep');
-  const { buscar, endereco: enderecoEncontrado, loading } = useCep();
+  const { buscar, endereco: enderecoEncontrado, loading, limpar } = useCep();
 
   useEffect(() => {
     cepMask.setValue(cep);
@@ -40,14 +40,22 @@ export const AddressForm: React.FC<AddressFormProps> = ({
       onAddressChange('cidade', enderecoEncontrado.localidade || '');
       onAddressChange('estado', enderecoEncontrado.uf || '');
     }
-  }, [enderecoEncontrado, onAddressChange]);
+  }, [enderecoEncontrado]);
 
   const handleCepChange = (value: string) => {
     cepMask.handleChange(value);
-    onAddressChange('cep', value.replace(/\D/g, ''));
+    const cleanCep = value.replace(/\D/g, '');
+    onAddressChange('cep', cleanCep);
     
-    if (value.replace(/\D/g, '').length === 8) {
+    if (cleanCep.length === 8) {
       buscar(value);
+    } else if (cleanCep.length === 0) {
+      // Limpar dados quando CEP for removido
+      limpar();
+      onAddressChange('endereco', '');
+      onAddressChange('bairro', '');
+      onAddressChange('cidade', '');
+      onAddressChange('estado', '');
     }
   };
 

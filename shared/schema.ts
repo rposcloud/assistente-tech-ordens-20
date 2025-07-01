@@ -310,7 +310,7 @@ export const insertClienteSchema = createInsertSchema(clientes).omit({
   user_id: true, // Adicionado pelo backend
 }).extend({
   // Tornar campos opcionais para flexibilidade
-  email: z.string().email().optional(),
+  email: z.string().optional().or(z.literal('')),
   telefone: z.string().optional(),
   cpf_cnpj: z.string().optional(),
   data_nascimento: z.string().optional(),
