@@ -228,6 +228,11 @@ Changelog:
   * Header responsivo: versão simplificada mobile, informações completas desktop
   * Sidebar: navegação fixa desktop (lg:static) + overlay mobile (fixed)
   * Sistema 100% funcional em ambas as versões mantendo todas as funcionalidades
+- July 1, 2025. AJUSTES FINAIS DE IMPRESSÃO E FONTES DESKTOP:
+  * Fontes desktop aumentadas sutilmente para melhor legibilidade (15px base, +0.05-0.075rem)
+  * CSS de impressão totalmente otimizado: eliminada barra de rolagem e páginas duplicadas
+  * Impressão forçada para página única com overflow hidden em todos os elementos
+  * Sistema finalizado e pronto para deploy com todas as funcionalidades operacionais
 
 ## User Preferences
 
