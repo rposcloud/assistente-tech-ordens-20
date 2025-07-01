@@ -54,38 +54,25 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   return (
     <div className="w-full max-w-none p-4 space-y-3 print:p-2 print:space-y-2">
-      {/* Cabeçalho da Empresa */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg print:bg-gray-800">
-        <div className="p-4 print:p-3">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+      {/* Cabeçalho */}
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="p-3 print:p-2">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold print:text-lg">
-                {ordem.empresa?.nome_completo || ordem.empresa?.empresa || 'TechService'}
+              <h1 className="text-lg font-bold text-gray-900 print:text-base">
+                TechService - Ordem de Serviço #{ordem.numero}
               </h1>
-              <p className="text-blue-100 text-sm print:text-xs">
-                Assistência Técnica Especializada
+              <p className="text-gray-600 text-sm print:text-xs">
+                {ordem.clientes?.nome} - {ordem.clientes?.telefone} | Data: {formatDate(ordem.data_abertura)}
               </p>
             </div>
-            <div className="text-center">
-              <h2 className="text-xl font-bold print:text-lg">
-                ORDEM DE SERVIÇO
-              </h2>
-              <p className="text-blue-100 text-lg font-semibold print:text-base">
-                #{ordem.numero}
-              </p>
-            </div>
-            <div className="text-right print:text-left">
-              <p className="text-sm print:text-xs text-blue-100">
-                Data: {formatDate(ordem.data_abertura)}
-              </p>
-              <div className="flex gap-2 justify-end print:justify-start mt-1">
-                <Badge className={`px-2 py-1 text-xs bg-white text-gray-800 border`}>
-                  {statusLabels[ordem.status] || ordem.status}
-                </Badge>
-                <Badge className={`px-2 py-1 text-xs bg-white text-gray-800 border`}>
-                  {ordem.prioridade?.toUpperCase()}
-                </Badge>
-              </div>
+            <div className="flex gap-2 print:gap-1">
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                {statusLabels[ordem.status] || ordem.status}
+              </Badge>
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                {ordem.prioridade?.toUpperCase()}
+              </Badge>
             </div>
           </div>
         </div>
@@ -375,10 +362,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </div>
               <div className="border-t border-gray-200 pt-2 print:pt-1">
                 <p className="text-xs font-medium text-center">
-                  {ordem.empresa?.nome_completo || 'TechService'} - Assistência Técnica
+                  TechService - Assistência Técnica
                 </p>
                 <p className="text-xs text-center text-gray-600">
-                  {ordem.empresa?.telefone || ''} | {ordem.empresa?.email || ''}
+                  Contato: (11) 99999-9999 | contato@techservice.com.br
                 </p>
               </div>
             </div>

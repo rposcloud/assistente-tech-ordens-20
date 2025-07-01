@@ -98,8 +98,8 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-full h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="px-4 py-3 border-b bg-white flex-shrink-0 print:hidden">
+      <DialogContent className="max-w-5xl max-h-[85vh] p-0">
+        <DialogHeader className="px-4 py-3 border-b bg-white print:hidden">
           <div className="flex justify-between items-center">
             <DialogTitle className="text-lg font-semibold">
               Visualização da Ordem de Serviço
@@ -116,7 +116,7 @@ export const VisualizacaoOSModal: React.FC<VisualizacaoOSModalProps> = ({
           </div>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto print-area" style={{ maxHeight: 'calc(90vh - 60px)' }}>
+        <div className="overflow-y-auto print-area" style={{ maxHeight: 'calc(85vh - 80px)' }}>
           <VisualizacaoOS ordem={ordem} />
         </div>
       </DialogContent>
