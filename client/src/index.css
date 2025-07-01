@@ -210,6 +210,14 @@
     font-size: 20px !important;
   }
 
+  .print\:flex-row {
+    flex-direction: row !important;
+  }
+
+  .print\:flex-col {
+    flex-direction: column !important;
+  }
+
   .print\:p-1 {
     padding: 4px !important;
   }

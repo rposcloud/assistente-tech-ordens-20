@@ -67,19 +67,21 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
     <div className="bg-white p-6 print:p-4 max-w-full">
       {/* Cabeçalho da OS */}
       <div className="text-center mb-6 print:mb-4 border-b-2 border-blue-600 pb-4 print:pb-2">
-        <h1 className="text-3xl print:text-2xl font-bold text-blue-600 mb-2 print:mb-1">
+        <h1 className="text-3xl print:text-xl font-bold text-blue-600 mb-3 print:mb-2">
           ORDEM DE SERVIÇO
         </h1>
-        <div className="flex justify-center items-center gap-4 print:gap-2">
-          <span className="text-xl print:text-lg font-semibold">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 print:gap-2 print:flex-row">
+          <span className="text-2xl print:text-lg font-bold text-gray-800">
             Nº {ordem.numero}
           </span>
-          <span className={`px-3 py-1 print:px-2 print:py-0 rounded-full text-sm print:text-xs font-medium ${getStatusColor(ordem.status)}`}>
-            {getStatusText(ordem.status)}
-          </span>
-          <span className={`px-3 py-1 print:px-2 print:py-0 rounded-full text-sm print:text-xs font-medium ${getPrioridadeColor(ordem.prioridade)}`}>
-            {getPrioridadeText(ordem.prioridade)}
-          </span>
+          <div className="flex gap-2 print:gap-1">
+            <span className={`px-3 py-1 print:px-2 print:py-0 rounded-full text-sm print:text-xs font-medium ${getStatusColor(ordem.status)}`}>
+              {getStatusText(ordem.status)}
+            </span>
+            <span className={`px-3 py-1 print:px-2 print:py-0 rounded-full text-sm print:text-xs font-medium ${getPrioridadeColor(ordem.prioridade)}`}>
+              {getPrioridadeText(ordem.prioridade)}
+            </span>
+          </div>
         </div>
       </div>
 
