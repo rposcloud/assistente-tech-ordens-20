@@ -17,21 +17,19 @@ interface OrdemDetalhesModalProps {
 }
 
 const statusLabels = {
-  aguardando_diagnostico: 'Aguardando Diagnóstico',
-  aguardando_aprovacao: 'Aguardando Aprovação',
+  aberta: 'Aberta',
+  em_andamento: 'Em Andamento',
   aguardando_pecas: 'Aguardando Peças',
-  em_reparo: 'Em Reparo',
-  pronto_entrega: 'Pronto para Entrega',
-  entregue: 'Entregue'
+  pronta: 'Pronta',
+  finalizada: 'Finalizada'
 };
 
 const statusColors = {
-  aguardando_diagnostico: 'bg-yellow-100 text-yellow-800',
-  aguardando_aprovacao: 'bg-blue-100 text-blue-800',
+  aberta: 'bg-blue-100 text-blue-800',
+  em_andamento: 'bg-yellow-100 text-yellow-800',
   aguardando_pecas: 'bg-orange-100 text-orange-800',
-  em_reparo: 'bg-purple-100 text-purple-800',
-  pronto_entrega: 'bg-green-100 text-green-800',
-  entregue: 'bg-gray-100 text-gray-800'
+  pronta: 'bg-green-100 text-green-800',
+  finalizada: 'bg-gray-100 text-gray-800'
 };
 
 const prioridadeLabels = {

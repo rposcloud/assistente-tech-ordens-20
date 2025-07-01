@@ -104,12 +104,11 @@ export const Dashboard = () => {
 
   const formatStatus = (status: string) => {
     const statusMap = {
-      'aguardando_diagnostico': 'Aguardando Diagnóstico',
-      'aguardando_aprovacao': 'Aguardando Aprovação',
+      'aberta': 'Aberta',
+      'em_andamento': 'Em Andamento',
       'aguardando_pecas': 'Aguardando Peças',
-      'em_reparo': 'Em Reparo',
-      'pronto_entrega': 'Pronto para Entrega',
-      'entregue': 'Entregue'
+      'pronta': 'Pronta',
+      'finalizada': 'Finalizada'
     };
     return statusMap[status as keyof typeof statusMap] || status;
   };
