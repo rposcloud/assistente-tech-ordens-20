@@ -89,33 +89,69 @@ export const Financeiro = () => {
     }
   };
 
-  // Calcular estatísticas usando useMemo para performance
+  // Calcular estatísticas baseadas no filtro selecionado
   const estatisticas = useMemo(() => {
-    if (!Array.isArray(entradas)) return { receitas: 0, despesas: 0, saldo: 0, aReceber: 0, aPagar: 0 };
+    if (!Array.isArray(entradas)) return { receitas: 0, despesas: 0, saldo: 0, aReceber: 0, aPagar: 0, periodo: 'Este Mês' };
 
-    const hoje = new Date();
-    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    // Obter range de datas baseado no filtro atual
+    let rangeDatas = null;
+    let labelPeriodo = 'Este Mês';
+    
+    if (dataInicio && dataFim) {
+      rangeDatas = { inicio: new Date(dataInicio), fim: new Date(dataFim) };
+      labelPeriodo = 'Período Personalizado';
+    } else {
+      rangeDatas = obterRangeDatas(filtroRapido);
+      const labels: Record<FiltroRapido, string> = {
+        'hoje': 'Hoje',
+        'ontem': 'Ontem', 
+        'esta_semana': 'Esta Semana',
+        'semana_passada': 'Semana Passada',
+        'este_mes': 'Este Mês',
+        'mes_passado': 'Mês Passado',
+        'ultimos_3_meses': 'Últimos 3 Meses',
+        'este_ano': 'Este Ano',
+        'ano_passado': 'Ano Passado',
+        'todos': 'Todos os Períodos'
+      };
+      labelPeriodo = labels[filtroRapido];
+    }
 
-    // Receitas do mês atual (apenas pagas)
-    const receitas = entradas
-      .filter((entrada: any) => {
-        const data = new Date(entrada.data_vencimento);
-        return entrada.tipo === 'receita' && 
-               entrada.status === 'pago' &&
-               data >= inicioMes && data <= fimMes;
-      })
-      .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    // Receitas do período selecionado (apenas pagas)
+    let receitas = 0;
+    if (rangeDatas) {
+      receitas = entradas
+        .filter((entrada: any) => {
+          const data = new Date(entrada.data_vencimento);
+          return entrada.tipo === 'receita' && 
+                 entrada.status === 'pago' &&
+                 data >= rangeDatas.inicio && data <= rangeDatas.fim;
+        })
+        .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    } else {
+      // Para "todos", mostrar todas as receitas pagas
+      receitas = entradas
+        .filter((entrada: any) => entrada.tipo === 'receita' && entrada.status === 'pago')
+        .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    }
 
-    // Despesas do mês atual (apenas pagas)
-    const despesas = entradas
-      .filter((entrada: any) => {
-        const data = new Date(entrada.data_vencimento);
-        return entrada.tipo === 'despesa' && 
-               entrada.status === 'pago' &&
-               data >= inicioMes && data <= fimMes;
-      })
-      .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    // Despesas do período selecionado (apenas pagas)
+    let despesas = 0;
+    if (rangeDatas) {
+      despesas = entradas
+        .filter((entrada: any) => {
+          const data = new Date(entrada.data_vencimento);
+          return entrada.tipo === 'despesa' && 
+                 entrada.status === 'pago' &&
+                 data >= rangeDatas.inicio && data <= rangeDatas.fim;
+        })
+        .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    } else {
+      // Para "todos", mostrar todas as despesas pagas
+      despesas = entradas
+        .filter((entrada: any) => entrada.tipo === 'despesa' && entrada.status === 'pago')
+        .reduce((sum, entrada) => sum + (parseFloat(String(entrada.valor)) || 0), 0);
+    }
 
     // A receber (todas as receitas pendentes, sem filtro de período)
     const aReceber = entradas
@@ -132,9 +168,10 @@ export const Financeiro = () => {
       despesas,
       saldo: receitas - despesas,
       aReceber,
-      aPagar
+      aPagar,
+      periodo: labelPeriodo
     };
-  }, [entradas]);
+  }, [entradas, filtroRapido, dataInicio, dataFim]);
 
   // Entradas filtradas para a tabela
   const entradasFiltradas = useMemo(() => {
@@ -343,26 +380,26 @@ export const Financeiro = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
-              Receitas (Mês)
+              Receitas ({estatisticas.periodo})
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">R$ {estatisticas.receitas.toFixed(2)}</div>
-            <p className="text-xs text-gray-500 mt-1">Valores recebidos</p>
+            <p className="text-xs text-gray-500 mt-1">Valores recebidos no período</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">
-              Despesas (Mês)
+              Despesas ({estatisticas.periodo})
             </CardTitle>
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">R$ {estatisticas.despesas.toFixed(2)}</div>
-            <p className="text-xs text-gray-500 mt-1">Valores pagos</p>
+            <p className="text-xs text-gray-500 mt-1">Valores pagos no período</p>
           </CardContent>
         </Card>
 
