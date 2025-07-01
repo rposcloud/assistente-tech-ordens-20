@@ -1,19 +1,10 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building, CheckCircle, Printer } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { api } from '@/lib/api';
+import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building } from 'lucide-react';
 
-interface VisualizacaoOSProps {
+interface OrdemPrintViewProps {
   ordem: any;
+  profile?: any;
 }
 
 const statusColors = {
@@ -39,75 +30,7 @@ const prioridadeColors = {
   'urgente': 'bg-red-50 text-red-700 border-red-200'
 };
 
-export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
-  const { toast } = useToast();
-  const [showFinalizarDialog, setShowFinalizarDialog] = useState(false);
-  const [formaPagamento, setFormaPagamento] = useState('dinheiro');
-  const [dataVencimento, setDataVencimento] = useState(new Date().toISOString().split('T')[0]);
-  
-  // Buscar dados do perfil da empresa - hook deve estar no topo
-  const { data: profile } = useQuery({
-    queryKey: ['/api/profile'],
-    enabled: !!ordem // só executa se ordem existir
-  }) as { data: any };
-  
-  const abrirDialogoFinalizar = () => {
-    if (ordem?.status === 'finalizada') {
-      toast({
-        title: "Erro",
-        description: "Esta OS já foi finalizada",
-        variant: "destructive"
-      });
-      return;
-    }
-    setShowFinalizarDialog(true);
-  };
-
-  const abrirImpressao = () => {
-    const url = `/impressao-ordem/${ordem.id}`;
-    window.open(url, '_blank', 'width=800,height=900,scrollbars=yes,resizable=yes');
-  };
-
-  const finalizarOS = async () => {
-      try {
-        // Atualizar status da OS para 'finalizada' com dados de pagamento
-        await api.ordens.update(ordem.id, {
-          status: 'finalizada',
-          forma_pagamento: formaPagamento,
-          data_pagamento: dataVencimento
-        });
-
-        toast({
-          title: "Sucesso",
-          description: "OS finalizada com sucesso! Entrada financeira criada automaticamente."
-        });
-        
-        // Fechar o diálogo - o backend já criará a entrada financeira
-        setShowFinalizarDialog(false);
-        // Usar uma abordagem melhor que window.location.reload()
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-        
-      } catch (error) {
-        console.error('Erro:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao finalizar OS",
-          variant: "destructive"
-        });
-      }
-  };
-  
-  // Verificação de segurança
-  if (!ordem) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-gray-500">Nenhuma ordem de serviço selecionada.</p>
-      </div>
-    );
-  }
-
+export const OrdemPrintView: React.FC<OrdemPrintViewProps> = ({ ordem, profile }) => {
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Data não informada';
     return new Date(dateString).toLocaleDateString('pt-BR', {
@@ -128,33 +51,33 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
+    <div className="w-full max-w-none p-4 space-y-4 bg-white">
       {/* Cabeçalho da Empresa */}
       <div className="bg-gradient-to-r from-blue-50 to-gray-50 border border-gray-200 rounded-lg">
-        <div className="p-4 print:p-3">
+        <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg print:p-1">
-                <Building className="h-6 w-6 text-white print:h-4 print:w-4" />
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <Building className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 print:text-sm">
-                  Rp Informática
+                <h2 className="text-lg font-bold text-gray-900">
+                  {profile?.empresa || 'Rp Informática'}
                 </h2>
-                <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-xs">
-                  <p>CNPJ: 43.510.169/0001-31</p>
+                <div className="flex flex-col gap-1 text-sm text-gray-600">
+                  <p>CNPJ: {profile?.cnpj || '43.510.169/0001-31'}</p>
                 </div>
               </div>
             </div>
-            <div className="text-right text-sm text-gray-600 print:text-xs max-w-xs">
+            <div className="text-right text-sm text-gray-600 max-w-xs">
               <div className="space-y-1">
                 <p className="font-medium">Endereço:</p>
-                <p>Avenida Professor João Fiúsa, 507</p>
-                <p>Alto da Boa Vista - CEP: 14025-310</p>
-                <p>Ribeirão Preto/SP</p>
+                <p>{profile?.endereco || 'Avenida Professor João Fiúsa, 507'}</p>
+                <p>{profile?.bairro || 'Alto da Boa Vista'} - CEP: {profile?.cep || '14025-310'}</p>
+                <p>{profile?.cidade || 'Ribeirão Preto'}/{profile?.estado || 'SP'}</p>
               </div>
               <div className="mt-2 space-y-1">
-                <p><span className="font-medium">Tel:</span> (16) 98853-3739</p>
+                <p><span className="font-medium">Tel:</span> {profile?.telefone || '(16) 98853-3739'}</p>
               </div>
             </div>
           </div>
@@ -163,21 +86,21 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
       {/* Cabeçalho da Ordem de Serviço */}
       <div className="border-l-4 border-l-blue-500 bg-white border border-gray-200 rounded-lg">
-        <div className="p-4 print:p-3">
+        <div className="p-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 print:text-lg">
+              <h1 className="text-xl font-bold text-gray-900">
                 Ordem de Serviço #{ordem.numero}
               </h1>
-              <p className="text-gray-600 text-sm print:text-xs">
+              <p className="text-gray-600 text-sm">
                 {ordem.clientes?.nome} - {ordem.clientes?.telefone}
               </p>
             </div>
-            <div className="flex gap-2 print:gap-1">
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+            <div className="flex gap-2">
+              <Badge className={`px-2 py-1 text-xs font-medium border ${statusColors[ordem.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                 {statusLabels[ordem.status as keyof typeof statusLabels] || ordem.status}
               </Badge>
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade as keyof typeof prioridadeColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+              <Badge className={`px-2 py-1 text-xs font-medium border ${prioridadeColors[ordem.prioridade as keyof typeof prioridadeColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                 {ordem.prioridade?.toUpperCase()}
               </Badge>
             </div>
@@ -186,17 +109,17 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       </div>
 
       {/* Linha 1: Cliente e Equipamento */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 print:gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Informações do Cliente */}
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <User className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <User className="h-4 w-4 text-blue-600" />
               Cliente
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+          <div className="p-3">
+            <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <p className="font-medium text-gray-700">Nome:</p>
                 <p className="text-gray-900">{ordem.clientes?.nome}</p>
@@ -225,13 +148,13 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         {/* Informações do Equipamento */}
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Package className="h-4 w-4 text-green-600 print:h-3 print:w-3" />
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <Package className="h-4 w-4 text-green-600" />
               Equipamento
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-xs">
+          <div className="p-3">
+            <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <p className="font-medium text-gray-700">Tipo:</p>
                 <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
@@ -260,15 +183,15 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       {/* Descrição do Problema */}
       <div className="bg-white border border-gray-200 rounded-lg">
         <div className="p-3 border-b border-gray-100">
-          <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-            <FileText className="h-4 w-4 text-orange-600 print:h-3 print:w-3" />
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <FileText className="h-4 w-4 text-orange-600" />
             Descrição do Problema
           </h3>
         </div>
-        <div className="p-3 print:p-2 space-y-3 print:space-y-2">
+        <div className="p-3 space-y-3">
           <div>
             <p className="text-xs font-medium text-gray-700 mb-1">Defeito Relatado:</p>
-            <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded border print:p-1">
+            <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded border">
               {ordem.defeito_relatado}
             </p>
           </div>
@@ -276,7 +199,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           {ordem.diagnostico_tecnico && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Diagnóstico Técnico:</p>
-              <p className="text-xs text-gray-900 bg-blue-50 p-2 rounded border border-blue-200 print:p-1">
+              <p className="text-xs text-gray-900 bg-blue-50 p-2 rounded border border-blue-200">
                 {ordem.diagnostico_tecnico}
               </p>
             </div>
@@ -285,7 +208,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           {ordem.solucao_aplicada && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Solução Aplicada:</p>
-              <p className="text-xs text-gray-900 bg-green-50 p-2 rounded border border-green-200 print:p-1">
+              <p className="text-xs text-gray-900 bg-green-50 p-2 rounded border border-green-200">
                 {ordem.solucao_aplicada}
               </p>
             </div>
@@ -297,15 +220,15 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       {(ordem.produtos_utilizados?.length > 0 || ordem.pecas_utilizadas?.length > 0) && (
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Wrench className="h-4 w-4 text-purple-600 print:h-3 print:w-3" />
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <Wrench className="h-4 w-4 text-purple-600" />
               Produtos e Serviços Utilizados
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="space-y-2 print:space-y-1">
+          <div className="p-3">
+            <div className="space-y-2">
               {ordem.produtos_utilizados?.map((produto: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border">
                   <div className="flex-1">
                     <p className="text-xs font-medium text-gray-900">{produto.produto?.nome}</p>
                     <p className="text-xs text-gray-600">
@@ -319,7 +242,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               ))}
               
               {ordem.pecas_utilizadas?.map((peca: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border">
                   <div className="flex-1">
                     <p className="text-xs font-medium text-gray-900">{peca.nome}</p>
                     <p className="text-xs text-gray-600">
@@ -337,17 +260,17 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       )}
 
       {/* Linha 2: Serviço e Financeiro */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Informações de Serviço */}
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Clock className="h-4 w-4 text-indigo-600 print:h-3 print:w-3" />
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <Clock className="h-4 w-4 text-indigo-600" />
               Serviço
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="space-y-2 print:space-y-1 text-xs print:text-xs">
+          <div className="p-3">
+            <div className="space-y-2 text-xs">
               <div>
                 <p className="font-medium text-gray-700">Data Abertura:</p>
                 <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
@@ -369,13 +292,13 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         {/* Resumo Financeiro */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <CreditCard className="h-4 w-4 text-emerald-600 print:h-3 print:w-3" />
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
+              <CreditCard className="h-4 w-4 text-emerald-600" />
               Resumo Financeiro
             </h3>
           </div>
-          <div className="p-3 print:p-2">
-            <div className="grid grid-cols-2 gap-4 print:gap-2 text-xs print:text-xs">
+          <div className="p-3">
+            <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Mão de Obra:</span>
@@ -401,7 +324,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               <div className="flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-xs text-gray-500 mb-1">VALOR TOTAL</p>
-                  <p className="text-2xl font-bold text-green-600 print:text-xl">
+                  <p className="text-2xl font-bold text-green-600">
                     {formatCurrency(ordem.valor_total)}
                   </p>
                 </div>
@@ -415,90 +338,35 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       {ordem.observacoes_internas && (
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
-            <h3 className="text-sm font-semibold print:text-xs">Observações Internas</h3>
+            <h3 className="text-sm font-semibold">Observações Internas</h3>
           </div>
-          <div className="p-3 print:p-2">
-            <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200 print:p-1">
+          <div className="p-3">
+            <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200">
               {ordem.observacoes_internas}
             </p>
           </div>
         </div>
       )}
 
-      {/* Botões de Ação */}
-      <div className="flex justify-between items-center print:hidden">
-        <Button 
-          onClick={abrirImpressao}
-          variant="outline"
-          className="border-blue-300 text-blue-700 hover:bg-blue-50"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Imprimir OS
-        </Button>
-        
-        {ordem.status !== 'finalizada' && (
-          <Button 
-            onClick={abrirDialogoFinalizar}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Finalizar OS
-          </Button>
-        )}
-      </div>
-
-      {/* Diálogo de Finalização */}
-      <Dialog open={showFinalizarDialog} onOpenChange={setShowFinalizarDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Finalizar Ordem de Serviço</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Isso irá alterar o status para "Entregue" e criar uma entrada financeira de receita.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="forma-pagamento">Forma de Pagamento</Label>
-                <Select value={formaPagamento} onValueChange={setFormaPagamento}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a forma de pagamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                    <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
-                    <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
-                    <SelectItem value="pix">PIX</SelectItem>
-                    <SelectItem value="transferencia">Transferência</SelectItem>
-                    <SelectItem value="parcelado">Parcelado</SelectItem>
-                  </SelectContent>
-                </Select>
+      {/* Assinatura do Cliente */}
+      <div className="bg-white border border-gray-200 rounded-lg mt-8">
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="text-center">
+              <div className="border-t border-gray-300 pt-2 mt-16">
+                <p className="text-xs text-gray-600">Data: ___/___/______</p>
+                <p className="text-xs text-gray-600 font-medium mt-1">Assinatura do Cliente</p>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="data-vencimento">Data de Vencimento</Label>
-                <Input
-                  id="data-vencimento"
-                  type="date"
-                  value={dataVencimento}
-                  onChange={(e) => setDataVencimento(e.target.value)}
-                />
+            </div>
+            <div className="text-center">
+              <div className="border-t border-gray-300 pt-2 mt-16">
+                <p className="text-xs text-gray-600">Data: ___/___/______</p>
+                <p className="text-xs text-gray-600 font-medium mt-1">Assinatura do Técnico</p>
               </div>
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowFinalizarDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={finalizarOS} className="bg-green-600 hover:bg-green-700">
-              Finalizar OS
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 };

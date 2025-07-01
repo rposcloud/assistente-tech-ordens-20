@@ -18,6 +18,7 @@ import { NovaOrdem } from './pages/NovaOrdem';
 import { Financeiro } from './pages/Financeiro';
 import { Empresa } from './pages/Empresa';
 import { PortalCliente } from './pages/PortalCliente';
+import { ImpressaoOrdemDedicada } from './pages/ImpressaoOrdemDedicada';
 
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/portal/:token" element={<PortalCliente />} />
+            <Route path="/impressao-ordem/:id" element={<ImpressaoOrdemDedicada />} />
 
             <Route path="/dashboard" element={
               <ProtectedRoute>

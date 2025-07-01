@@ -120,18 +120,19 @@
     }
   }
 }
+/* CSS específico para impressão otimizada */
 @media print {
   @page {
     size: A4;
     margin: 0.5in;
   }
   
-  html, body, #root, main, .container {
-    overflow: hidden !important;
-    width: 100vw !important;
-    height: 100vh !important;
+  html, body, #root {
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
     max-width: 100% !important;
-    max-height: 100% !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
@@ -142,14 +143,19 @@
     line-height: 1.2 !important;
     background: white !important;
     color: black !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
   }
   
   * {
     box-shadow: none !important;
     text-shadow: none !important;
-    overflow: hidden !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
   
+  /* Garantir que elementos principais sejam visíveis */
   .print\:hidden {
     display: none !important;
   }
@@ -158,5 +164,93 @@
     display: block !important;
   }
   
-
+  .print\:p-0 {
+    padding: 0 !important;
+  }
+  
+  .print\:p-1 {
+    padding: 0.25rem !important;
+  }
+  
+  .print\:p-2 {
+    padding: 0.5rem !important;
+  }
+  
+  .print\:p-3 {
+    padding: 0.75rem !important;
+  }
+  
+  .print\:text-xs {
+    font-size: 0.65rem !important;
+  }
+  
+  .print\:text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  .print\:text-lg {
+    font-size: 0.9rem !important;
+  }
+  
+  .print\:text-xl {
+    font-size: 1.1rem !important;
+  }
+  
+  .print\:gap-1 {
+    gap: 0.25rem !important;
+  }
+  
+  .print\:gap-2 {
+    gap: 0.5rem !important;
+  }
+  
+  .print\:gap-3 {
+    gap: 0.75rem !important;
+  }
+  
+  .print\:space-y-1 > * + * {
+    margin-top: 0.25rem !important;
+  }
+  
+  .print\:space-y-2 > * + * {
+    margin-top: 0.5rem !important;
+  }
+  
+  .print\:space-y-3 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  .print\:h-3 {
+    height: 0.75rem !important;
+  }
+  
+  .print\:w-3 {
+    width: 0.75rem !important;
+  }
+  
+  .print\:h-4 {
+    height: 1rem !important;
+  }
+  
+  .print\:w-4 {
+    width: 1rem !important;
+  }
+  
+  /* Evitar quebras de página em elementos importantes */
+  .print-together {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Garantir cores de fundo nas badges */
+  .bg-blue-100, .bg-yellow-100, .bg-orange-100, .bg-green-100, .bg-gray-100,
+  .bg-green-50, .bg-blue-50, .bg-orange-50, .bg-red-50, .bg-gray-50,
+  .bg-blue-50, .bg-yellow-50 {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .border-blue-200, .border-yellow-200, .border-orange-200, .border-green-200, .border-gray-200 {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+  }
 }
