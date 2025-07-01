@@ -447,6 +447,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const ordem = await storage.updateOrdemServico(id, req.userId!, ordemData);
       
+      console.log('=== DEBUG INTEGRAÇÃO FINANCEIRA ===');
+      console.log('Status anterior:', statusAnterior);
+      console.log('Novo status:', novoStatus);
+      console.log('Condição atendida?', novoStatus === 'finalizada' && statusAnterior !== 'finalizada');
+      
       // Criar entrada financeira automaticamente quando OS é finalizada
       if (novoStatus === 'finalizada' && statusAnterior !== 'finalizada') {
         console.log('OS sendo finalizada! Status anterior:', statusAnterior, 'Novo status:', novoStatus);
