@@ -48,7 +48,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   const { data: profile } = useQuery({
     queryKey: ['/api/profile'],
     enabled: true
-  });
+  }) as { data: any };
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Data não informada';
