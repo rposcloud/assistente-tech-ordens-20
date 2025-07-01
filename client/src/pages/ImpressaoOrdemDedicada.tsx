@@ -8,9 +8,20 @@ import { Button } from '@/components/ui/button';
 export const ImpressaoOrdemDedicada: React.FC = () => {
   const { id } = useParams();
 
-  // Buscar dados da ordem
+  // Buscar dados da ordem para impressão
   const { data: ordem, isLoading: isLoadingOrdem } = useQuery({
-    queryKey: ['/api/ordens', id],
+    queryKey: ['/api/ordens', id, 'print'],
+    queryFn: async () => {
+      const response = await fetch(`/api/ordens/${id}/print`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Erro ao buscar ordem para impressão');
+      }
+      return response.json();
+    },
     enabled: !!id
   });
 

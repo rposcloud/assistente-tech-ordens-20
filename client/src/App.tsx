@@ -35,7 +35,11 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/portal/:token" element={<PortalCliente />} />
-            <Route path="/impressao-ordem/:id" element={<ImpressaoOrdemDedicada />} />
+            <Route path="/impressao-ordem/:id" element={
+              <ProtectedRoute>
+                <ImpressaoOrdemDedicada />
+              </ProtectedRoute>
+            } />
 
             <Route path="/dashboard" element={
               <ProtectedRoute>

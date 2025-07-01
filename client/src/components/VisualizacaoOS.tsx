@@ -64,7 +64,19 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   const abrirImpressao = () => {
+    if (!ordem?.id) {
+      console.error('ID da ordem não encontrado:', ordem);
+      toast({
+        title: "Erro",
+        description: "ID da ordem não encontrado",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log('Abrindo impressão para ordem:', ordem.id);
     const url = `/impressao-ordem/${ordem.id}`;
+    console.log('URL da impressão:', url);
     window.open(url, '_blank', 'width=800,height=900,scrollbars=yes,resizable=yes');
   };
 
