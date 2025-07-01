@@ -15,9 +15,7 @@ export const Dashboard = () => {
   const { ordens, loading: loadingOrdens } = useOrdens();
   const { entradas, loading: loadingFinanceiro } = useFinanceiro();
   
-  // Debug: verificar dados financeiros
-  console.log('Dados financeiros recebidos:', entradas);
-  console.log('Loading financeiro:', loadingFinanceiro);
+
 
   const totalClientes = clientes?.length || 0;
   const totalProdutos = produtos?.length || 0;
@@ -36,13 +34,19 @@ export const Dashboard = () => {
   // Receitas do mês atual
   const receitasDoMes = todasReceitas.filter(e => {
     const dataEntrada = new Date(e.data_vencimento);
-    return dataEntrada >= primeiroDiaDoMes && dataEntrada <= ultimoDiaDoMes;
+    // Ajustar para comparar apenas ano e mês
+    const mesEntrada = dataEntrada.getFullYear() * 12 + dataEntrada.getMonth();
+    const mesAtual = hoje.getFullYear() * 12 + hoje.getMonth();
+    return mesEntrada === mesAtual;
   });
   
   // Despesas do mês atual
   const despesasDoMes = todasDespesas.filter(e => {
     const dataEntrada = new Date(e.data_vencimento);
-    return dataEntrada >= primeiroDiaDoMes && dataEntrada <= ultimoDiaDoMes;
+    // Ajustar para comparar apenas ano e mês
+    const mesEntrada = dataEntrada.getFullYear() * 12 + dataEntrada.getMonth();
+    const mesAtual = hoje.getFullYear() * 12 + hoje.getMonth();
+    return mesEntrada === mesAtual;
   });
   
   // Calcular totais
@@ -59,18 +63,29 @@ export const Dashboard = () => {
   const lucroMes = totalReceitaMes - totalDespesaMes;
   
   // Receitas pagas (status pago)
-  const receitasPagas = receitasDoMes.filter(e => e.status === 'pago');
+  const receitasPagas = receitasDoMes.filter((e: any) => e.status === 'pago');
   const totalReceitaPaga = receitasPagas.reduce((acc, entrada) => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
   }, 0);
   
   // Receitas pendentes
-  const receitasPendentes = receitasDoMes.filter(e => e.status === 'pendente');
+  const receitasPendentes = receitasDoMes.filter((e: any) => e.status === 'pendente');
   const totalReceitaPendente = receitasPendentes.reduce((acc, entrada) => {
     const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
     return acc + (valor || 0);
   }, 0);
+  
+  // Debug: verificar dados financeiros
+  console.log('Dados financeiros recebidos:', entradas);
+  console.log('Loading financeiro:', loadingFinanceiro);
+  console.log('Total receita mês:', totalReceitaMes);
+  console.log('Total despesa mês:', totalDespesaMes);
+  console.log('Receitas do mês:', receitasDoMes);
+  console.log('Despesas do mês:', despesasDoMes);
+  console.log('Data atual:', hoje);
+  console.log('Primeiro dia do mês:', primeiroDiaDoMes);
+  console.log('Último dia do mês:', ultimoDiaDoMes);
   
   // Estatísticas de ordens
   const ordensAbertas = ordens?.filter(o => o.status !== 'entregue')?.length || 0;

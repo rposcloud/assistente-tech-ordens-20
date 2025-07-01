@@ -1,0 +1,40 @@
+[vite] connecting...
+[vite] connected.
+Dados financeiros recebidos: 
+Array []
+Loading financeiro: true
+Dados financeiros recebidos: 
+Array []
+Loading financeiro: true
+Dados financeiros recebidos: 
+Array []
+Loading financeiro: true
+Dados financeiros recebidos: 
+Array [{…}]
+Loading financeiro: false
+Dados financeiros recebidos: 
+Array [{…}]
+Loading financeiro: false
+Dados financeiros recebidos: 
+Array [{…}]
+Loading financeiro: false
+Ordens disponíveis: 0
+Loading: true
+Ordens disponíveis: 3
+Loading: false
+Ordens disponíveis: 3
+Loading: false
+Erro ao buscar /api/produtos: 
+Error {}
+message: "Endpoint não suportado: /api/produtos"
+stack: "Error: Endpoint não suportado: /api/produtos↵ at fetchData (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/hooks/useApi.ts:35:17)↵ at https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/src/hooks/useApi.ts:46:5↵ at commitHookEffectListMount (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:16915:34)↵ at commitPassiveMountOnFiber (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:18156:19)↵ at commitPassiveMountEffects_complete (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:18129:17)↵ at commitPassiveMountEffects_begin (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:18119:15)↵ at commitPassiveMountEffects (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:18109:11)↵ at flushPassiveEffectsImpl (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:19490:11)↵ at flushPassiveEffects (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:19447:22)↵ at commitRootImpl (https://37046431-8343-4b8e-a2c5-e1d6e7f3e672-00-2dvm7qoubmjhj.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=785fb734:19416:13)"
+get stack: ƒ ()
+length: 0
+name: ""
+[[Prototype]]: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+Ordens disponíveis: 3
+Loading: false
