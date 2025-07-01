@@ -171,6 +171,12 @@ Changelog:
   * Dados de teste atualizados de "admin@techservice.com" para "admin@oscloud.com"
   * Documentação e descrição do sistema atualizadas para refletir novo nome
   * Identidade visual unificada com novo nome e logo em 100% das páginas do sistema
+- July 1, 2025. Repaginação completa do Dashboard:
+  * Cards redimensionados para layout mais compacto (5 colunas em desktop)
+  * Seção de "Ações Rápidas" com botões coloridos para navegação rápida
+  * Tabela de "Últimas Ordens de Serviço" com status coloridos e botões de ação
+  * Menu dropdown com ícones para visualizar/editar ordens diretamente do Dashboard
+  * Layout otimizado focado em funcionalidades práticas e navegação eficiente
 
 ## User Preferences
 
