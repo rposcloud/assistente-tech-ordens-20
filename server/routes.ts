@@ -254,14 +254,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Dados recebidos para ordem:', req.body);
       console.log('User ID:', req.userId);
       
+      const { produtos_utilizados, ...dadosOrdem } = req.body;
       const ordemData = insertOrdemServicoSchema.parse({
-        ...req.body,
+        ...dadosOrdem,
         user_id: req.userId!
       });
       
       console.log('Dados validados para ordem:', ordemData);
       
       const ordem = await storage.createOrdemServico(ordemData, req.userId!);
+      
+      // Processar produtos utilizados se fornecidos
+      if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
+        console.log('Salvando produtos utilizados:', produtos_utilizados);
+        
+        for (const produto of produtos_utilizados) {
+          if (produto.tipo === 'produto' && produto.produto_id) {
+            await storage.addProdutoUtilizado(
+              ordem.id, 
+              produto.produto_id, 
+              produto.quantidade, 
+              produto.valor_unitario
+            );
+            console.log(`Produto adicionado: ${produto.nome}`);
+          } else if (produto.tipo === 'peca_avulsa') {
+            await storage.addPecaUtilizada(
+              ordem.id, 
+              produto.nome, 
+              produto.quantidade, 
+              produto.valor_unitario
+            );
+            console.log(`Peça avulsa adicionada: ${produto.nome}`);
+          }
+        }
+      }
+      
       res.json(ordem);
     } catch (error) {
       console.error('Create ordem error:', error);
