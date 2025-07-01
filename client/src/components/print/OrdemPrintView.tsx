@@ -51,7 +51,7 @@ export const OrdemPrintView: React.FC<OrdemPrintViewProps> = ({ ordem, profile }
   };
 
   return (
-    <div className="w-full max-w-none p-4 space-y-4 bg-white">
+    <div id="ordem-print-content" className="w-full max-w-none p-4 space-y-4 bg-white">
       {/* Cabeçalho da Empresa */}
       <div className="bg-gradient-to-r from-blue-50 to-gray-50 border border-gray-200 rounded-lg">
         <div className="p-4">

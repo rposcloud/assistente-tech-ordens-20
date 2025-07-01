@@ -2,9 +2,11 @@ import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { OrdemPrintView } from '@/components/print/OrdemPrintView';
-import { Loader2, Printer } from 'lucide-react';
+import { Loader2, Printer, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export const ImpressaoOrdemDedicada: React.FC = () => {
   const { id } = useParams();
@@ -42,6 +44,46 @@ export const ImpressaoOrdemDedicada: React.FC = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const element = document.getElementById('ordem-print-content');
+      if (!element) return;
+
+      // Configurações para melhor qualidade
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Calcular dimensões para A4
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const finalWidth = imgWidth * ratio;
+      const finalHeight = imgHeight * ratio;
+
+      // Centralizar na página
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = (pdfHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+      pdf.save(`OS-${ordem?.ordem?.numero || 'ordem'}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      // Fallback para impressão
+      handlePrint();
+    }
   };
 
   // Auto-print quando a página carrega (opcional)
@@ -97,10 +139,63 @@ export const ImpressaoOrdemDedicada: React.FC = () => {
         .impressao-ordem-dedicada .navigation {
           display: none !important;
         }
+        
+        @media print {
+          * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          html, body {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            font-size: 12px !important;
+          }
+          
+          .impressao-ordem-dedicada {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            page-break-inside: avoid !important;
+          }
+          
+          #ordem-print-content {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 8px !important;
+            overflow: visible !important;
+            page-break-inside: avoid !important;
+            box-shadow: none !important;
+          }
+          
+          .print\\:hidden,
+          .no-print {
+            display: none !important;
+          }
+          
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+        }
       `}</style>
       
-      {/* Botão de impressão - visível apenas na tela */}
-      <div className="print:hidden fixed top-4 right-4 z-50 no-print">
+      {/* Botões de ação - visíveis apenas na tela */}
+      <div className="print:hidden fixed top-4 right-4 z-50 no-print flex gap-2">
+        <Button 
+          onClick={handleDownloadPDF}
+          className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Download PDF
+        </Button>
         <Button 
           onClick={handlePrint}
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"

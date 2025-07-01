@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Printer, Download, ArrowLeft } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { useProfile } from '@/hooks/useProfile';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface OrdemCompleta {
   id: string;
@@ -93,9 +95,44 @@ export const ImpressaoOrdem = () => {
     window.print();
   };
 
-  const handleDownload = () => {
-    // Simular download como PDF (implementação básica)
-    handlePrint();
+  const handleDownload = async () => {
+    try {
+      const element = document.getElementById('print-content');
+      if (!element) return;
+
+      // Configurações para melhor qualidade
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Calcular dimensões para A4
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const finalWidth = imgWidth * ratio;
+      const finalHeight = imgHeight * ratio;
+
+      // Centralizar na página
+      const x = (pdfWidth - finalWidth) / 2;
+      const y = (pdfHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+      pdf.save(`OS-${ordem?.numero || 'ordem'}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      // Fallback para impressão
+      handlePrint();
+    }
   };
 
   const handleVoltar = () => {
@@ -146,7 +183,7 @@ export const ImpressaoOrdem = () => {
       </div>
 
       {/* Conteúdo da página - formatado para A4 */}
-      <div className="max-w-4xl mx-auto p-8 bg-white min-h-screen">
+      <div id="print-content" className="max-w-4xl mx-auto p-8 bg-white min-h-screen">
         {/* Cabeçalho da empresa */}
         <div className="border-b-2 border-gray-200 pb-6 mb-8">
           <div className="flex justify-between items-start">
