@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
+import { VisualizacaoOSModal } from '@/components/modals/VisualizacaoOSModal';
 
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
@@ -46,6 +47,8 @@ export const Ordens = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ordemToDelete, setOrdemToDelete] = useState<OrdemServico | null>(null);
+  const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
+  const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
 
 
 
@@ -115,6 +118,11 @@ export const Ordens = () => {
     setModalOpen(true);
   };
 
+  const handleVisualizarOrdem = (ordem: OrdemServico) => {
+    setOrdemParaVisualizacao(ordem);
+    setVisualizacaoModalOpen(true);
+  };
+
 
 
   const columns: Column<OrdemServico>[] = [
@@ -167,6 +175,18 @@ export const Ordens = () => {
       sortable: false,
       render: (ordem) => (
         <div className="flex space-x-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleVisualizarOrdem(ordem);
+            }}
+            title="Visualizar OS"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -297,6 +317,15 @@ export const Ordens = () => {
         onSubmit={handleSubmit}
         initialData={selectedOrdem}
         loading={modalLoading}
+      />
+
+      <VisualizacaoOSModal
+        isOpen={visualizacaoModalOpen}
+        onClose={() => {
+          setVisualizacaoModalOpen(false);
+          setOrdemParaVisualizacao(null);
+        }}
+        ordem={ordemParaVisualizacao}
       />
 
 
