@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, UserPlus, Search, FileText } from 'lucide-react';
+import { Users, UserPlus, Search, FileText, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { useClientes, Cliente } from '../hooks/useClientes';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ClienteForm } from '../components/forms/ClienteForm';
@@ -62,22 +62,22 @@ export const Clientes = () => {
     },
     {
       key: 'acoes',
-      label: 'Ações',
+      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
       render: (cliente) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 justify-center">
           <button
             onClick={() => handleEditCliente(cliente)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
             title="Editar cliente"
           >
-            Editar
+            <Edit className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleDeleteCliente(cliente.id)}
-            className="text-red-600 hover:text-red-800 text-sm font-medium"
+            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
             title="Excluir cliente"
           >
-            Excluir
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ),

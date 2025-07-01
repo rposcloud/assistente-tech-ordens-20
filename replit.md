@@ -159,6 +159,11 @@ Changelog:
   * Adicionado card "Valor OS Abertas" mostrando soma total das ordens em aberto
   * Layout simplificado com todos os cards principais em uma única seção
   * Alertas de estoque baixo mantidos quando aplicáveis
+- July 1, 2025. Padronização completa de ícones nos menus de ações:
+  * Substituído texto "Ações" por ícone MoreHorizontal em todas as tabelas
+  * Ícones Edit e Trash2 padronizados em todas as páginas (Clientes, Produtos, Ordens, Financeiro)
+  * Interface visual mais limpa e moderna com botões de ação consistentes
+  * Mantida funcionalidade de tooltips para acessibilidade
 
 ## User Preferences
 

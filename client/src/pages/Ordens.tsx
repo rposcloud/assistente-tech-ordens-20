@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
@@ -171,7 +171,7 @@ export const Ordens = () => {
     },
     {
       key: 'actions',
-      label: 'Ações',
+      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
       sortable: false,
       render: (ordem) => (
         <div className="flex space-x-2">

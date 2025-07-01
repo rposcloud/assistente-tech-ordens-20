@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Package, Plus } from 'lucide-react';
+import { FileText, Package, Plus, Edit, Trash2, MoreHorizontal } from 'lucide-react';
 import { useProdutos } from '../hooks/useProdutos';
 import { SortableTable, Column } from '../components/ui/sortable-table';
 import { ProductForm } from '../components/forms/ProductForm';
@@ -62,22 +62,22 @@ export const Produtos = () => {
     { key: 'preco_venda', label: 'Preço', render: (produto) => `R$ ${Number(produto.preco_venda).toFixed(2)}` },
     {
       key: 'acoes',
-      label: 'Ações',
+      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
       render: (produto) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 justify-center">
           <button
             onClick={() => handleEditProduto(produto)}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
             title="Editar produto"
           >
-            Editar
+            <Edit className="h-4 w-4" />
           </button>
           <button
             onClick={() => handleDeleteProduto(produto.id)}
-            className="text-red-600 hover:text-red-800 text-sm font-medium"
+            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
             title="Excluir produto"
           >
-            Excluir
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ),
