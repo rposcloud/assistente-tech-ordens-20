@@ -20,7 +20,10 @@ import {
   MoreHorizontal,
   UserPlus,
   ShoppingCart,
-  Calculator
+  Calculator,
+  Link as LinkIcon,
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -73,6 +76,24 @@ export const Dashboard = () => {
       const valor = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : ordem.valor_total;
       return acc + (valor || 0);
     }, 0) || 0;
+
+  // Análise de vínculos financeiros
+  const ordensComVinculoFinanceiro = ordens?.filter(ordem => {
+    return Array.isArray(entradas) && entradas.some((entrada: any) => entrada.ordem_servico_id === ordem.id);
+  }) || [];
+
+  const ordensEntreguesComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status === 'entregue');
+  const ordensAbertasComFinanceiro = ordensComVinculoFinanceiro.filter(ordem => ordem.status !== 'entregue');
+
+  // Cálculos de receitas já vinculadas a OS
+  const receitasVinculadasOS = Array.isArray(entradas) ? entradas.filter((e: any) => {
+    return e.tipo === 'receita' && e.ordem_servico_id;
+  }) : [];
+
+  const valorReceitasVinculadas = receitasVinculadasOS.reduce((acc, entrada) => {
+    const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+    return acc + (valor || 0);
+  }, 0);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -173,6 +194,37 @@ export const Dashboard = () => {
     }
   ];
 
+  // Cards de Integridade de Dados
+  const integridadeCards = [
+    {
+      title: 'OS Protegidas',
+      value: loadingOrdens || loadingFinanceiro ? '...' : ordensComVinculoFinanceiro.length.toString(),
+      subtitle: 'Com vínculos financeiros',
+      icon: Shield,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      warning: false
+    },
+    {
+      title: 'Receitas Vinculadas',
+      value: loadingFinanceiro ? '...' : formatCurrency(valorReceitasVinculadas),
+      subtitle: `${receitasVinculadasOS.length} entradas`,
+      icon: LinkIcon,
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-50',
+      warning: false
+    },
+    {
+      title: 'OS Abertas Protegidas',
+      value: loadingOrdens || loadingFinanceiro ? '...' : ordensAbertasComFinanceiro.length.toString(),
+      subtitle: 'Não podem ser alteradas',
+      icon: AlertTriangle,
+      color: ordensAbertasComFinanceiro.length > 0 ? 'text-amber-600' : 'text-gray-600',
+      bgColor: ordensAbertasComFinanceiro.length > 0 ? 'bg-amber-50' : 'bg-gray-50',
+      warning: ordensAbertasComFinanceiro.length > 0
+    }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -206,6 +258,62 @@ export const Dashboard = () => {
           );
         })}
       </div>
+
+      {/* Cards de Integridade de Dados */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Integridade de Dados Financeiros
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Monitoramento de vínculos entre ordens de serviço e entradas financeiras
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {integridadeCards.map((card, index) => {
+              const Icon = card.icon;
+              return (
+                <div key={index} className={`p-4 rounded-lg border-2 ${card.warning ? 'border-amber-200' : 'border-gray-200'} hover:shadow-sm transition-shadow`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`p-2 rounded-lg ${card.bgColor}`}>
+                      <Icon className={`h-4 w-4 ${card.color}`} />
+                    </div>
+                    {card.warning && (
+                      <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full">
+                        Atenção
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-medium text-gray-900">{card.title}</h4>
+                    <div className={`text-lg font-bold ${card.color}`}>
+                      {card.value}
+                    </div>
+                    <p className="text-xs text-gray-500">{card.subtitle}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {ordensAbertasComFinanceiro.length > 0 && (
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-amber-800">Atenção: OS Abertas com Vínculos Financeiros</p>
+                  <p className="text-amber-700 mt-1">
+                    {ordensAbertasComFinanceiro.length} ordem(ns) em aberto possui(em) entradas financeiras vinculadas.
+                    Essas ordens têm proteções especiais contra alterações de valor e status.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Ações Rápidas */}
       <Card>

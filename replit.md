@@ -198,6 +198,15 @@ Changelog:
   * Cards de recursos redimensionados para tamanho mais compacto
   * Menu de navegação simplificado com apenas "Recursos" e "Depoimentos"
   * Layout focado essencialmente no cadastro de novos usuários
+- July 1, 2025. Sistema de proteção robusta para OS com vínculos financeiros:
+  * Implementada lógica completa de validação para edição/exclusão de OS vinculadas
+  * Proteção backend: valores e status de OS não podem ser alterados se houver vínculos financeiros
+  * Sistema inteligente de exclusão: oferece opções para excluir ou manter entradas financeiras
+  * Dashboard com seção "Integridade de Dados Financeiros" mostrando métricas importantes
+  * Cards especiais indicando OS protegidas, receitas vinculadas e alertas de situações críticas
+  * Validação no banco: verificação automática de vínculos antes de qualquer alteração
+  * Interface de usuário intuitiva com confirmações e opções claras para o usuário
+  * Sistema não prejudica funcionamento normal, apenas adiciona camadas de proteção
 
 ## User Preferences
 

@@ -412,8 +412,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verificar se o status está sendo alterado para "entregue"
       const ordemAnterior = await storage.getOrdemServico(id, req.userId!);
-      const statusAnterior = ordemAnterior?.status;
+      if (!ordemAnterior) {
+        return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
+      }
+      
+      const statusAnterior = ordemAnterior.status;
       const novoStatus = ordemData.status;
+
+      // Verificar se há entradas financeiras vinculadas
+      const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
+      const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
+      
+      // Proteção: Se alterar valor total e houver entradas financeiras
+      if (entradasDaOS.length > 0 && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
+        return res.status(400).json({
+          error: 'Não é possível alterar o valor total desta OS',
+          motivo: 'Esta OS possui entradas financeiras vinculadas',
+          entradas_vinculadas: entradasDaOS.length,
+          valor_atual: ordemAnterior.valor_total,
+          valor_tentativa: ordemData.valor_total,
+          sugestao: 'Para alterar o valor, primeiro desvincule ou ajuste as entradas financeiras relacionadas'
+        });
+      }
+
+      // Proteção: Se alterar status de "entregue" para outro e houver entradas financeiras
+      if (statusAnterior === 'entregue' && novoStatus && novoStatus !== 'entregue' && entradasDaOS.length > 0) {
+        return res.status(400).json({
+          error: 'Não é possível alterar o status desta OS finalizada',
+          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi entregue',
+          entradas_vinculadas: entradasDaOS.length,
+          sugestao: 'Para reabrir esta OS, primeiro trate as entradas financeiras associadas'
+        });
+      }
       
       const ordem = await storage.updateOrdemServico(id, req.userId!, ordemData);
       
@@ -488,8 +518,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
+      const { force } = req.query; // Parâmetro para forçar exclusão
+      
+      // Verificar se a OS existe e obter detalhes
+      const ordem = await storage.getOrdemServico(id, req.userId!);
+      if (!ordem) {
+        return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
+      }
+
+      // Verificar se existem entradas financeiras vinculadas a esta OS
+      const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
+      const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
+      
+      if (entradasDaOS.length > 0 && !force) {
+        return res.status(400).json({ 
+          error: 'Esta OS possui entradas financeiras vinculadas',
+          entradas_vinculadas: entradasDaOS.length,
+          detalhes: 'Para excluir esta OS, você deve primeiro decidir o que fazer com as entradas financeiras associadas.',
+          opcoes: {
+            excluir_financeiro: 'DELETE /api/ordens/' + id + '?force=true&action=delete_financial',
+            manter_financeiro: 'DELETE /api/ordens/' + id + '?force=true&action=keep_financial'
+          }
+        });
+      }
+
+      // Se force=true, processar baseado na ação
+      if (force) {
+        const action = req.query.action as string;
+        
+        if (action === 'delete_financial') {
+          // Excluir entradas financeiras vinculadas primeiro
+          for (const entrada of entradasDaOS) {
+            await storage.deleteEntradaFinanceira(entrada.id, req.userId!);
+          }
+          console.log(`${entradasDaOS.length} entradas financeiras excluídas junto com OS ${id}`);
+        } else if (action === 'keep_financial') {
+          // Desvincular entradas financeiras (remover ordem_servico_id)
+          for (const entrada of entradasDaOS) {
+            await storage.updateEntradaFinanceira(entrada.id, req.userId!, {
+              ordem_servico_id: null,
+              observacoes: (entrada.observacoes || '') + ' [OS original excluída]'
+            });
+          }
+          console.log(`${entradasDaOS.length} entradas financeiras desvinculadas da OS ${id}`);
+        }
+      }
+
+      // Excluir a ordem de serviço
       await storage.deleteOrdemServico(id, req.userId!);
-      res.json({ message: 'Ordem deleted successfully' });
+      
+      res.json({ 
+        message: 'Ordem excluída com sucesso',
+        entradas_processadas: entradasDaOS.length,
+        acao_financeiro: force ? req.query.action : 'nenhuma'
+      });
     } catch (error) {
       console.error('Delete ordem error:', error);
       res.status(500).json({ error: 'Internal server error' });

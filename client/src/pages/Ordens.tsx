@@ -109,7 +109,58 @@ export const Ordens = () => {
       setOrdemToDelete(null);
     } catch (error: any) {
       console.error('Error deleting ordem:', error);
-      toast.error(`Erro ao excluir ordem: ${error.message || 'Erro desconhecido'}`);
+      
+      // Verificar se é erro de vínculo financeiro
+      if (error.response?.status === 400 && error.response?.data?.entradas_vinculadas) {
+        const errorData = error.response.data;
+        toast.error(
+          `${errorData.error}\n\n` +
+          `Entradas vinculadas: ${errorData.entradas_vinculadas}\n` +
+          `${errorData.detalhes}`,
+          { duration: 8000 }
+        );
+        
+        // Mostrar opções para o usuário
+        if (window.confirm(
+          `Esta OS possui ${errorData.entradas_vinculadas} entrada(s) financeira(s) vinculada(s).\n\n` +
+          `Deseja:\n` +
+          `✓ EXCLUIR também as entradas financeiras?\n` +
+          `✗ MANTER as entradas e apenas desvincular da OS?\n\n` +
+          `Clique OK para EXCLUIR ou Cancelar para MANTER`
+        )) {
+          // Excluir entradas financeiras junto
+          try {
+            await fetch(`/api/ordens/${ordemToDelete.id}?force=true&action=delete_financial`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            toast.success('Ordem e entradas financeiras excluídas com sucesso!');
+            setDeleteDialogOpen(false);
+            setOrdemToDelete(null);
+            // Recarregar dados
+            window.location.reload();
+          } catch (forceError) {
+            toast.error('Erro ao excluir forçadamente');
+          }
+        } else {
+          // Manter entradas, apenas desvincular
+          try {
+            await fetch(`/api/ordens/${ordemToDelete.id}?force=true&action=keep_financial`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            toast.success('Ordem excluída, entradas financeiras mantidas e desvinculadas');
+            setDeleteDialogOpen(false);
+            setOrdemToDelete(null);
+            // Recarregar dados
+            window.location.reload();
+          } catch (forceError) {
+            toast.error('Erro ao desvincular entradas');
+          }
+        }
+      } else {
+        toast.error(`Erro ao excluir ordem: ${error.message || 'Erro desconhecido'}`);
+      }
     }
   };
 

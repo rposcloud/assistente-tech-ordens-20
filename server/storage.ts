@@ -348,6 +348,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteOrdemServico(id: string, userId: string): Promise<void> {
+    // Verificar se há entradas financeiras vinculadas antes de deletar
+    const entradasVinculadas = await db.select()
+      .from(entradasFinanceiras)
+      .where(and(
+        eq(entradasFinanceiras.ordem_servico_id, id),
+        eq(entradasFinanceiras.user_id, userId)
+      ));
+
+    if (entradasVinculadas.length > 0) {
+      throw new Error(`Não é possível excluir OS com ${entradasVinculadas.length} entrada(s) financeira(s) vinculada(s)`);
+    }
+
     await db.delete(ordensServico).where(and(eq(ordensServico.id, id), eq(ordensServico.user_id, userId)));
   }
 
