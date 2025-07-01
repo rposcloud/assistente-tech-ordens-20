@@ -34,7 +34,17 @@ const prioridadeColors = {
 };
 
 export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
+  // Verificação de segurança
+  if (!ordem) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-gray-500">Nenhuma ordem de serviço selecionada.</p>
+      </div>
+    );
+  }
+
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Data não informada';
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
