@@ -183,6 +183,15 @@ Changelog:
   * Badge "Vinculado à OS" exibido na tabela para identificar origem
   * Mensagem explicativa quando usuário tenta excluir entrada protegida
   * Integração completa entre módulos de OS e financeiro com rastreabilidade
+- July 1, 2025. Landing page e logo completamente repaginadas:
+  * Nova logo OS Cloud com SVG moderno e gradientes profissionais
+  * Design contemporâneo com nuvem, documento e engrenagem integrados
+  * Landing page totalmente redesenhada com layout moderno
+  * Seção hero com gradientes e animações suaves
+  * Cards de recursos com gradientes coloridos distintos
+  * Seção de estatísticas, depoimentos e call-to-action
+  * Footer profissional com links organizados
+  * Design responsivo otimizado para todos os dispositivos
 
 ## User Preferences
 
