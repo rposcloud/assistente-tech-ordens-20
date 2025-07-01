@@ -72,7 +72,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   return (
     <div className="w-full max-w-none p-4 space-y-4 print:p-3 print:space-y-3">
       {/* Cabeçalho da Empresa */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg">
+      <div className="bg-gradient-to-r from-blue-50 to-gray-50 border border-gray-200 rounded-lg">
         <div className="p-4 print:p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -81,17 +81,44 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900 print:text-sm">
-                  {profile?.empresa || 'Nome da Empresa'}
+                  {profile?.empresa || 'Empresa não cadastrada'}
                 </h2>
-                <p className="text-sm text-gray-600 print:text-xs">
-                  CNPJ: {profile?.cnpj || 'XX.XXX.XXX/XXXX-XX'}
-                </p>
+                <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-xs">
+                  {profile?.cnpj && (
+                    <p>CNPJ: {profile.cnpj}</p>
+                  )}
+                  {profile?.inscricao_estadual && (
+                    <p>IE: {profile.inscricao_estadual}</p>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="text-right text-sm text-gray-600 print:text-xs">
-              <p>{profile?.endereco ? `${profile.endereco}, ${profile.numero || 'S/N'}` : 'Endereço da empresa'}</p>
-              <p>{profile?.cidade && profile?.estado ? `${profile.cidade}/${profile.estado}` : 'Cidade/Estado'}</p>
-              <p>{profile?.telefone || 'Telefone da empresa'}</p>
+            <div className="text-right text-sm text-gray-600 print:text-xs max-w-xs">
+              {profile?.endereco && (
+                <div className="space-y-1">
+                  <p className="font-medium">Endereço:</p>
+                  <p>{profile.endereco}{profile.numero ? `, ${profile.numero}` : ''}</p>
+                  {profile.complemento && <p>{profile.complemento}</p>}
+                  <p>
+                    {profile.bairro && `${profile.bairro} - `}
+                    {profile.cep && `CEP: ${profile.cep}`}
+                  </p>
+                  <p>
+                    {profile.cidade && profile.estado ? `${profile.cidade}/${profile.estado}` : ''}
+                  </p>
+                </div>
+              )}
+              <div className="mt-2 space-y-1">
+                {profile?.telefone && (
+                  <p><span className="font-medium">Tel:</span> {profile.telefone}</p>
+                )}
+                {profile?.email_empresa && (
+                  <p><span className="font-medium">Email:</span> {profile.email_empresa}</p>
+                )}
+                {profile?.site && (
+                  <p><span className="font-medium">Site:</span> {profile.site}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
