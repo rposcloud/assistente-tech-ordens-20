@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal, CheckSquare, Search } from 'lucide-react';
+import { Plus, FileText, Clock, CheckCircle, AlertCircle, Edit, Trash2, Eye, MoreHorizontal, CheckSquare, Search, ChevronDown } from 'lucide-react';
 import { useOrdens } from '@/hooks/useOrdens';
 import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
@@ -12,6 +12,12 @@ import { VisualizacaoOSModal } from '@/components/modals/VisualizacaoOSModal';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
 const statusColors = {
@@ -31,6 +37,15 @@ const statusLabels = {
   pronto_entrega: 'Pronto p/ Entrega',
   entregue: 'Entregue'
 };
+
+const statusOptions = [
+  { value: 'aguardando_diagnostico', label: 'Aguardando Diagnóstico' },
+  { value: 'aguardando_aprovacao', label: 'Aguardando Aprovação' },
+  { value: 'aguardando_pecas', label: 'Aguardando Peças' },
+  { value: 'em_reparo', label: 'Em Reparo' },
+  { value: 'pronto_entrega', label: 'Pronto p/ Entrega' },
+  { value: 'entregue', label: 'Entregue' }
+];
 
 export const Ordens = () => {
   const { ordens, loading, createOrdem, updateOrdem, deleteOrdem } = useOrdens();
@@ -249,6 +264,19 @@ export const Ordens = () => {
     }
   };
 
+  const handleChangeStatus = async (ordem: OrdemServico, newStatus: string) => {
+    try {
+      await updateOrdem(ordem.id!, {
+        ...ordem,
+        status: newStatus
+      });
+      toast.success(`Status alterado para: ${statusLabels[newStatus as keyof typeof statusLabels]}`);
+    } catch (error: any) {
+      console.error('Erro ao alterar status:', error);
+      toast.error('Erro ao alterar status');
+    }
+  };
+
 
 
   const columns: Column<OrdemServico>[] = [
@@ -274,9 +302,42 @@ export const Ordens = () => {
       label: 'Status',
       sortable: true,
       render: (ordem) => (
-        <Badge className={statusColors[ordem.status]}>
-          {statusLabels[ordem.status]}
-        </Badge>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={`h-auto p-0 ${statusColors[ordem.status]} hover:opacity-80 transition-opacity`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Badge className={`${statusColors[ordem.status]} cursor-pointer flex items-center gap-1`}>
+                {statusLabels[ordem.status]}
+                <ChevronDown className="h-3 w-3" />
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-48">
+            {statusOptions.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (option.value !== ordem.status) {
+                    handleChangeStatus(ordem, option.value);
+                  }
+                }}
+                className={`${ordem.status === option.value ? 'bg-gray-100 font-medium' : ''} cursor-pointer`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${statusColors[option.value]?.split(' ')[0] || 'bg-gray-400'}`} />
+                  {option.label}
+                  {ordem.status === option.value && (
+                    <span className="ml-auto text-xs text-gray-500">(atual)</span>
+                  )}
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     },
     {
