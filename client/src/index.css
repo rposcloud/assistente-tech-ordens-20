@@ -120,30 +120,20 @@
     }
   }
 }
-/* Otimização de impressão para mobile e desktop */
+/* Estilos para impressão - formatação A4 */
 @media print {
   @page {
     size: A4;
-    margin: 0.5in;
+    margin: 1cm;
   }
   
   body {
     font-size: 11pt !important;
     line-height: 1.3 !important;
     background: white !important;
-    color: black !important;
   }
   
-  /* Ocultar apenas elementos específicos de navegação */
-  .print\:hidden,
-  .no-print,
-  button:not(.print-button),
-  .bg-gradient-to-r:not(.print-content),
-  .shadow-lg:not(.print-content),
-  header:not(.print-header),
-  nav:not(.print-nav),
-  .sidebar,
-  .menu-toggle {
+  .print\:hidden {
     display: none !important;
   }
   
@@ -151,101 +141,20 @@
     display: block !important;
   }
   
-  /* Evitar quebras de página */
+  /* Evitar quebras de página em elementos importantes */
   .print\:break-inside-avoid {
     break-inside: avoid;
     page-break-inside: avoid;
   }
   
-  /* Mostrar conteúdo principal */
-  .print\:block {
-    display: block !important;
-  }
-  
-  /* Otimizar tabelas para impressão */
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    border: 1px solid #000 !important;
-  }
-  
-  th, td {
-    border: 1px solid #000 !important;
-    padding: 4px 6px !important;
-    font-size: 10pt !important;
-    background: white !important;
-    color: black !important;
-  }
-  
-  /* Garantir que texto e dados apareçam */
-  p, div, span, h1, h2, h3, h4, h5, h6, td, th, li, ul, ol {
-    color: black !important;
-    background: transparent !important;
-  }
-  
-  /* Forçar visibilidade do conteúdo principal */
-  .content, .main-content, main, article, section {
-    display: block !important;
-    visibility: visible !important;
-  }
-  
-  /* Cards e containers */
-  .card, .card-content, .table-container {
-    border: 1px solid #ddd !important;
-    background: white !important;
-  }
-  
-  /* Cards para impressão */
-  .print-card {
-    border: 1px solid #ddd !important;
-    margin-bottom: 8px !important;
-    padding: 8px !important;
-    page-break-inside: avoid;
-  }
-  
-  /* Layout responsivo */
+  /* Ajustes de layout para impressão */
   .max-w-4xl {
     max-width: 100% !important;
   }
   
-  /* Remover efeitos visuais */
+  /* Remover sombras e efeitos desnecessários */
   * {
     box-shadow: none !important;
     text-shadow: none !important;
-  }
-  
-  /* Otimizações específicas para mobile */
-  @media (max-width: 768px) {
-    @page {
-      margin: 0.3in;
-    }
-    
-    body {
-      font-size: 9pt !important;
-    }
-    
-    .print-card {
-      padding: 6px !important;
-      margin-bottom: 6px !important;
-    }
-    
-    th, td {
-      padding: 3px 4px !important;
-      font-size: 8pt !important;
-    }
-    
-    /* Ajustar títulos para mobile */
-    h1 { font-size: 14pt !important; }
-    h2 { font-size: 12pt !important; }
-    h3 { font-size: 10pt !important; }
-    
-    /* Compactar espaçamentos */
-    .space-y-4 > * + * {
-      margin-top: 8px !important;
-    }
-    
-    .space-y-2 > * + * {
-      margin-top: 4px !important;
-    }
   }
 }
