@@ -61,14 +61,16 @@ export function NovaOrdem() {
   });
 
   // Buscar clientes
-  const { data: clientes = [] } = useQuery({
+  const { data: clientes = [], isLoading: loadingClientes, error: errorClientes } = useQuery({
     queryKey: ['/api/clientes'],
   });
 
   // Buscar produtos
-  const { data: produtos = [] } = useQuery({
+  const { data: produtos = [], isLoading: loadingProdutos, error: errorProdutos } = useQuery({
     queryKey: ['/api/produtos'],
   });
+
+
 
   // Calcular valor total baseado nos produtos selecionados
   const valorTotal = produtosSelecionados.reduce(
