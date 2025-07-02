@@ -131,8 +131,17 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
   }, [initialData]);
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+    // Calcular valor total baseado nos produtos utilizados
+    const totalProdutos = produtosUtilizados.reduce((total, produto) => total + produto.valor_total, 0);
+    const valorMaoObra = parseFloat(values.valor_mao_obra || '0');
+    const desconto = parseFloat(values.desconto || '0');
+    const acrescimo = parseFloat(values.acrescimo || '0');
+    
+    const valorTotal = totalProdutos + valorMaoObra + acrescimo - desconto;
+
     const dadosOrdem = {
       ...values,
+      valor_total: valorTotal.toString(),
       produtos_utilizados: produtosUtilizados,
       data_abertura: initialData?.data_abertura || new Date().toISOString(),
       historico_status: initialData?.historico_status || []
