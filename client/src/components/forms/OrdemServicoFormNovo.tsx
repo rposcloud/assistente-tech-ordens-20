@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { ProdutosOrdemSection } from './ProdutosOrdemSection';
 
 // Esquema de validação simples (apenas cliente obrigatório)
 const formSchema = z.object({
@@ -40,6 +41,17 @@ interface OrdemServicoFormProps {
   loading?: boolean;
 }
 
+interface ProdutoUtilizado {
+  id?: string;
+  produto_id?: string;
+  nome: string;
+  categoria: 'peca' | 'servico';
+  quantidade: number;
+  valor_unitario: number;
+  valor_total: number;
+  tipo: 'produto' | 'peca_avulsa';
+}
+
 export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
   onSubmit,
   onCancel,
@@ -47,6 +59,7 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
   loading = false
 }) => {
   const { toast } = useToast();
+  const [produtosUtilizados, setProdutosUtilizados] = useState<ProdutoUtilizado[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,12 +90,50 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
     queryKey: ['/clientes'],
   });
 
+  // Carregar produtos utilizados quando initialData muda
+  useEffect(() => {
+    if (initialData) {
+      const produtos: ProdutoUtilizado[] = [];
+
+      // Adicionar produtos utilizados (produtos cadastrados)
+      if (initialData.produtos_utilizados) {
+        initialData.produtos_utilizados.forEach((item: any) => {
+          produtos.push({
+            id: item.id,
+            produto_id: item.produto_id,
+            nome: item.produto?.nome || item.nome || 'Produto sem nome',
+            categoria: item.produto?.categoria || 'peca',
+            quantidade: item.quantidade,
+            valor_unitario: parseFloat(item.valor_unitario) || 0,
+            valor_total: parseFloat(item.valor_total) || 0,
+            tipo: 'produto'
+          });
+        });
+      }
+
+      // Adicionar peças utilizadas (itens avulsos)
+      if (initialData.pecas_utilizadas) {
+        initialData.pecas_utilizadas.forEach((item: any) => {
+          produtos.push({
+            id: item.id,
+            nome: item.nome,
+            categoria: 'peca',
+            quantidade: item.quantidade,
+            valor_unitario: parseFloat(item.valor_unitario) || 0,
+            valor_total: parseFloat(item.valor_total) || 0,
+            tipo: 'peca_avulsa'
+          });
+        });
+      }
+
+      setProdutosUtilizados(produtos);
+    }
+  }, [initialData]);
+
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     const dadosOrdem = {
       ...values,
-      // Manter dados existentes como produtos utilizados, histórico, etc.
-      produtos_utilizados: initialData?.produtos_utilizados || [],
-      pecas_utilizadas: initialData?.pecas_utilizadas || [],
+      produtos_utilizados: produtosUtilizados,
       data_abertura: initialData?.data_abertura || new Date().toISOString(),
       historico_status: initialData?.historico_status || []
     };
@@ -286,6 +337,12 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
             />
           </CardContent>
         </Card>
+
+        {/* Produtos e Serviços */}
+        <ProdutosOrdemSection
+          produtosUtilizados={produtosUtilizados}
+          onProdutosChange={setProdutosUtilizados}
+        />
 
         {/* Informações de Serviço */}
         <Card>
