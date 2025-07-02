@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -56,6 +56,14 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
 }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Estado local para atualização instantânea da UI
+  const [displayStatus, setDisplayStatus] = useState(currentStatus);
+  
+  // Sincronizar com prop quando ela mudar
+  useEffect(() => {
+    setDisplayStatus(currentStatus);
+  }, [currentStatus]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -70,13 +78,12 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
         title: "Status atualizado!",
         description: `Ordem alterada para: ${statusConfig[newStatus as keyof typeof statusConfig]?.label}`,
       });
-      // Invalidar múltiplas queries relacionadas para garantir atualização
+      // Invalidar cache para atualização em outras partes
       queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/ordens', ordemId] });
-      // Forçar refetch imediato
-      queryClient.refetchQueries({ queryKey: ['/api/ordens'] });
     },
-    onError: (error: any) => {
+    onError: (error: any, newStatus) => {
+      // Reverter estado local em caso de erro
+      setDisplayStatus(currentStatus);
       toast({
         title: "Erro ao atualizar status",
         description: error.message || "Tente novamente.",
@@ -86,12 +93,15 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
   });
 
   const handleStatusChange = (newStatus: string) => {
-    if (newStatus !== currentStatus) {
+    if (newStatus !== displayStatus) {
+      // Atualizar imediatamente a UI local
+      setDisplayStatus(newStatus);
+      // Enviar para o servidor
       updateStatusMutation.mutate(newStatus);
     }
   };
 
-  const currentConfig = statusConfig[currentStatus as keyof typeof statusConfig];
+  const currentConfig = statusConfig[displayStatus as keyof typeof statusConfig];
   
   const buttonSize = size === 'sm' ? 'h-8 px-2 text-xs' : 
                    size === 'lg' ? 'h-12 px-4 text-base' : 
@@ -126,7 +136,7 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
             key={status}
             onClick={() => handleStatusChange(status)}
             className={`flex items-center gap-3 py-3 px-3 cursor-pointer ${
-              status === currentStatus ? 'bg-gray-100 font-medium' : ''
+              status === displayStatus ? 'bg-gray-100 font-medium' : ''
             }`}
           >
             <span className="text-lg">{config.emoji}</span>
@@ -134,7 +144,7 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
               <span className="font-medium">{config.label}</span>
               <span className="text-xs text-gray-500">{config.description}</span>
             </div>
-            {status === currentStatus && (
+            {status === displayStatus && (
               <span className="ml-auto text-xs text-blue-600">✓ Atual</span>
             )}
           </DropdownMenuItem>

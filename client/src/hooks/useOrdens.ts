@@ -32,12 +32,11 @@ export const useOrdens = () => {
     fetchOrdens();
   }, [user]);
 
-  // Listen to React Query cache invalidations
+  // Listen to React Query cache invalidations - versão simplificada
   useEffect(() => {
-    const unsubscribe = queryClient.getQueryCache().subscribe(() => {
-      // Quando o cache de ordens for invalidado, refetch os dados
-      const queryState = queryClient.getQueryState(['/api/ordens']);
-      if (queryState && !queryState.isFetching) {
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      // Apenas reagir a invalidações específicas da query de ordens
+      if (event?.query?.queryKey?.[0] === '/api/ordens' && event.type === 'updated') {
         fetchOrdens();
       }
     });
