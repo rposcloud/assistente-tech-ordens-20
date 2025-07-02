@@ -48,9 +48,26 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   
   // Buscar dados do perfil da empresa do contexto de autenticação
   const { profile } = useAuth();
+
+  // Buscar dados atualizados da ordem para garantir que os produtos estão sincronizados
+  const { data: ordemAtualizada } = useQuery({
+    queryKey: ['/api/ordens', ordem?.id],
+    queryFn: async () => {
+      if (!ordem?.id) return null;
+      const response = await fetch(`/api/ordens/${ordem.id}`);
+      if (!response.ok) throw new Error('Erro ao buscar ordem');
+      return response.json();
+    },
+    enabled: !!ordem?.id,
+    refetchOnMount: true, // Sempre recarregar quando o componente monta
+    refetchOnWindowFocus: false
+  });
+
+  // Usar a ordem atualizada se disponível, senão usar a ordem passada como prop
+  const ordemCompleta = ordemAtualizada || ordem;
   
   const abrirDialogoFinalizar = () => {
-    if (ordem?.status === 'finalizada') {
+    if (ordemCompleta?.status === 'finalizada') {
       toast({
         title: "Erro",
         description: "Esta OS já foi finalizada",
@@ -62,8 +79,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
 
   const abrirImpressao = () => {
-    if (!ordem?.id) {
-      console.error('ID da ordem não encontrado:', ordem);
+    if (!ordemCompleta?.id) {
+      console.error('ID da ordem não encontrado:', ordemCompleta);
       toast({
         title: "Erro",
         description: "ID da ordem não encontrado",
@@ -72,8 +89,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       return;
     }
     
-    console.log('Abrindo impressão para ordem:', ordem.id);
-    const url = `/impressao-ordem/${ordem.id}`;
+    console.log('Abrindo impressão para ordem:', ordemCompleta.id);
+    const url = `/impressao-ordem/${ordemCompleta.id}`;
     console.log('URL da impressão:', url);
     window.open(url, '_blank', 'width=800,height=900,scrollbars=yes,resizable=yes');
   };
@@ -81,7 +98,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   const finalizarOS = async () => {
       try {
         // Atualizar status da OS para 'finalizada' com dados de pagamento
-        await api.ordens.update(ordem.id, {
+        await api.ordens.update(ordemCompleta.id, {
           status: 'finalizada',
           forma_pagamento: formaPagamento,
           data_pagamento: dataVencimento
@@ -110,10 +127,10 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   };
   
   // Verificação de segurança
-  if (!ordem) {
+  if (!ordemCompleta) {
     return (
       <div className="p-4 text-center">
-        <p className="text-gray-500">Nenhuma ordem de serviço selecionada.</p>
+        <p className="text-gray-500">Carregando ordem de serviço...</p>
       </div>
     );
   }
