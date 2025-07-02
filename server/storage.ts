@@ -241,12 +241,31 @@ export class DatabaseStorage implements IStorage {
         .from(pecasUtilizadas)
         .where(eq(pecasUtilizadas.ordem_servico_id, ordem.id));
 
+      // Calcular valor total dos produtos utilizados
+      const valorProdutos = produtosUtilizadosData.reduce((total, produto) => {
+        return total + (produto.valor_total || 0);
+      }, 0);
+
+      // Calcular valor total das peças utilizadas
+      const valorPecas = pecasUtilizadasData.reduce((total, peca) => {
+        return total + (peca.valor_total || 0);
+      }, 0);
+
+      // Valor base da ordem
+      const valorBase = parseFloat(ordem.valor_total?.toString() || '0');
+      const valorAvulso = parseFloat(ordem.valor_avulso?.toString() || '0');
+      const desconto = parseFloat(ordem.desconto?.toString() || '0');
+
+      // Calcular valor final total
+      const valorFinal = valorBase + valorAvulso + valorProdutos + valorPecas - desconto;
+
       return {
         ...ordem,
         clientes: clientesMap.get(ordem.cliente_id) || null,
         produtos_utilizados: produtosUtilizadosData,
         pecas_utilizadas: pecasUtilizadasData,
-        empresa: empresa[0] || null
+        empresa: empresa[0] || null,
+        valor_final: valorFinal
       };
     }));
 
