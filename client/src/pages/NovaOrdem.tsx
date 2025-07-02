@@ -81,12 +81,8 @@ export function NovaOrdem() {
   form.setValue('valor_total', valorTotal.toString());
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => {
-      console.log('Mutation executada com dados:', data);
-      return apiRequestWithMethod('/ordens', 'POST', data);
-    },
-    onSuccess: (result) => {
-      console.log('Ordem criada com sucesso:', result);
+    mutationFn: (data: any) => apiRequestWithMethod('/ordens', 'POST', data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/ordens'] });
       toast({
         title: "Sucesso",
@@ -95,7 +91,6 @@ export function NovaOrdem() {
       navigate('/ordens');
     },
     onError: (error: any) => {
-      console.error('Erro na criação da ordem:', error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao criar ordem de serviço",
@@ -105,9 +100,6 @@ export function NovaOrdem() {
   });
 
   const onSubmit = (data: any) => {
-    console.log('Dados do formulário:', data);
-    console.log('Produtos selecionados:', produtosSelecionados);
-    
     const ordemData = {
       ...data,
       valor_total: parseFloat(data.valor_total || '0'),
@@ -117,8 +109,6 @@ export function NovaOrdem() {
         valor_unitario: p.valor_unitario
       })),
     };
-    
-    console.log('Dados que serão enviados:', ordemData);
     createMutation.mutate(ordemData);
   };
 
@@ -268,6 +258,40 @@ export function NovaOrdem() {
 
                   <FormField
                     control={form.control}
+                    name="marca"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Marca *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ex: Samsung, Apple, Dell, etc."
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="modelo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Modelo *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ex: Galaxy S21, iPhone 12, Inspiron 15, etc."
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="defeito_relatado"
                     render={({ field }) => (
                       <FormItem>
@@ -330,12 +354,6 @@ export function NovaOrdem() {
                       type="submit"
                       disabled={createMutation.isPending}
                       className="flex-1"
-                      onClick={(e) => {
-                        console.log('Botão Criar Ordem clicado!');
-                        console.log('Erros do formulário:', form.formState.errors);
-                        console.log('Formulário válido:', form.formState.isValid);
-                        console.log('Valores do formulário:', form.getValues());
-                      }}
                     >
                       {createMutation.isPending ? "Criando..." : "Criar Ordem"}
                     </Button>
