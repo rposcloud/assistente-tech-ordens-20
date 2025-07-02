@@ -106,7 +106,7 @@ export const HomePage = () => {
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 O futuro da
                 <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"> assistência técnica</span>
-                está aqui
+                {' '}está aqui
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">
