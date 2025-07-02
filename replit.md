@@ -285,10 +285,10 @@ Changelog:
   * Sistema totalmente funcional com cálculos precisos
 - July 2, 2025. CORREÇÃO CRÍTICA DE VISUALIZAÇÃO DE PRODUTOS EM OS:
   * Identificado e corrigido bug onde VisualizacaoOS mostrava apenas um produto após edições
-  * Problema: referências inconsistentes entre 'ordem' e 'ordemCompleta' no componente
-  * Solução: padronização completa para usar 'ordemCompleta' em todas as referências de dados
-  * Sistema de busca de dados atualizados implementado para garantir sincronização
-  * Visualização agora mostra corretamente todos os produtos/serviços editados
+  * Problema: componente buscava dados do servidor ao invés de usar dados já disponíveis
+  * Solução SIMPLES: usar diretamente os dados da ordem passada como prop
+  * Removida complexidade desnecessária de consultas adicionais ao servidor
+  * Visualização agora mostra corretamente todos os produtos/serviços da ordem atual
 
 ## Best Practices para Assistências Técnicas
 
