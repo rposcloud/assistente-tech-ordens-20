@@ -28,47 +28,40 @@ export const OSCloudLogo: React.FC<OSCloudLogoProps> = ({
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Background with gradient */}
-      <rect width="64" height="64" rx="16" fill="url(#bgGradient)"/>
-      
-      {/* Cloud shape */}
-      <path 
-        d="M20 38c-2.2 0-4-1.8-4-4s1.8-4 4-4c.4-4.6 4.2-8 9-8 3.8 0 7 2.4 8.4 5.6.6-.2 1.2-.2 1.6-.2 3.4 0 6 2.6 6 6s-2.6 6-6 6H20z" 
-        fill="white" 
-        fillOpacity="0.9"
-      />
-      
-      {/* Document/Order icon */}
-      <rect x="28" y="28" width="16" height="12" rx="2" fill="url(#docGradient)" stroke="white" strokeWidth="1"/>
-      <line x1="30" y1="32" x2="42" y2="32" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="30" y1="35" x2="40" y2="35" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="30" y1="38" x2="36" y2="38" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-      
-      {/* Service gear */}
-      <circle cx="44" cy="44" r="6" fill="url(#gearGradient)" stroke="white" strokeWidth="1.5"/>
-      <circle cx="44" cy="44" r="2" fill="white"/>
-      
-      {/* Gear teeth */}
-      <rect x="43" y="36" width="2" height="3" rx="1" fill="white"/>
-      <rect x="43" y="49" width="2" height="3" rx="1" fill="white"/>
-      <rect x="36" y="43" width="3" height="2" rx="1" fill="white"/>
-      <rect x="49" y="43" width="3" height="2" rx="1" fill="white"/>
-      
       <defs>
-        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#3B82F6"/>
-          <stop offset="50%" stopColor="#1D4ED8"/>
-          <stop offset="100%" stopColor="#1E3A8A"/>
+        <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6"/>
+          <stop offset="100%" stopColor="#1d4ed8"/>
         </linearGradient>
         <linearGradient id="docGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#60A5FA"/>
-          <stop offset="100%" stopColor="#3B82F6"/>
+          <stop offset="0%" stopColor="#f8fafc"/>
+          <stop offset="100%" stopColor="#e2e8f0"/>
         </linearGradient>
         <linearGradient id="gearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FBBF24"/>
-          <stop offset="100%" stopColor="#F59E0B"/>
+          <stop offset="0%" stopColor="#f59e0b"/>
+          <stop offset="100%" stopColor="#d97706"/>
         </linearGradient>
       </defs>
+      
+      {/* Nuvem de fundo */}
+      <path 
+        d="M48 28c0-2.2-1.8-4-4-4-0.4 0-0.8 0.1-1.2 0.2C41.4 20.8 38 18 34 18c-4.4 0-8 3.6-8 8 0 0.3 0 0.6 0.1 0.9C24.8 27.6 23 29.2 23 31.5c0 2.5 2 4.5 4.5 4.5h16c2.8 0 5-2.2 5-5z" 
+        fill="url(#cloudGradient)"
+      />
+      
+      {/* Documento/OS */}
+      <rect x="22" y="32" width="20" height="26" rx="2" fill="url(#docGradient)" stroke="#1e40af" strokeWidth="1"/>
+      
+      {/* Linhas do documento */}
+      <line x1="26" y1="38" x2="38" y2="38" stroke="#64748b" strokeWidth="1"/>
+      <line x1="26" y1="42" x2="36" y2="42" stroke="#64748b" strokeWidth="1"/>
+      <line x1="26" y1="46" x2="38" y2="46" stroke="#64748b" strokeWidth="1"/>
+      <line x1="26" y1="50" x2="34" y2="50" stroke="#64748b" strokeWidth="1"/>
+      
+      {/* Engrenagem pequena */}
+      <circle cx="50" cy="48" r="6" fill="url(#gearGradient)" stroke="#d97706" strokeWidth="1"/>
+      <circle cx="50" cy="48" r="3" fill="none" stroke="#d97706" strokeWidth="1"/>
+      <path d="M50 42v2 M50 52v2 M56 48h-2 M46 48h-2 M54.24 43.76l-1.41 1.41 M47.17 50.83l-1.41 1.41 M54.24 52.24l-1.41-1.41 M47.17 45.17l-1.41-1.41" stroke="#d97706" strokeWidth="1"/>
     </svg>
   );
 

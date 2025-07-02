@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="docGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Nuvem de fundo -->
+  <path d="M48 28c0-2.2-1.8-4-4-4-0.4 0-0.8 0.1-1.2 0.2C41.4 20.8 38 18 34 18c-4.4 0-8 3.6-8 8 0 0.3 0 0.6 0.1 0.9C24.8 27.6 23 29.2 23 31.5c0 2.5 2 4.5 4.5 4.5h16c2.8 0 5-2.2 5-5z" fill="url(#cloudGradient)"/>
+  
+  <!-- Documento/OS -->
+  <rect x="22" y="32" width="20" height="26" rx="2" fill="url(#docGradient)" stroke="#1e40af" stroke-width="1"/>
+  
+  <!-- Linhas do documento -->
+  <line x1="26" y1="38" x2="38" y2="38" stroke="#64748b" stroke-width="1"/>
+  <line x1="26" y1="42" x2="36" y2="42" stroke="#64748b" stroke-width="1"/>
+  <line x1="26" y1="46" x2="38" y2="46" stroke="#64748b" stroke-width="1"/>
+  <line x1="26" y1="50" x2="34" y2="50" stroke="#64748b" stroke-width="1"/>
+  
+  <!-- Engrenagem pequena -->
+  <circle cx="50" cy="48" r="6" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+  <circle cx="50" cy="48" r="3" fill="none" stroke="#d97706" stroke-width="1"/>
+  <path d="M50 42v2 M50 52v2 M56 48h-2 M46 48h-2 M54.24 43.76l-1.41 1.41 M47.17 50.83l-1.41 1.41 M54.24 52.24l-1.41-1.41 M47.17 45.17l-1.41-1.41" stroke="#d97706" stroke-width="1"/>
+</svg>
