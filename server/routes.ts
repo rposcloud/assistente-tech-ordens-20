@@ -639,15 +639,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Ordem not found' });
       }
       
+      // Debug: verificar estrutura dos dados
+      const ordemCompleta = ordem as any;
+      console.log('=== DEBUG ORDEM ===');
+      console.log('Ordem ID:', id);
+      console.log('Produtos utilizados:', ordemCompleta.produtos_utilizados);
+      console.log('Peças utilizadas:', ordemCompleta.pecas_utilizadas);
+      console.log('Cliente:', ordemCompleta.clientes);
+      
       // Retornar dados formatados para impressão
       res.json({
         ordem: {
           ...ordem,
-          cliente: ordem.clientes,
-          produtos_utilizados: ordem.produtos_utilizados || [],
-          pecas_utilizadas: ordem.pecas_utilizadas || []
+          cliente: ordemCompleta.clientes,
+          produtos_utilizados: ordemCompleta.produtos_utilizados || [],
+          pecas_utilizadas: ordemCompleta.pecas_utilizadas || []
         },
-        empresa: ordem.empresa
+        empresa: ordemCompleta.empresa
       });
     } catch (error) {
       console.error('Get ordem for print error:', error);
