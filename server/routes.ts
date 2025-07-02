@@ -406,9 +406,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user_id: req.userId!
       });
       
+      console.log('=== DEBUG CRIAÇÃO ORDEM ===');
+      console.log('Produtos utilizados no request body:', req.body.produtos_utilizados);
       console.log('Dados validados para ordem:', ordemData);
       
       const ordem = await storage.createOrdemServico(ordemData, req.userId!);
+      console.log('Ordem criada com ID:', ordem.id);
       
       // Processar produtos utilizados se fornecidos
       if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
