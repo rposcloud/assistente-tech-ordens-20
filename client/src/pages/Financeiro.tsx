@@ -465,7 +465,7 @@ export const Financeiro = () => {
             Acompanhe receitas, despesas e fluxo de caixa do seu negócio
           </p>
         </div>
-        <Button onClick={handleNewEntrada} className="flex items-center whitespace-nowrap">
+        <Button onClick={handleNewEntrada} className="flex items-center whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="mr-2 h-4 w-4" />
           Nova Entrada
         </Button>

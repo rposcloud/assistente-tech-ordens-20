@@ -64,7 +64,7 @@ export const Ordens = () => {
   const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
   const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  
+
   // Estados para modal de pagamento
   const [pagamentoModalOpen, setPagamentoModalOpen] = useState(false);
   const [ordemParaPagamento, setOrdemParaPagamento] = useState<OrdemServico | null>(null);
@@ -78,7 +78,7 @@ export const Ordens = () => {
   // Filtrar ordens baseado na busca
   const filteredOrdens = ordens.filter(ordem => {
     if (!searchTerm) return true;
-    
+
     const searchLower = searchTerm.toLowerCase();
     return (
       ordem.numero?.toLowerCase().includes(searchLower) ||
@@ -100,9 +100,9 @@ export const Ordens = () => {
   const handleSubmit = async (data: any) => {
     try {
       setModalLoading(true);
-      
+
       console.log('Submetendo dados:', data);
-      
+
       if (selectedOrdem) {
         await updateOrdem(selectedOrdem.id!, data);
         toast.success('Ordem atualizada com sucesso!');
@@ -110,7 +110,7 @@ export const Ordens = () => {
         await createOrdem(data);
         toast.success('Ordem criada com sucesso!');
       }
-      
+
       setModalOpen(false);
       setSelectedOrdem(undefined);
     } catch (error: any) {
@@ -150,7 +150,7 @@ export const Ordens = () => {
     if (!deleteModal.ordem) return;
 
     setDeleteModal(prev => ({ ...prev, loading: true }));
-    
+
     try {
       await deleteOrdem(deleteModal.ordem.id!);
       toast.success('Ordem excluída com sucesso!');
@@ -161,7 +161,7 @@ export const Ordens = () => {
       });
     } catch (error: any) {
       console.error('Error deleting ordem:', error);
-      
+
       // Verificar se é erro de vínculo financeiro
       if (error.response?.status === 400 && error.response?.data?.entradas_vinculadas) {
         const errorData = error.response.data;
@@ -171,7 +171,7 @@ export const Ordens = () => {
           `${errorData.detalhes}`,
           { duration: 8000 }
         );
-        
+
         // Mostrar opções para o usuário
         if (window.confirm(
           `Esta OS possui ${errorData.entradas_vinculadas} entrada(s) financeira(s) vinculada(s).\n\n` +
@@ -256,11 +256,11 @@ export const Ordens = () => {
       toast.error('Erro: ID da ordem não encontrado');
       return;
     }
-    
+
     setLoadingPagamento(true);
     try {
       console.log('Finalizando OS com ID:', ordemParaPagamento.id);
-      
+
       // Atualizar OS para status "finalizada" - a entrada financeira será criada automaticamente pelo backend
       await updateOrdem(ordemParaPagamento.id, {
         status: 'finalizada'
@@ -396,7 +396,7 @@ export const Ordens = () => {
             Gerencie suas ordens de serviço e acompanhe o progresso dos reparos
           </p>
         </div>
-        <Button onClick={handleNewOrdem} className="flex items-center">
+        <Button onClick={handleNewOrdem} className="flex items-center bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="mr-2 h-4 w-4" />
           Nova Ordem
         </Button>
@@ -486,7 +486,7 @@ export const Ordens = () => {
             <div className="text-center py-8">
               <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">Nenhuma ordem de serviço encontrada</p>
-              <Button onClick={handleNewOrdem} className="mt-4">
+              <Button onClick={handleNewOrdem} className="mt-4 bg-blue-600 hover:bg-blue-700 text-white">
                 <Plus className="mr-2 h-4 w-4" />
                 Criar primeira ordem
               </Button>
@@ -590,7 +590,7 @@ export const Ordens = () => {
                             size="md"
                           />
                         </div>
-                        
+
                         <div>
                           <div className="text-gray-500 text-xs">Valor</div>
                           <div className="font-semibold text-green-600">
