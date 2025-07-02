@@ -140,17 +140,58 @@ export const HomePage = () => {
             </div>
             
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl transform rotate-3 opacity-10"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
-                <div className="space-y-4">
-                  <div className="h-4 bg-gradient-to-r from-blue-200 to-cyan-200 rounded-full w-3/4"></div>
-                  <div className="h-4 bg-gradient-to-r from-green-200 to-emerald-200 rounded-full w-1/2"></div>
-                  <div className="h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                    <OSCloudLogo size="xl" showText={false} />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl transform rotate-2 opacity-10"></div>
+              <div className="relative bg-white rounded-2xl shadow-xl p-6 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
+                {/* Simulação de uma OS no sistema */}
+                <div className="space-y-3">
+                  {/* Header da OS */}
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <OSCloudLogo size="sm" showText={false} />
+                      <span className="text-sm font-semibold text-gray-700">OS #000123</span>
+                    </div>
+                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                      Em Andamento
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg"></div>
-                    <div className="h-16 bg-gradient-to-br from-orange-100 to-red-100 rounded-lg"></div>
+                  
+                  {/* Cliente e equipamento */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">João Silva - iPhone 12</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <span className="text-sm text-gray-600">Troca de tela e bateria</span>
+                    </div>
+                  </div>
+                  
+                  {/* Progresso visual */}
+                  <div className="space-y-2">
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full w-3/4 transition-all duration-1000"></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Progresso: 75%</span>
+                      <span>Valor: R$ 350,00</span>
+                    </div>
+                  </div>
+                  
+                  {/* Mini dashboard */}
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <div className="text-center p-2 bg-blue-50 rounded">
+                      <div className="text-xs font-semibold text-blue-600">12</div>
+                      <div className="text-xs text-gray-500">Abertas</div>
+                    </div>
+                    <div className="text-center p-2 bg-green-50 rounded">
+                      <div className="text-xs font-semibold text-green-600">8</div>
+                      <div className="text-xs text-gray-500">Finalizadas</div>
+                    </div>
+                    <div className="text-center p-2 bg-orange-50 rounded">
+                      <div className="text-xs font-semibold text-orange-600">3</div>
+                      <div className="text-xs text-gray-500">Aguardando</div>
+                    </div>
                   </div>
                 </div>
               </div>

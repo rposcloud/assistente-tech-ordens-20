@@ -269,6 +269,12 @@ Changelog:
   * HTML atualizado com favicon SVG e título descritivo
   * Identidade visual unificada em todo o sistema
   * Ícone otimizado para diferentes tamanhos mantendo legibilidade
+- July 2, 2025. MELHORIA DA REPRESENTAÇÃO VISUAL NA LANDING PAGE:
+  * Substituída visualização abstrata por simulação realista de ordem de serviço
+  * Interface mockup mostra OS #000123 com cliente, equipamento e progresso
+  * Mini dashboard com métricas relevantes (abertas, finalizadas, aguardando)
+  * Visual contextualizado para assistência técnica com barra de progresso
+  * Tamanho reduzido e mais elegante para melhor experiência visual
 
 ## Best Practices para Assistências Técnicas
 
