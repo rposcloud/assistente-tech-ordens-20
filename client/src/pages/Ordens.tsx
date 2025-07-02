@@ -595,9 +595,27 @@ export const Ordens = () => {
                           <div className="text-gray-500 text-xs">Valor</div>
                           <div className="font-semibold text-green-600">
                             {(() => {
-                              const valor = ordem.valor_final || ordem.valor_total || '0';
-                              const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
-                              return `R$ ${(valorNumerico || 0).toFixed(2)}`;
+                              // Use valor_final se disponível, senão calcule
+                              let valor = 0;
+                              if (ordem.valor_final && ordem.valor_final > 0) {
+                                valor = ordem.valor_final;
+                              } else {
+                                // Valor base da ordem
+                                const valorBase = parseFloat(ordem.valor_total?.toString() || '0');
+                                // Somar produtos utilizados
+                                const valorProdutos = ordem.produtos_utilizados?.reduce((total: number, produto: any) => {
+                                  const valorProduto = parseFloat(produto.valor_total?.toString() || '0');
+                                  return total + valorProduto;
+                                }, 0) || 0;
+                                // Somar peças utilizadas
+                                const valorPecas = ordem.pecas_utilizadas?.reduce((total: number, peca: any) => {
+                                  const valorPeca = parseFloat(peca.valor_total?.toString() || '0');
+                                  return total + valorPeca;
+                                }, 0) || 0;
+                                
+                                valor = valorBase + valorProdutos + valorPecas;
+                              }
+                              return `R$ ${valor.toFixed(2).replace('.', ',')}`;
                             })()}
                           </div>
                         </div>

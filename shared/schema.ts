@@ -373,8 +373,11 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   // Campos de pagamento - aceita null
   forma_pagamento: z.enum(["dinheiro", "cartao_credito", "cartao_debito", "pix", "transferencia", "parcelado"]).nullable().optional(),
   
-  // Tipo de equipamento - opcional
-  tipo_equipamento: z.enum(["smartphone", "notebook", "desktop", "tablet", "outros", "todos"]).nullable().optional(),
+  // Tipo de equipamento - opcional, aceita string vazia
+  tipo_equipamento: z.string().optional().transform(val => {
+    if (!val || val === '') return null;
+    return val as "smartphone" | "notebook" | "desktop" | "tablet" | "outros" | "todos";
+  }),
   
   // Campos opcionais - aceita string vazia, null ou undefined
   marca: z.string().optional(),
