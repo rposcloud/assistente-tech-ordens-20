@@ -326,48 +326,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         </div>
       </div>
 
-      {/* Produtos e Serviços */}
-      {(ordem.produtos_utilizados?.length > 0 || ordem.pecas_utilizadas?.length > 0) && (
-        <div className="bg-white border border-gray-200 rounded-lg">
-          <div className="p-3 border-b border-gray-100">
-            <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
-              <Wrench className="h-4 w-4 text-purple-600 print:h-3 print:w-3" />
-              Produtos e Serviços Utilizados
-            </h3>
-          </div>
-          <div className="p-3 print:p-2">
-            <div className="space-y-2 print:space-y-1">
-              {ordem.produtos_utilizados?.map((produto: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900 print:text-sm">{produto.produto?.nome}</p>
-                    <p className="text-xs text-gray-600 print:text-sm">
-                      {produto.quantidade}x - {formatCurrency(produto.valor_unitario)} cada
-                    </p>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900 print:text-sm">
-                    {formatCurrency(produto.valor_total)}
-                  </p>
-                </div>
-              ))}
-              
-              {ordem.pecas_utilizadas?.map((peca: any, index: number) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded border print:p-1">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-900 print:text-sm">{peca.nome}</p>
-                    <p className="text-xs text-gray-600 print:text-sm">
-                      {peca.quantidade}x - {formatCurrency(peca.valor_unitario)} cada
-                    </p>
-                  </div>
-                  <p className="text-xs font-semibold text-gray-900 print:text-sm">
-                    {formatCurrency(peca.valor_total)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Linha 2: Serviço e Financeiro */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:gap-3">
