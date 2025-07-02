@@ -88,5 +88,31 @@ export const api = {
   },
 };
 
+// Função para uso direto em mutations que aceita método e dados separados
+export const apiRequestWithMethod = async (endpoint: string, method: string = 'GET', data?: any) => {
+  const token = getAuthToken();
+  
+  const config: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+    },
+  };
+
+  if (data && method !== 'GET') {
+    config.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, config);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Erro na requisição');
+  }
+
+  return response.json();
+};
+
 export { apiRequest };
 export default api;

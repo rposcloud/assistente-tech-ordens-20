@@ -12,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, UserPlus, Package } from "lucide-react";
-import { apiRequest } from "../lib/api";
+import { apiRequestWithMethod } from "../lib/api";
 import { Badge } from "@/components/ui/badge";
 import { ClienteCadastroRapidoModal } from "@/components/modals/ClienteCadastroRapidoModal";
 import { ProdutoCadastroRapidoModal } from "@/components/modals/ProdutoCadastroRapidoModal";
@@ -81,9 +81,9 @@ export function NovaOrdem() {
   form.setValue('valor_total', valorTotal.toString());
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/ordens', 'POST', data),
+    mutationFn: (data: any) => apiRequestWithMethod('/ordens', 'POST', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+      queryClient.invalidateQueries({ queryKey: ['/ordens'] });
       toast({
         title: "Sucesso",
         description: "Ordem de serviço criada com sucesso!",
@@ -152,7 +152,7 @@ export function NovaOrdem() {
 
   const handleClienteCreated = (cliente: any) => {
     // Atualiza a lista de clientes no cache
-    queryClient.invalidateQueries({ queryKey: ['/api/clientes'] });
+    queryClient.invalidateQueries({ queryKey: ['/clientes'] });
     // Seleciona automaticamente o novo cliente
     form.setValue('cliente_id', cliente.id);
     // Fecha o modal
@@ -161,7 +161,7 @@ export function NovaOrdem() {
 
   const handleProdutoCreated = (produto: any) => {
     // Atualiza a lista de produtos no cache
-    queryClient.invalidateQueries({ queryKey: ['/api/produtos'] });
+    queryClient.invalidateQueries({ queryKey: ['/produtos'] });
     // Seleciona automaticamente o novo produto
     setProdutoSelecionado(produto.id);
     // Fecha o modal

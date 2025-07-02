@@ -27,7 +27,9 @@ const queryClient = new QueryClient({
     queries: {
       queryFn: async ({ queryKey }) => {
         const [url] = queryKey as [string];
-        return apiRequest(url);
+        // Para queryKeys que começam com /, adiciona /api automaticamente
+        const endpoint = url.startsWith('/') ? url : `/${url}`;
+        return apiRequest(endpoint);
       },
     },
   },
