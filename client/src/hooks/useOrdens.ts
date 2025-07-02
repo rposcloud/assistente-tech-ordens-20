@@ -75,17 +75,56 @@ export const useOrdens = () => {
     }
   };
 
-  const deleteOrdem = async (id: string) => {
+  const deleteOrdem = async (id: string, options?: { force?: boolean; action?: string }) => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
-      await api.ordens.delete(id);
+      const params = new URLSearchParams();
+      if (options?.force) params.append('force', 'true');
+      if (options?.action) params.append('action', options.action);
+      
+      const url = `/api/ordens/${id}${params.toString() ? `?${params.toString()}` : ''}`;
+      await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      }).then(async (response) => {
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw errorData;
+        }
+        return response.json();
+      });
+
       await fetchOrdens();
-      // Invalidate React Query cache
       queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
       return true;
     } catch (error) {
       console.error('Erro ao deletar ordem:', error);
+      throw error;
+    }
+  };
+
+  const getProtectionStatus = async (id: string) => {
+    if (!user) throw new Error('Usuário não autenticado');
+
+    try {
+      const response = await fetch(`/api/ordens/${id}/protection-status`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao verificar status de proteção');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao verificar proteção:', error);
       throw error;
     }
   };
@@ -96,6 +135,7 @@ export const useOrdens = () => {
     createOrdem,
     updateOrdem,
     deleteOrdem,
+    getProtectionStatus,
     refetch: fetchOrdens
   };
 };

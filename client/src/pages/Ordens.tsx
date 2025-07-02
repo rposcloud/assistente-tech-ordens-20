@@ -50,7 +50,7 @@ const statusOptions = [
 ];
 
 export const Ordens = () => {
-  const { ordens, loading, createOrdem, updateOrdem, deleteOrdem } = useOrdens();
+  const { ordens, loading, createOrdem, updateOrdem, deleteOrdem, getProtectionStatus } = useOrdens();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
@@ -161,36 +161,21 @@ export const Ordens = () => {
   };
 
   const handleDeleteClick = async (ordem: OrdemServico) => {
-    // Verificar entradas financeiras vinculadas
     try {
-      const response = await fetch(`/api/financeiro/check-ordem/${ordem.id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const checkResult = await response.json();
+      // Usar novo endpoint de status de proteção
+      const protectionData = await getProtectionStatus(ordem.id);
       
-      // Buscar detalhes das entradas se existirem
-      let financialEntries = [];
-      if (checkResult.hasFinancialEntry) {
-        const entriesResponse = await fetch('/api/financeiro', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const allEntries = await entriesResponse.json();
-        financialEntries = allEntries.filter((entry: any) => entry.ordem_servico_id === ordem.id);
-      }
+      const financialEntries = protectionData.linked_entries || [];
 
       setDeleteModal({
         isOpen: true,
         ordem,
         loading: false,
-        hasFinancialEntry: checkResult.hasFinancialEntry,
+        hasFinancialEntry: protectionData.protection.is_protected,
         financialEntries
       });
     } catch (error) {
-      console.error('Erro ao verificar vínculos financeiros:', error);
+      console.error('Erro ao verificar proteção:', error);
       // Fallback para modal simples em caso de erro
       setDeleteModal({
         isOpen: true,
