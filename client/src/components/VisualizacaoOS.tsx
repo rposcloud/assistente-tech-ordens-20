@@ -399,6 +399,67 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           </div>
         </div>
 
+        {/* Produtos e Serviços Utilizados */}
+        {((ordem.produtos_utilizados && ordem.produtos_utilizados.length > 0) || 
+          (ordem.pecas_utilizadas && ordem.pecas_utilizadas.length > 0)) && (
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
+            <div className="p-3 border-b border-gray-100">
+              <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
+                <Package className="h-4 w-4 text-blue-600 print:h-3 print:w-3" />
+                Produtos e Serviços Utilizados
+              </h3>
+            </div>
+            <div className="p-3 print:p-2">
+              <div className="space-y-3 print:space-y-2">
+                {/* Produtos Cadastrados */}
+                {ordem.produtos_utilizados && ordem.produtos_utilizados.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-700 mb-2 print:text-xs">Produtos/Serviços:</h4>
+                    <div className="space-y-1 print:space-y-1">
+                      {ordem.produtos_utilizados.map((produto: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center text-xs print:text-xs bg-gray-50 p-2 rounded print:p-1">
+                          <div className="flex-1">
+                            <span className="font-medium">{produto.produto?.nome || 'Produto'}</span>
+                            {produto.produto?.descricao && (
+                              <span className="text-gray-600 ml-2">- {produto.produto.descricao}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 print:gap-2">
+                            <span className="text-gray-600">Qtd: {produto.quantidade}</span>
+                            <span className="text-gray-600">Unit: {formatCurrency(produto.valor_unitario)}</span>
+                            <span className="font-medium text-green-600">{formatCurrency(produto.valor_total)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Peças Avulsas */}
+                {ordem.pecas_utilizadas && ordem.pecas_utilizadas.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-700 mb-2 print:text-xs">Peças Avulsas:</h4>
+                    <div className="space-y-1 print:space-y-1">
+                      {ordem.pecas_utilizadas.map((peca: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center text-xs print:text-xs bg-gray-50 p-2 rounded print:p-1">
+                          <div className="flex-1">
+                            <span className="font-medium">{peca.nome}</span>
+                          </div>
+                          <div className="flex items-center gap-4 print:gap-2">
+                            <span className="text-gray-600">Qtd: {peca.quantidade}</span>
+                            <span className="text-gray-600">Unit: {formatCurrency(peca.valor_unitario)}</span>
+                            <span className="font-medium text-green-600">{formatCurrency(peca.valor_total)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Resumo Financeiro */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
