@@ -19,6 +19,14 @@ export const OrdemServicoModal: React.FC<OrdemServicoModalProps> = ({
   initialData,
   loading = false
 }) => {
+  console.log('📋 Modal: Renderizando com initialData:', {
+    hasData: !!initialData,
+    isOpen,
+    loading,
+    produtos_utilizados: initialData?.produtos_utilizados?.length || 0,
+    pecas_utilizadas: initialData?.pecas_utilizadas?.length || 0
+  });
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

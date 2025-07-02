@@ -653,7 +653,8 @@ export const Ordens = () => {
         isOpen={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          setSelectedOrdem(undefined);
+          // Delay clearing selectedOrdem to allow modal animation
+          setTimeout(() => setSelectedOrdem(undefined), 200);
         }}
         onSubmit={handleSubmit}
         initialData={selectedOrdem}

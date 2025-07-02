@@ -560,8 +560,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               produto.quantidade, 
               produto.valor_unitario
             );
-          } else if (produto.tipo === 'peca_avulsa') {
-            console.log('➕ Server: Adicionando peça avulsa:', produto);
+          } else if (produto.tipo === 'peca_avulsa' || !produto.produto_id) {
+            // Produtos avulsos OU produtos existentes sem produto_id
+            console.log('➕ Server: Adicionando peça/produto avulso:', produto);
             await storage.addPecaUtilizada(
               id, 
               produto.nome, 
