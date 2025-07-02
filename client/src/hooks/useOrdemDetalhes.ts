@@ -63,7 +63,7 @@ interface OrdemDetalhes {
 
 export const useOrdemDetalhes = (ordemId?: string) => {
   return useQuery({
-    queryKey: ['/api/ordens', ordemId, 'print'],
+    queryKey: ['/ordens', ordemId, 'print'],
     queryFn: async (): Promise<OrdemDetalhes> => {
       const response = await fetch(`/api/ordens/${ordemId}/print`);
       if (!response.ok) {

@@ -62,12 +62,12 @@ export function NovaOrdem() {
 
   // Buscar clientes
   const { data: clientes = [], isLoading: loadingClientes, error: errorClientes } = useQuery({
-    queryKey: ['/api/clientes'],
+    queryKey: ['/clientes'],
   });
 
   // Buscar produtos
   const { data: produtos = [], isLoading: loadingProdutos, error: errorProdutos } = useQuery({
-    queryKey: ['/api/produtos'],
+    queryKey: ['/produtos'],
   });
 
 
