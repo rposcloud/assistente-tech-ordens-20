@@ -476,29 +476,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const statusAnterior = ordemAnterior.status;
       const novoStatus = ordemData.status;
 
-      // Verificar se há entradas financeiras vinculadas
-      const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
-      const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
+      // Verificar proteção financeira robusta
+      const protection = await checkFinancialProtection(id, req.userId!);
       
-      // Proteção: Se alterar valor total e houver entradas financeiras E a OS já foi finalizada
-      if (entradasDaOS.length > 0 && statusAnterior === 'finalizada' && ordemData.valor_total && ordemData.valor_total !== ordemAnterior.valor_total) {
-        return res.status(400).json({
-          error: 'Não é possível alterar o valor total desta OS finalizada',
-          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi finalizada',
-          entradas_vinculadas: entradasDaOS.length,
-          valor_atual: ordemAnterior.valor_total,
-          valor_tentativa: ordemData.valor_total,
-          sugestao: 'Para alterar o valor, primeiro trate as entradas financeiras associadas'
-        });
-      }
-
-      // Proteção: Se alterar status de "finalizada" para outro e houver entradas financeiras
-      if (statusAnterior === 'finalizada' && novoStatus && novoStatus !== 'finalizada' && entradasDaOS.length > 0) {
-        return res.status(400).json({
-          error: 'Não é possível alterar o status desta OS finalizada',
-          motivo: 'Esta OS possui entradas financeiras vinculadas e já foi finalizada',
-          entradas_vinculadas: entradasDaOS.length,
-          sugestao: 'Para reabrir esta OS, primeiro trate as entradas financeiras associadas'
+      // Validar alterações para OS protegidas
+      const validation = validateProtectedOSChanges(
+        protection, 
+        ordemAnterior, 
+        ordemData, 
+        novoStatus && novoStatus !== statusAnterior ? 'status_change' : 'update'
+      );
+      
+      if (!validation.allowed) {
+        return res.status(423).json({
+          error: 'Operação não permitida - OS financeiramente protegida',
+          protection_status: {
+            protected: true,
+            linked_entries: protection.count,
+            total_value: protection.totalValue
+          },
+          validation_errors: validation.errors,
+          message: 'Esta OS possui vínculos financeiros que impedem esta alteração',
+          suggestion: 'Gerencie as entradas financeiras vinculadas antes de alterar a OS'
         });
       }
       
@@ -604,49 +603,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { id } = req.params;
-      const { force } = req.query; // Parâmetro para forçar exclusão
+      const { force, action } = req.query;
       
-      // Verificar se a OS existe e obter detalhes
+      // Verificar se a OS existe
       const ordem = await storage.getOrdemServico(id, req.userId!);
       if (!ordem) {
         return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
       }
 
-      // Verificar se existem entradas financeiras vinculadas a esta OS
-      const entradasVinculadas = await storage.getEntradasFinanceiras(req.userId!);
-      const entradasDaOS = entradasVinculadas.filter(entrada => entrada.ordem_servico_id === id);
+      // Verificar proteção financeira robusta
+      const protection = await checkFinancialProtection(id, req.userId!);
       
-      if (entradasDaOS.length > 0 && !force) {
-        return res.status(400).json({ 
-          error: 'Esta OS possui entradas financeiras vinculadas',
-          entradas_vinculadas: entradasDaOS.length,
-          detalhes: 'Para excluir esta OS, você deve primeiro decidir o que fazer com as entradas financeiras associadas.',
-          opcoes: {
-            excluir_financeiro: 'DELETE /api/ordens/' + id + '?force=true&action=delete_financial',
-            manter_financeiro: 'DELETE /api/ordens/' + id + '?force=true&action=keep_financial'
-          }
+      // Validar operação de exclusão
+      const validation = validateProtectedOSChanges(protection, ordem, {}, 'delete');
+      
+      // Se a OS está protegida e não foi forçada a exclusão
+      if (!validation.allowed && !force) {
+        return res.status(423).json({
+          error: 'Exclusão não permitida - OS financeiramente protegida',
+          protection_status: {
+            protected: true,
+            linked_entries: protection.count,
+            total_value: protection.totalValue
+          },
+          validation_errors: validation.errors,
+          options: {
+            delete_all: `DELETE /api/ordens/${id}?force=true&action=delete_financial`,
+            unlink_keep: `DELETE /api/ordens/${id}?force=true&action=keep_financial`
+          },
+          message: 'Esta OS possui vínculos financeiros. Escolha uma das opções disponíveis.',
+          linked_entries: protection.linkedEntries.map(e => ({
+            id: e.id,
+            valor: e.valor,
+            descricao: e.descricao,
+            data_vencimento: e.data_vencimento
+          }))
         });
       }
 
-      // Se force=true, processar baseado na ação
-      if (force) {
-        const action = req.query.action as string;
-        
+      // Processar exclusão forçada com ação específica
+      if (force && protection.hasProtection) {
         if (action === 'delete_financial') {
-          // Excluir entradas financeiras vinculadas primeiro
-          for (const entrada of entradasDaOS) {
+          // Excluir entradas financeiras vinculadas
+          for (const entrada of protection.linkedEntries) {
             await storage.deleteEntradaFinanceira(entrada.id, req.userId!);
           }
-          console.log(`${entradasDaOS.length} entradas financeiras excluídas junto com OS ${id}`);
         } else if (action === 'keep_financial') {
-          // Desvincular entradas financeiras (remover ordem_servico_id)
-          for (const entrada of entradasDaOS) {
+          // Desvincular entradas (manter como entrada independente)
+          for (const entrada of protection.linkedEntries) {
             await storage.updateEntradaFinanceira(entrada.id, req.userId!, {
               ordem_servico_id: null,
-              observacoes: (entrada.observacoes || '') + ' [OS original excluída]'
+              observacoes: (entrada.observacoes || '') + ' [OS original excluída - entrada mantida]'
             });
           }
-          console.log(`${entradasDaOS.length} entradas financeiras desvinculadas da OS ${id}`);
         }
       }
 
@@ -654,9 +663,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteOrdemServico(id, req.userId!);
       
       res.json({ 
-        message: 'Ordem excluída com sucesso',
-        entradas_processadas: entradasDaOS.length,
-        acao_financeiro: force ? req.query.action : 'nenhuma'
+        success: true,
+        message: 'OS excluída com sucesso',
+        protection_info: {
+          was_protected: protection.hasProtection,
+          entries_processed: protection.count,
+          action_taken: force ? action : 'none'
+        }
       });
     } catch (error) {
       console.error('Delete ordem error:', error);
@@ -720,6 +733,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verificar se existe entrada financeira vinculada a uma ordem específica
+  // Endpoint para validar proteções financeiras
+  app.get('/api/ordens/:id/protection-status', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verificar se a OS existe
+      const ordem = await storage.getOrdemServico(id, req.userId!);
+      if (!ordem) {
+        return res.status(404).json({ error: 'Ordem de serviço não encontrada' });
+      }
+
+      // Verificar proteção financeira
+      const protection = await checkFinancialProtection(id, req.userId!);
+      
+      res.json({
+        ordem_id: id,
+        numero: ordem.numero,
+        status: ordem.status,
+        valor_total: ordem.valor_total,
+        protection: {
+          is_protected: protection.hasProtection,
+          linked_entries_count: protection.count,
+          total_linked_value: protection.totalValue,
+          can_edit_value: !protection.hasProtection || ordem.status !== 'finalizada',
+          can_change_status: !protection.hasProtection || ordem.status !== 'finalizada',
+          can_delete: !protection.hasProtection
+        },
+        linked_entries: protection.linkedEntries.map(e => ({
+          id: e.id,
+          descricao: e.descricao,
+          valor: e.valor,
+          data_vencimento: e.data_vencimento,
+          tipo: e.tipo
+        }))
+      });
+    } catch (error) {
+      console.error('Protection status error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.get('/api/financeiro/check-ordem/:ordemId', authenticateToken, async (req: AuthRequest, res) => {
     try {
       const { ordemId } = req.params;
@@ -880,6 +934,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
 }
 
 // Helper function to create default categories
+// Função auxiliar para verificar proteções financeiras
+async function checkFinancialProtection(ordemId: string, userId: string) {
+  const entradas = await storage.getEntradasFinanceiras(userId);
+  const entradasVinculadas = entradas.filter(entrada => entrada.ordem_servico_id === ordemId);
+  
+  return {
+    hasProtection: entradasVinculadas.length > 0,
+    linkedEntries: entradasVinculadas,
+    count: entradasVinculadas.length,
+    totalValue: entradasVinculadas.reduce((acc, entrada) => {
+      const valor = typeof entrada.valor === 'string' ? parseFloat(entrada.valor) : entrada.valor;
+      return acc + (valor || 0);
+    }, 0)
+  };
+}
+
+// Função para validar alterações em OS protegidas
+function validateProtectedOSChanges(
+  protection: any, 
+  currentOS: any, 
+  updates: any, 
+  operation: 'update' | 'delete' | 'status_change'
+) {
+  if (!protection.hasProtection) {
+    return { allowed: true };
+  }
+
+  const errors = [];
+  
+  // Proteção contra alteração de valor total
+  if (operation === 'update' && updates.valor_total && updates.valor_total !== currentOS.valor_total) {
+    errors.push({
+      field: 'valor_total',
+      error: 'Valor total não pode ser alterado',
+      reason: 'OS possui entradas financeiras vinculadas',
+      current_value: currentOS.valor_total,
+      attempted_value: updates.valor_total
+    });
+  }
+
+  // Proteção contra alteração de status de finalizada
+  if (operation === 'status_change' && currentOS.status === 'finalizada' && updates.status !== 'finalizada') {
+    errors.push({
+      field: 'status',
+      error: 'Status não pode ser alterado',
+      reason: 'OS finalizada possui entradas financeiras vinculadas',
+      current_status: currentOS.status,
+      attempted_status: updates.status
+    });
+  }
+
+  // Proteção contra exclusão
+  if (operation === 'delete') {
+    errors.push({
+      operation: 'delete',
+      error: 'OS não pode ser excluída',
+      reason: 'OS possui entradas financeiras vinculadas',
+      linked_entries: protection.count,
+      total_value: protection.totalValue
+    });
+  }
+
+  return {
+    allowed: errors.length === 0,
+    errors,
+    protection
+  };
+}
+
 async function createDefaultCategories(userId: string) {
   try {
     // Default financial categories
