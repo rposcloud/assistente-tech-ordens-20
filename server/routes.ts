@@ -15,10 +15,14 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
-if (!process.env.JWT_SECRET) {
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  // Em produção, forçar erro se JWT_SECRET não estiver configurado
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production environment');
+  }
   console.warn("⚠️ JWT_SECRET não configurado. Usando chave temporária para desenvolvimento.");
-}
+  return 'dev-secret-key-' + Math.random().toString(36).substring(2, 15);
+})();
 
 // Criar diretório de uploads se não existir
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -66,10 +70,7 @@ interface AuthRequest extends Request {
 }
 
 const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  // Debug para PUT /api/ordens
-  if (req.method === 'PUT' && req.path.includes('/api/ordens/')) {
-    console.log('🔐 AUTH: PUT para ordens recebido:', req.path);
-  }
+  // Debug logs removidos para produção
   
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
@@ -457,14 +458,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
-    console.log('🚨 DEBUG: PUT /api/ordens/' + req.params.id + ' INICIADO');
+    // Debug log removido para produção
     try {
       const { id } = req.params;
       const { produtos_utilizados, ...dadosOrdem } = req.body;
       
-      console.log('🚀 Server: PUT /api/ordens/' + id + ' recebido');
-      console.log('📋 Server: Body completo:', req.body);
-      console.log('📦 Server: produtos_utilizados extraído:', produtos_utilizados);
+      // Logs sensíveis removidos para produção
       
       const ordemData = insertOrdemServicoSchema.partial().parse(dadosOrdem);
       
@@ -733,7 +732,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/financeiro', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      console.log('Dados recebidos para entrada financeira:', req.body);
+      // Log sensível removido para produção
       
       const entradaData = insertEntradaFinanceiraSchema.parse({
         ...req.body,

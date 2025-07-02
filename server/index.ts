@@ -6,10 +6,22 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
+// Configure trust proxy para rate limiting funcionar corretamente
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: false, // Desabilitado para desenvolvimento
-  crossOriginEmbedderPolicy: false
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // unsafe-eval necessário para Vite dev
+      connectSrc: ["'self'", "ws:", "wss:"]
+    }
+  },
+  crossOriginEmbedderPolicy: false // Mantido false para compatibilidade com Vite
 }));
 
 // Rate limiting
