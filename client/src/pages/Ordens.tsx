@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const statusColors: Record<string, string> = {
   aberta: 'bg-blue-100 text-blue-800',
@@ -49,6 +50,7 @@ const statusOptions = [
 export const Ordens = () => {
   const { ordens, loading, createOrdem, updateOrdem, deleteOrdem } = useOrdens();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | undefined>();
   const [modalLoading, setModalLoading] = useState(false);
@@ -106,6 +108,17 @@ export const Ordens = () => {
       if (selectedOrdem) {
         await updateOrdem(selectedOrdem.id!, data);
         toast.success('Ordem atualizada com sucesso!');
+        
+        // Invalidar cache para recarregar dados atualizados
+        queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+        
+        // Se existe uma ordem sendo visualizada e é a mesma que foi editada, 
+        // simplesmente fechar o modal para que seja reaberto com dados atualizados
+        if (ordemParaVisualizacao && ordemParaVisualizacao.id === selectedOrdem.id) {
+          setVisualizacaoModalOpen(false);
+          setOrdemParaVisualizacao(null);
+          toast.success('Para ver as alterações, clique em "Visualizar" novamente');
+        }
       } else {
         await createOrdem(data);
         toast.success('Ordem criada com sucesso!');
