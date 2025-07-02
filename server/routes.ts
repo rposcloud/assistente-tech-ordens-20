@@ -719,6 +719,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Verificar se existe entrada financeira vinculada a uma ordem específica
+  app.get('/api/financeiro/check-ordem/:ordemId', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { ordemId } = req.params;
+      const entradas = await storage.getEntradasFinanceiras(req.userId!);
+      const entradaVinculada = entradas.find(entrada => entrada.ordem_servico_id === ordemId);
+      
+      res.json({
+        hasFinancialEntry: !!entradaVinculada,
+        financialEntry: entradaVinculada || null
+      });
+    } catch (error) {
+      console.error('Check financial entry error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Entradas Financeiras routes
   app.get('/api/financeiro', authenticateToken, async (req: AuthRequest, res) => {
     try {

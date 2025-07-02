@@ -338,6 +338,7 @@ export const Ordens = () => {
           ordemId={ordem.id} 
           currentStatus={ordem.status}
           size="sm"
+          valorTotal={parseFloat(ordem.valor_total || '0')}
         />
       )
     },

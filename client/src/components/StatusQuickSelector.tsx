@@ -6,14 +6,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { StatusChangeConfirmationModal } from './modals/StatusChangeConfirmationModal';
 
 interface StatusQuickSelectorProps {
   ordemId: string;
   currentStatus: string;
   size?: 'sm' | 'md' | 'lg';
+  valorTotal?: number;
 }
 
 const statusConfig = {
@@ -52,7 +54,8 @@ const statusConfig = {
 export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
   ordemId,
   currentStatus,
-  size = 'md'
+  size = 'md',
+  valorTotal = 0
 }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -60,10 +63,23 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
   // Estado local para atualização instantânea da UI
   const [displayStatus, setDisplayStatus] = useState(currentStatus);
   
+  // Estados do modal de confirmação
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string>('');
+  
   // Sincronizar com prop quando ela mudar
   useEffect(() => {
     setDisplayStatus(currentStatus);
   }, [currentStatus]);
+
+  // Verificar se existe entrada financeira vinculada
+  const { data: financialCheck } = useQuery({
+    queryKey: ['/api/financeiro/check-ordem', ordemId],
+    enabled: currentStatus === 'finalizada',
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  const hasFinancialEntry = financialCheck?.hasFinancialEntry || false;
 
   const updateStatusMutation = useMutation({
     mutationFn: async (newStatus: string) => {
@@ -94,11 +110,44 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
 
   const handleStatusChange = (newStatus: string) => {
     if (newStatus !== displayStatus) {
-      // Atualizar imediatamente a UI local
-      setDisplayStatus(newStatus);
-      // Enviar para o servidor
-      updateStatusMutation.mutate(newStatus);
+      // Verificar se precisa de confirmação (saindo de finalizada com entrada financeira)
+      const needsConfirmation = currentStatus === 'finalizada' && 
+                               newStatus !== 'finalizada' && 
+                               hasFinancialEntry;
+      
+      if (needsConfirmation) {
+        // Mostrar modal de confirmação
+        setPendingStatus(newStatus);
+        setShowConfirmModal(true);
+      } else {
+        // Mudança simples - prosseguir normalmente
+        setDisplayStatus(newStatus);
+        updateStatusMutation.mutate(newStatus);
+      }
     }
+  };
+
+  const handleConfirmStatusChange = (action: 'keep' | 'delete' | 'pending') => {
+    setShowConfirmModal(false);
+    setDisplayStatus(pendingStatus);
+    
+    // Enviar com informação da ação escolhida
+    updateStatusMutation.mutate(pendingStatus, {
+      onSettled: () => {
+        // Reset do estado
+        setPendingStatus('');
+      }
+    });
+
+    // TODO: Implementar lógica específica para cada ação no backend
+    if (action === 'delete') {
+      // Excluir entrada financeira vinculada
+      console.log('Excluindo entrada financeira vinculada');
+    } else if (action === 'pending') {
+      // Marcar entrada como pendente
+      console.log('Marcando entrada como pendente');
+    }
+    // action === 'keep' não faz nada especial
   };
 
   const currentConfig = statusConfig[displayStatus as keyof typeof statusConfig];
@@ -112,45 +161,61 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
                    'text-base';
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className={`${buttonSize} ${currentConfig?.color || 'text-gray-600 bg-gray-50'} border-0 rounded-full font-medium transition-all hover:scale-105`}
-          disabled={updateStatusMutation.isPending}
-        >
-          <span className={`${emojiSize} mr-1`}>
-            {currentConfig?.emoji || '❓'}
-          </span>
-          {size !== 'sm' && (
-            <span className="hidden sm:inline">
-              {currentConfig?.label || 'Status'}
-            </span>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      
-      <DropdownMenuContent align="end" className="w-56">
-        {Object.entries(statusConfig).map(([status, config]) => (
-          <DropdownMenuItem
-            key={status}
-            onClick={() => handleStatusChange(status)}
-            className={`flex items-center gap-3 py-3 px-3 cursor-pointer ${
-              status === displayStatus ? 'bg-gray-100 font-medium' : ''
-            }`}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className={`${buttonSize} ${currentConfig?.color || 'text-gray-600 bg-gray-50'} border-0 rounded-full font-medium transition-all hover:scale-105`}
+            disabled={updateStatusMutation.isPending}
           >
-            <span className="text-lg">{config.emoji}</span>
-            <div className="flex flex-col">
-              <span className="font-medium">{config.label}</span>
-              <span className="text-xs text-gray-500">{config.description}</span>
-            </div>
-            {status === displayStatus && (
-              <span className="ml-auto text-xs text-blue-600">✓ Atual</span>
+            <span className={`${emojiSize} mr-1`}>
+              {currentConfig?.emoji || '❓'}
+            </span>
+            {size !== 'sm' && (
+              <span className="hidden sm:inline">
+                {currentConfig?.label || 'Status'}
+              </span>
             )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </Button>
+        </DropdownMenuTrigger>
+        
+        <DropdownMenuContent align="end" className="w-56">
+          {Object.entries(statusConfig).map(([status, config]) => (
+            <DropdownMenuItem
+              key={status}
+              onClick={() => handleStatusChange(status)}
+              className={`flex items-center gap-3 py-3 px-3 cursor-pointer ${
+                status === displayStatus ? 'bg-gray-100 font-medium' : ''
+              }`}
+            >
+              <span className="text-lg">{config.emoji}</span>
+              <div className="flex flex-col">
+                <span className="font-medium">{config.label}</span>
+                <span className="text-xs text-gray-500">{config.description}</span>
+              </div>
+              {status === displayStatus && (
+                <span className="ml-auto text-xs text-blue-600">✓ Atual</span>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <StatusChangeConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => {
+          setShowConfirmModal(false);
+          setPendingStatus('');
+        }}
+        onConfirm={handleConfirmStatusChange}
+        currentStatus={currentStatus}
+        newStatus={pendingStatus}
+        hasFinancialEntry={hasFinancialEntry}
+        financialValue={valorTotal}
+        loading={updateStatusMutation.isPending}
+      />
+    </>
   );
 };
 
