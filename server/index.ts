@@ -1,10 +1,39 @@
 import express, { type Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Desabilitado para desenvolvimento
+  crossOriginEmbedderPolicy: false
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // Máximo 100 requisições por IP por window
+  message: 'Muitas requisições deste IP, tente novamente mais tarde.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limit mais restritivo para auth
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos  
+  max: 5, // Máximo 5 tentativas de login por IP por window
+  message: 'Muitas tentativas de login, tente novamente em 15 minutos.',
+  skipSuccessfulRequests: true,
+});
+
+app.use(limiter);
+app.use('/api/auth', authLimiter);
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use((req, res, next) => {
   const start = Date.now();

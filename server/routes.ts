@@ -15,7 +15,10 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
 
 // Criar diretório de uploads se não existir
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -37,13 +40,22 @@ const storage_multer = multer.diskStorage({
 const upload = multer({
   storage: storage_multer,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
+    fileSize: 2 * 1024 * 1024, // 2MB
+    files: 1
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    // Lista branca de tipos MIME seguros
+    const allowedMimes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'image/webp'
+    ];
+    
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Apenas arquivos de imagem são permitidos'));
+      cb(new Error('Apenas arquivos JPG, PNG e WebP são permitidos'));
     }
   }
 });
@@ -98,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET!, { expiresIn: '24h' });
       const profile = await storage.getProfile(user.id);
 
       res.json({ 
@@ -165,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create default categories
       await createDefaultCategories(user.id);
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET!, { expiresIn: '24h' });
 
       res.json({ 
         user: { id: user.id, email: user.email },
