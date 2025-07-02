@@ -81,8 +81,12 @@ export function NovaOrdem() {
   form.setValue('valor_total', valorTotal.toString());
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiRequestWithMethod('/ordens', 'POST', data),
-    onSuccess: () => {
+    mutationFn: (data: any) => {
+      console.log('Mutation executada com dados:', data);
+      return apiRequestWithMethod('/ordens', 'POST', data);
+    },
+    onSuccess: (result) => {
+      console.log('Ordem criada com sucesso:', result);
       queryClient.invalidateQueries({ queryKey: ['/ordens'] });
       toast({
         title: "Sucesso",
@@ -91,6 +95,7 @@ export function NovaOrdem() {
       navigate('/ordens');
     },
     onError: (error: any) => {
+      console.error('Erro na criação da ordem:', error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao criar ordem de serviço",
@@ -100,6 +105,9 @@ export function NovaOrdem() {
   });
 
   const onSubmit = (data: any) => {
+    console.log('Dados do formulário:', data);
+    console.log('Produtos selecionados:', produtosSelecionados);
+    
     const ordemData = {
       ...data,
       valor_total: parseFloat(data.valor_total || '0'),
@@ -109,6 +117,8 @@ export function NovaOrdem() {
         valor_unitario: p.valor_unitario
       })),
     };
+    
+    console.log('Dados que serão enviados:', ordemData);
     createMutation.mutate(ordemData);
   };
 
@@ -320,6 +330,12 @@ export function NovaOrdem() {
                       type="submit"
                       disabled={createMutation.isPending}
                       className="flex-1"
+                      onClick={(e) => {
+                        console.log('Botão Criar Ordem clicado!');
+                        console.log('Erros do formulário:', form.formState.errors);
+                        console.log('Formulário válido:', form.formState.isValid);
+                        console.log('Valores do formulário:', form.getValues());
+                      }}
                     >
                       {createMutation.isPending ? "Criando..." : "Criar Ordem"}
                     </Button>
