@@ -54,9 +54,16 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
     queryKey: ['/api/ordens', ordem?.id],
     queryFn: async () => {
       if (!ordem?.id) return null;
+      console.log('🔍 VisualizacaoOS: Buscando dados atualizados da ordem', ordem.id);
       const response = await fetch(`/api/ordens/${ordem.id}`);
       if (!response.ok) throw new Error('Erro ao buscar ordem');
-      return response.json();
+      const data = await response.json();
+      console.log('📦 VisualizacaoOS: Dados recebidos do servidor:', {
+        id: data.id,
+        produtos_utilizados: data.produtos_utilizados?.length || 0,
+        produtos_detalhes: data.produtos_utilizados
+      });
+      return data;
     },
     enabled: !!ordem?.id,
     refetchOnMount: true, // Sempre recarregar quando o componente monta
@@ -65,6 +72,14 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
   // Usar a ordem atualizada se disponível, senão usar a ordem passada como prop
   const ordemCompleta = ordemAtualizada || ordem;
+  
+  // Log para monitorar qual dados está sendo usado
+  console.log('🎯 VisualizacaoOS: Dados finais sendo usados:', {
+    fonte: ordemAtualizada ? 'servidor_atualizado' : 'prop_original',
+    id: ordemCompleta?.id,
+    produtos_utilizados: ordemCompleta?.produtos_utilizados?.length || 0,
+    produtos_detalhes: ordemCompleta?.produtos_utilizados
+  });
   
   const abrirDialogoFinalizar = () => {
     if (ordemCompleta?.status === 'finalizada') {

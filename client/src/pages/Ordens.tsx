@@ -106,15 +106,29 @@ export const Ordens = () => {
       console.log('Submetendo dados:', data);
 
       if (selectedOrdem) {
-        await updateOrdem(selectedOrdem.id!, data);
+        console.log('💾 Ordens: Iniciando atualização da OS', selectedOrdem.id);
+        console.log('📝 Ordens: Dados sendo enviados:', {
+          produtos_utilizados: data.produtos_utilizados?.length || 0,
+          produtos_detalhes: data.produtos_utilizados
+        });
+        
+        const ordemAtualizada = await updateOrdem(selectedOrdem.id!, data);
+        console.log('✅ Ordens: OS atualizada retornada:', {
+          id: ordemAtualizada?.id,
+          produtos_utilizados: ordemAtualizada?.produtos_utilizados?.length || 0,
+          produtos_detalhes: ordemAtualizada?.produtos_utilizados
+        });
+        
         toast.success('Ordem atualizada com sucesso!');
         
         // Invalidar cache para recarregar dados atualizados
+        console.log('🔄 Ordens: Invalidando cache das ordens');
         queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
         
         // Se existe uma ordem sendo visualizada e é a mesma que foi editada, 
         // simplesmente fechar o modal para que seja reaberto com dados atualizados
         if (ordemParaVisualizacao && ordemParaVisualizacao.id === selectedOrdem.id) {
+          console.log('👁️ Ordens: Fechando modal de visualização para reabrir com dados atualizados');
           setVisualizacaoModalOpen(false);
           setOrdemParaVisualizacao(null);
           toast.success('Para ver as alterações, clique em "Visualizar" novamente');
@@ -243,6 +257,11 @@ export const Ordens = () => {
   };
 
   const handleVisualizarOrdem = (ordem: OrdemServico) => {
+    console.log('👁️ Ordens: Abrindo visualização da OS', {
+      id: ordem.id,
+      produtos_utilizados: ordem.produtos_utilizados?.length || 0,
+      produtos_detalhes: ordem.produtos_utilizados
+    });
     setOrdemParaVisualizacao(ordem);
     setVisualizacaoModalOpen(true);
   };

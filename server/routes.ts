@@ -527,13 +527,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Processar produtos utilizados se fornecidos
       if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
+        console.log('🔧 Server: Atualizando produtos da OS', id);
+        console.log('📦 Server: Produtos recebidos:', {
+          quantidade: produtos_utilizados.length,
+          detalhes: produtos_utilizados
+        });
+        
         // Primeiro, remover todos os produtos existentes
+        console.log('🗑️ Server: Removendo produtos existentes');
         await db.delete(produtosUtilizados).where(eq(produtosUtilizados.ordem_servico_id, id));
         await db.delete(pecasUtilizadas).where(eq(pecasUtilizadas.ordem_servico_id, id));
         
         // Inserir novos produtos
+        console.log('💾 Server: Inserindo novos produtos');
         for (const produto of produtos_utilizados) {
           if (produto.tipo === 'produto' && produto.produto_id) {
+            console.log('➕ Server: Adicionando produto cadastrado:', produto);
             await storage.addProdutoUtilizado(
               id, 
               produto.produto_id, 
@@ -541,6 +550,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               produto.valor_unitario
             );
           } else if (produto.tipo === 'peca_avulsa') {
+            console.log('➕ Server: Adicionando peça avulsa:', produto);
             await storage.addPecaUtilizada(
               id, 
               produto.nome, 
@@ -549,11 +559,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
           }
         }
+        console.log('✅ Server: Produtos atualizados com sucesso');
       }
       
-      // Lógica simplificada: sem criação automática de entrada financeira
+      // Buscar ordem atualizada com produtos para retornar dados completos
+      const ordemCompleta = await storage.getOrdemServico(id, req.userId!);
+      console.log('📤 Server: Retornando ordem atualizada:', {
+        id: ordemCompleta?.id,
+        produtos_utilizados: ordemCompleta?.produtos_utilizados?.length || 0,
+        produtos_detalhes: ordemCompleta?.produtos_utilizados
+      });
       
-      res.json(ordem);
+      res.json(ordemCompleta);
     } catch (error) {
       console.error('Update ordem error:', error);
       res.status(500).json({ error: 'Internal server error' });
