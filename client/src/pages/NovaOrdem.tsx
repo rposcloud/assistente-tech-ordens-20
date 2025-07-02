@@ -11,9 +11,10 @@ import { insertOrdemServicoSchema } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, UserPlus } from "lucide-react";
 import { apiRequest } from "../lib/api";
 import { Badge } from "@/components/ui/badge";
+import { ClienteCadastroRapidoModal } from "@/components/modals/ClienteCadastroRapidoModal";
 
 type ProdutoSelecionado = {
   id: string;
@@ -39,6 +40,7 @@ export function NovaOrdem() {
   
   const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState('');
+  const [showCadastroRapido, setShowCadastroRapido] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(insertOrdemServicoSchema.extend({
@@ -144,6 +146,15 @@ export function NovaOrdem() {
     );
   };
 
+  const handleClienteCreated = (cliente: any) => {
+    // Atualiza a lista de clientes no cache
+    queryClient.invalidateQueries({ queryKey: ['/api/clientes'] });
+    // Seleciona automaticamente o novo cliente
+    form.setValue('cliente_id', cliente.id);
+    // Fecha o modal
+    setShowCadastroRapido(false);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6">
@@ -175,7 +186,19 @@ export function NovaOrdem() {
                     name="cliente_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cliente *</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Cliente *</FormLabel>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCadastroRapido(true)}
+                            className="flex items-center gap-1 text-xs"
+                          >
+                            <UserPlus className="h-3 w-3" />
+                            Novo Cliente
+                          </Button>
+                        </div>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -370,6 +393,13 @@ export function NovaOrdem() {
           </Card>
         </div>
       </div>
+
+      {/* Modal de Cadastro Rápido */}
+      <ClienteCadastroRapidoModal
+        isOpen={showCadastroRapido}
+        onClose={() => setShowCadastroRapido(false)}
+        onClienteCreated={handleClienteCreated}
+      />
     </div>
   );
 }
