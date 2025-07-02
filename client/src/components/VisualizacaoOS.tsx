@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, Building, CheckCircle, Printer } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,22 +49,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   // Buscar dados do perfil da empresa do contexto de autenticação
   const { profile } = useAuth();
 
-  // Buscar dados atualizados da ordem para garantir que os produtos estão sincronizados
-  const { data: ordemAtualizada } = useQuery({
-    queryKey: ['/api/ordens', ordem?.id],
-    queryFn: async () => {
-      if (!ordem?.id) return null;
-      const response = await fetch(`/api/ordens/${ordemCompleta.id}`);
-      if (!response.ok) throw new Error('Erro ao buscar ordem');
-      return response.json();
-    },
-    enabled: !!ordem?.id,
-    refetchOnMount: true, // Sempre recarregar quando o componente monta
-    refetchOnWindowFocus: false
-  });
-
-  // Usar a ordem atualizada se disponível, senão usar a ordem passada como prop
-  const ordemCompleta = ordemAtualizada || ordem;
+  // Usar diretamente os dados da ordem passada como prop
+  const ordemCompleta = ordem;
   
   const abrirDialogoFinalizar = () => {
     if (ordemCompleta?.status === 'finalizada') {
