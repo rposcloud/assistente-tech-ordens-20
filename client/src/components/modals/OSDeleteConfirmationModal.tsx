@@ -116,34 +116,45 @@ export const OSDeleteConfirmationModal: React.FC<OSDeleteConfirmationModalProps>
                   onClick={() => onConfirm('delete-all')}
                   disabled={loading}
                   className="w-full justify-start"
-                  variant="outline"
+                  variant="destructive"
                 >
-                  <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                  <Trash2 className="h-4 w-4 mr-2 text-white" />
                   Excluir tudo (OS + entradas financeiras)
+                </Button>
+
+                <Button
+                  onClick={() => onConfirm('cancel')}
+                  disabled={loading}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Cancelar e manter tudo
                 </Button>
               </>
             ) : (
-              <Button
-                onClick={() => onConfirm('delete-all')}
-                disabled={loading}
-                className="w-full"
-                variant="destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {loading ? 'Excluindo...' : 'Confirmar Exclusão'}
-              </Button>
+              <>
+                <Button
+                  onClick={() => onConfirm('delete-all')}
+                  disabled={loading}
+                  className="w-full"
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {loading ? 'Excluindo...' : 'Confirmar Exclusão'}
+                </Button>
+
+                <Button
+                  onClick={() => onConfirm('cancel')}
+                  disabled={loading}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  Cancelar
+                </Button>
+              </>
             )}
           </div>
-
-          <Button
-            onClick={() => onConfirm('cancel')}
-            disabled={loading}
-            variant="ghost"
-            className="w-full"
-          >
-            <Shield className="h-4 w-4 mr-2" />
-            Cancelar e manter tudo
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

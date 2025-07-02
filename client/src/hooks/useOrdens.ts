@@ -111,18 +111,34 @@ export const useOrdens = () => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
-      const response = await fetch(`/api/ordens/${id}/protection-status`, {
+      // Primeiro verificar se tem entradas vinculadas usando endpoint existente
+      const checkResponse = await fetch(`/api/financeiro/check-ordem/${id}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-
-      if (!response.ok) {
-        throw new Error('Erro ao verificar status de proteção');
+      const checkResult = await checkResponse.json();
+      
+      // Se tem entradas, buscar detalhes
+      let linkedEntries = [];
+      if (checkResult.hasFinancialEntry) {
+        const entriesResponse = await fetch('/api/financeiro', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const allEntries = await entriesResponse.json();
+        linkedEntries = allEntries.filter((entry: any) => entry.ordem_servico_id === id);
       }
 
-      return await response.json();
+      return {
+        protection: {
+          is_protected: checkResult.hasFinancialEntry,
+          linked_entries_count: linkedEntries.length,
+          can_delete: !checkResult.hasFinancialEntry
+        },
+        linked_entries: linkedEntries
+      };
     } catch (error) {
       console.error('Erro ao verificar proteção:', error);
       throw error;
