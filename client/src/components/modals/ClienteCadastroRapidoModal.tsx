@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 import { Cliente } from '@shared/schema';
 import { UserPlus, Loader2 } from 'lucide-react';
+import { formatCPF, formatCNPJ, formatPhone, formatCEP } from '@/utils/masks';
 
 interface ClienteCadastroRapidoModalProps {
   isOpen: boolean;
@@ -112,9 +113,22 @@ export const ClienteCadastroRapidoModal: React.FC<ClienteCadastroRapidoModalProp
   };
 
   const handleInputChange = (field: string, value: string) => {
+    let maskedValue = value;
+    
+    // Aplicar máscaras baseadas no campo
+    if (field === 'telefone') {
+      maskedValue = formatPhone(value);
+    } else if (field === 'cpf_cnpj') {
+      maskedValue = formData.tipo_documento === 'cpf' 
+        ? formatCPF(value) 
+        : formatCNPJ(value);
+    } else if (field === 'cep') {
+      maskedValue = formatCEP(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: maskedValue
     }));
   };
 
