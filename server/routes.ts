@@ -440,6 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/ordens/:id', authenticateToken, async (req: AuthRequest, res) => {
+    console.log('🚨 DEBUG: PUT /api/ordens/' + req.params.id + ' INICIADO');
     try {
       const { id } = req.params;
       const { produtos_utilizados, ...dadosOrdem } = req.body;
