@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -42,12 +41,12 @@ export const Dashboard = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
   const { ordens, loading: loadingOrdens } = useOrdens();
   const { entradas, loading: loadingFinanceiro } = useFinanceiro();
-  
+
   // Cálculos básicos
   const totalClientes = clientes?.length || 0;
   const totalProdutos = produtos?.length || 0;
   const ordensAbertas = ordens?.filter(o => o.status !== 'finalizada')?.length || 0;
-  
+
   // Cálculos financeiros
   const hoje = new Date();
   const mesAtual = hoje.getMonth();
@@ -74,7 +73,7 @@ export const Dashboard = () => {
       return acc + (valor || 0);
     }, 0) || 0;
 
-  
+
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -173,7 +172,7 @@ export const Dashboard = () => {
     }
   ];
 
-  
+
 
   return (
     <div className="space-y-6">
@@ -209,7 +208,7 @@ export const Dashboard = () => {
         })}
       </div>
 
-      
+
 
       {/* Ações Rápidas */}
       <Card>
@@ -358,7 +357,7 @@ export const Dashboard = () => {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    
+
                     <div className="flex justify-between items-center">
                       <div className="flex flex-col gap-1">
                         <div className="text-xs text-gray-500 capitalize">
