@@ -275,6 +275,14 @@ Changelog:
   * Mini dashboard com métricas relevantes (abertas, finalizadas, aguardando)
   * Visual contextualizado para assistência técnica com barra de progresso
   * Tamanho reduzido e mais elegante para melhor experiência visual
+- July 2, 2025. CORREÇÃO CRÍTICA DE VALORES E NOVA NUMERAÇÃO:
+  * Implementado sistema de numeração por ano: 2025-1, 2025-2, etc.
+  * Numeração compacta que cresce dinamicamente (sem zeros desnecessários)
+  * Reinício automático da contagem a cada ano
+  * Corrigido bug crítico: valores das OS mostravam dobrado na listagem
+  * Problema: frontend usava 'valor_final' em vez de 'valor_total' correto
+  * Valores agora consistentes entre Dashboard e listagem de Ordens
+  * Sistema totalmente funcional com cálculos precisos
 
 ## Best Practices para Assistências Técnicas
 

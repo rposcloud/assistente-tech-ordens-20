@@ -310,11 +310,11 @@ export const Ordens = () => {
       )
     },
     {
-      key: 'valor_final',
+      key: 'valor_total',
       label: 'Valor',
       sortable: true,
       render: (ordem) => {
-        const valor = ordem.valor_final || ordem.valor_total || '0';
+        const valor = ordem.valor_total || '0';
         const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
         return `R$ ${(valorNumerico || 0).toFixed(2)}`;
       }
@@ -594,7 +594,7 @@ export const Ordens = () => {
                         <div>
                           <div className="text-gray-500 text-xs">Valor</div>
                           <div className="font-semibold text-green-600">
-                            R$ {(ordem.valor_final || 0).toFixed(2).replace('.', ',')}
+                            R$ {(parseFloat(ordem.valor_total || '0')).toFixed(2).replace('.', ',')}
                           </div>
                         </div>
 
