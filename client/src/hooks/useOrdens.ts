@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,6 +10,7 @@ export const useOrdens = () => {
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const fetchOrdens = async () => {
     if (!user) return;
@@ -16,11 +18,13 @@ export const useOrdens = () => {
     try {
       setLoading(true);
       const data = await api.ordens.list();
+      console.log('Ordens disponíveis:', data?.length || 0);
       setOrdens(data || []);
     } catch (error) {
       console.error('Erro ao buscar ordens:', error);
     } finally {
       setLoading(false);
+      console.log('Loading:', false);
     }
   };
 
@@ -28,12 +32,27 @@ export const useOrdens = () => {
     fetchOrdens();
   }, [user]);
 
+  // Listen to React Query cache invalidations
+  useEffect(() => {
+    const unsubscribe = queryClient.getQueryCache().subscribe(() => {
+      // Quando o cache de ordens for invalidado, refetch os dados
+      const queryState = queryClient.getQueryState(['/api/ordens']);
+      if (queryState && !queryState.isFetching) {
+        fetchOrdens();
+      }
+    });
+
+    return unsubscribe;
+  }, [queryClient]);
+
   const createOrdem = async (ordemData: Omit<OrdemServico, 'id' | 'created_at' | 'updated_at' | 'numero_ordem'>) => {
     if (!user) throw new Error('Usuário não autenticado');
 
     try {
       const data = await api.ordens.create(ordemData);
       await fetchOrdens();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
       return data;
     } catch (error) {
       console.error('Erro ao criar ordem:', error);
@@ -47,6 +66,9 @@ export const useOrdens = () => {
     try {
       const data = await api.ordens.update(id, ordemData);
       await fetchOrdens();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens', id] });
       return data;
     } catch (error) {
       console.error('Erro ao atualizar ordem:', error);
@@ -60,6 +82,9 @@ export const useOrdens = () => {
     try {
       await api.ordens.delete(id);
       await fetchOrdens();
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+      return true;
     } catch (error) {
       console.error('Erro ao deletar ordem:', error);
       throw error;

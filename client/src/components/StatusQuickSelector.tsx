@@ -70,7 +70,11 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
         title: "Status atualizado!",
         description: `Ordem alterada para: ${statusConfig[newStatus as keyof typeof statusConfig]?.label}`,
       });
+      // Invalidar múltiplas queries relacionadas para garantir atualização
       queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens', ordemId] });
+      // Forçar refetch imediato
+      queryClient.refetchQueries({ queryKey: ['/api/ordens'] });
     },
     onError: (error: any) => {
       toast({
