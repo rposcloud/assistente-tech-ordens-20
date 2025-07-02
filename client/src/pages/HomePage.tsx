@@ -290,17 +290,13 @@ export const HomePage = () => {
             Junte-se a centenas de empresas que já confiam no OS Cloud
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link to="/cadastro">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 text-lg">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-4 text-lg">
                 Começar Gratuitamente
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg">
-              <MessageSquare className="mr-2 w-5 h-5" />
-              Falar com Especialista
-            </Button>
           </div>
           
           <div className="mt-8 text-blue-100">
