@@ -84,10 +84,11 @@ export const useOrdens = () => {
       if (options?.action) params.append('action', options.action);
       
       const url = `/api/ordens/${id}${params.toString() ? `?${params.toString()}` : ''}`;
+      const token = localStorage.getItem('auth_token');
       await fetch(url, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       }).then(async (response) => {
@@ -112,9 +113,10 @@ export const useOrdens = () => {
 
     try {
       // Primeiro verificar se tem entradas vinculadas usando endpoint existente
+      const token = localStorage.getItem('auth_token');
       const checkResponse = await fetch(`/api/financeiro/check-ordem/${id}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       const checkResult = await checkResponse.json();
@@ -124,7 +126,7 @@ export const useOrdens = () => {
       if (checkResult.hasFinancialEntry) {
         const entriesResponse = await fetch('/api/financeiro', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           }
         });
         const allEntries = await entriesResponse.json();
