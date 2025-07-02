@@ -552,7 +552,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Inserir novos produtos
         console.log('💾 Server: Inserindo novos produtos');
         for (const produto of produtos_utilizados) {
-          if (produto.tipo === 'produto' && produto.produto_id) {
+          if (produto.produto_id) {
+            // Produto cadastrado (tem produto_id)
             console.log('➕ Server: Adicionando produto cadastrado:', produto);
             await storage.addProdutoUtilizado(
               id, 
@@ -560,9 +561,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               produto.quantidade, 
               produto.valor_unitario
             );
-          } else if (produto.tipo === 'peca_avulsa' || !produto.produto_id) {
-            // Produtos avulsos OU produtos existentes sem produto_id
-            console.log('➕ Server: Adicionando peça/produto avulso:', produto);
+          } else {
+            // Peça avulsa (não tem produto_id)
+            console.log('➕ Server: Adicionando peça avulsa:', produto);
             await storage.addPecaUtilizada(
               id, 
               produto.nome, 

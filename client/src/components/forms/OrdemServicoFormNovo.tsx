@@ -100,7 +100,7 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
         initialData.produtos_utilizados.forEach((item: any) => {
           produtos.push({
             id: item.id,
-            produto_id: item.produto_id,
+            produto_id: item.produto?.id || item.produto_id, // Garantir produto_id correto
             nome: item.produto?.nome || item.nome || 'Produto sem nome',
             categoria: item.produto?.categoria || 'peca',
             quantidade: item.quantidade,
