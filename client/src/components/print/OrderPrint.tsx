@@ -1,12 +1,12 @@
 import React, { forwardRef } from 'react';
 import { OrdemServico, Cliente } from '../../types';
 import { formatCurrency } from '../../utils/masks';
-import { CompanyProfile } from '../../hooks/useProfile';
+import { Profile } from '@shared/schema';
 
 interface OrderPrintProps {
   ordem: OrdemServico;
   cliente: Cliente;
-  companyProfile?: CompanyProfile | null;
+  companyProfile?: Profile | null;
 }
 
 export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
@@ -195,17 +195,17 @@ export const OrderPrint = forwardRef<HTMLDivElement, OrderPrintProps>(
           <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">VALORES</h3>
           <div className="grid grid-cols-2 gap-6 text-base">
             <div className="space-y-3">
-              <p><strong>Mão de Obra:</strong> {formatCurrency(ordem.valor_mao_obra)}</p>
-              <p><strong>Valor Total:</strong> {formatCurrency(ordem.valor_total)}</p>
-              {ordem.desconto && ordem.desconto > 0 && (
-                <p><strong>Desconto:</strong> {formatCurrency(ordem.desconto)}</p>
+              <p><strong>Mão de Obra:</strong> {formatCurrency(Number(ordem.valor_mao_obra))}</p>
+              <p><strong>Valor Total:</strong> {formatCurrency(Number(ordem.valor_total))}</p>
+              {ordem.desconto && Number(ordem.desconto) > 0 && (
+                <p><strong>Desconto:</strong> {formatCurrency(Number(ordem.desconto))}</p>
               )}
-              {ordem.acrescimo && ordem.acrescimo > 0 && (
-                <p><strong>Acréscimo:</strong> {formatCurrency(ordem.acrescimo)}</p>
+              {ordem.acrescimo && Number(ordem.acrescimo) > 0 && (
+                <p><strong>Acréscimo:</strong> {formatCurrency(Number(ordem.acrescimo))}</p>
               )}
             </div>
             <div className="space-y-3">
-              <p className="text-xl"><strong>VALOR FINAL:</strong> <span className="text-green-600">{formatCurrency(ordem.valor_final || ordem.valor_total)}</span></p>
+              <p className="text-xl"><strong>VALOR FINAL:</strong> <span className="text-green-600">{formatCurrency(Number((ordem as any).valor_final || ordem.valor_total))}</span></p>
               {ordem.forma_pagamento && (
                 <p><strong>Forma Pagamento:</strong> {ordem.forma_pagamento.replace('_', ' ')}</p>
               )}

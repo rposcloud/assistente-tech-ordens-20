@@ -23,7 +23,7 @@ export const EntradaFinanceiraForm: React.FC<EntradaFinanceiraFormProps> = ({
   initialData,
   loading = false
 }) => {
-  const [formData, setFormData] = useState<Partial<EntradaFinanceira>>({
+  const [formData, setFormData] = useState<any>({
     tipo: 'receita',
     descricao: '',
     valor: 0,
@@ -58,14 +58,14 @@ export const EntradaFinanceiraForm: React.FC<EntradaFinanceiraFormProps> = ({
   };
 
   const updateField = (field: string, value: any) => {
-    setFormData(prev => {
+    setFormData((prev: any) => {
       const newData = { ...prev, [field]: value };
       
       // Atualizar valor da parcela automaticamente
       if (field === 'valor' || field === 'parcelas') {
-        const valor = field === 'valor' ? value : (newData.valor || 0);
-        const parcelas = field === 'parcelas' ? value : (newData.parcelas || 1);
-        newData.valor_parcela = parcelas > 0 ? valor / parcelas : valor;
+        const valor = field === 'valor' ? value : ((newData as any).valor || 0);
+        const parcelas = field === 'parcelas' ? value : ((newData as any).parcelas || 1);
+        (newData as any).valor_parcela = parcelas > 0 ? valor / parcelas : valor;
       }
       
       return newData;

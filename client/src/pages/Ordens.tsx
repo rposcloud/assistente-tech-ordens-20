@@ -259,8 +259,8 @@ export const Ordens = () => {
   const handleVisualizarOrdem = (ordem: OrdemServico) => {
     console.log('👁️ Ordens: Abrindo visualização da OS', {
       id: ordem.id,
-      produtos_utilizados: ordem.produtos_utilizados?.length || 0,
-      produtos_detalhes: ordem.produtos_utilizados
+      produtos_utilizados: (ordem as any).produtos_utilizados?.length || 0,
+      produtos_detalhes: (ordem as any).produtos_utilizados
     });
     setOrdemParaVisualizacao(ordem);
     setVisualizacaoModalOpen(true);

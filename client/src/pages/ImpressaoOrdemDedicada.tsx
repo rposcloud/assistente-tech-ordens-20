@@ -211,7 +211,7 @@ export const ImpressaoOrdemDedicada: React.FC = () => {
       </div>
 
       {/* CSS específico para impressão */}
-      <style jsx>{`
+      <style>{`
         @media print {
           @page {
             margin: 0.5in;

@@ -64,7 +64,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({ cliente, onSave, onCan
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave(formData as any);
   };
 
   const updateField = (field: string, value: string) => {

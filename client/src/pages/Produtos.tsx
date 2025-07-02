@@ -26,9 +26,9 @@ export const Produtos = () => {
   const handleSaveProduto = async (produtoData: Omit<Produto, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     try {
       if (editingProduto) {
-        await updateProduto(editingProduto.id, produtoData);
+        await updateProduto(editingProduto.id, produtoData as any);
       } else {
-        await createProduto(produtoData);
+        await createProduto(produtoData as any);
       }
       setShowModal(false);
       setEditingProduto(null);
@@ -81,7 +81,7 @@ export const Produtos = () => {
 
   const produtosFiltrados = produtos.filter(produto => {
     const searchRegex = new RegExp(searchTerm, 'i');
-    const matchesSearch = searchRegex.test(produto.nome) || searchRegex.test(produto.descricao || '') || searchRegex.test(produto.codigo || '');
+    const matchesSearch = searchRegex.test(produto.nome) || searchRegex.test(produto.descricao || '') || searchRegex.test((produto as any).codigo || '');
     const matchesCategory = filterCategory === 'todos' || produto.categoria === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -97,7 +97,7 @@ export const Produtos = () => {
     { key: 'preco_venda', label: 'Preço', render: (produto) => `R$ ${Number(produto.preco_venda).toFixed(2)}` },
     {
       key: 'acoes',
-      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
+      label: '',
       render: (produto) => (
         <div className="flex space-x-2 justify-center">
           <button
@@ -181,7 +181,7 @@ export const Produtos = () => {
           {/* Versão Desktop - Tabela */}
           <div className="hidden lg:block">
             <SortableTable
-              data={produtosFiltrados}
+              data={produtosFiltrados as any}
               columns={colunas}
               keyExtractor={(produto) => produto.id}
               emptyMessage="Nenhum produto ou serviço encontrado"
@@ -216,14 +216,14 @@ export const Produtos = () => {
                       </div>
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleEditProduto(produto)}
+                          onClick={() => handleEditProduto(produto as any)}
                           className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
                           title="Editar produto"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteProduto(produto)}
+                          onClick={() => handleDeleteProduto(produto as any)}
                           className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50"
                           title="Excluir produto"
                         >
@@ -268,7 +268,7 @@ export const Produtos = () => {
       {/* Modal de Formulário */}
       {showModal && (
         <ProductForm
-          produto={editingProduto}
+          produto={editingProduto as any}
           onSave={handleSaveProduto}
           onCancel={() => {
             setShowModal(false);

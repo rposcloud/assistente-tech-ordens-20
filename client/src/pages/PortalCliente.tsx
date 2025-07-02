@@ -8,13 +8,13 @@ import { OrderPrint } from '../components/print/OrderPrint';
 import { formatCurrency } from '../utils/masks';
 import { isTokenValid } from '../utils/tokenUtils';
 import { useReactToPrint } from 'react-to-print';
-import { CompanyProfile } from '../hooks/useProfile';
+import { Profile } from '@shared/schema';
 
 export const PortalCliente = () => {
   const { token } = useParams<{ token: string }>();
   const [ordem, setOrdem] = useState<OrdemServico | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
-  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
+  const [companyProfile, setCompanyProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);

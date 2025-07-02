@@ -184,41 +184,41 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
                   {profile?.empresa || 'Nome da Empresa'}
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-sm">
-                  {profile?.cnpj && <p>CNPJ: {profile.cnpj}</p>}
-                  {profile?.inscricao_estadual && <p>IE: {profile.inscricao_estadual}</p>}
+                  {(profile as any)?.cnpj && <p>CNPJ: {(profile as any).cnpj}</p>}
+                  {(profile as any)?.inscricao_estadual && <p>IE: {(profile as any).inscricao_estadual}</p>}
                 </div>
               </div>
             </div>
             <div className="text-right text-sm text-gray-600 print:text-sm max-w-xs">
               <div className="space-y-1">
-                {(profile?.endereco || profile?.cidade) && <p className="font-medium">Endereço:</p>}
-                {profile?.endereco && (
+                {((profile as any)?.endereco || (profile as any)?.cidade) && <p className="font-medium">Endereço:</p>}
+                {(profile as any)?.endereco && (
                   <p>
-                    {profile.endereco}
-                    {profile?.numero && `, ${profile.numero}`}
-                    {profile?.complemento && ` - ${profile.complemento}`}
+                    {(profile as any).endereco}
+                    {(profile as any)?.numero && `, ${(profile as any).numero}`}
+                    {(profile as any)?.complemento && ` - ${(profile as any).complemento}`}
                   </p>
                 )}
-                {(profile?.bairro || profile?.cep) && (
+                {((profile as any)?.bairro || (profile as any)?.cep) && (
                   <p>
-                    {profile?.bairro && `${profile.bairro}`}
-                    {profile?.bairro && profile?.cep && ' - '}
-                    {profile?.cep && `CEP: ${profile.cep}`}
+                    {(profile as any)?.bairro && `${(profile as any).bairro}`}
+                    {(profile as any)?.bairro && (profile as any)?.cep && ' - '}
+                    {(profile as any)?.cep && `CEP: ${(profile as any).cep}`}
                   </p>
                 )}
-                {(profile?.cidade || profile?.estado) && (
-                  <p>{profile?.cidade}{profile?.cidade && profile?.estado && '/'}{profile?.estado}</p>
+                {((profile as any)?.cidade || (profile as any)?.estado) && (
+                  <p>{(profile as any)?.cidade}{(profile as any)?.cidade && (profile as any)?.estado && '/'}{(profile as any)?.estado}</p>
                 )}
               </div>
               <div className="mt-2 space-y-1">
                 {profile?.telefone && (
                   <p><span className="font-medium">Tel:</span> {profile.telefone}</p>
                 )}
-                {profile?.email_empresa && (
-                  <p><span className="font-medium">Email:</span> {profile.email_empresa}</p>
+                {(profile as any)?.email_empresa && (
+                  <p><span className="font-medium">Email:</span> {(profile as any).email_empresa}</p>
                 )}
-                {profile?.site && (
-                  <p><span className="font-medium">Site:</span> {profile.site}</p>
+                {(profile as any)?.site && (
+                  <p><span className="font-medium">Site:</span> {(profile as any).site}</p>
                 )}
               </div>
             </div>

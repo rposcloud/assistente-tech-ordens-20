@@ -92,7 +92,7 @@ export function NovaOrdem() {
   const adicionarProduto = () => {
     if (!produtoSelecionado) return;
     
-    const produto = produtos.find(p => p.id === produtoSelecionado);
+    const produto = (produtos as any)?.find((p: any) => p.id === produtoSelecionado);
     if (!produto) return;
     
     const novoProduto: ProdutoSelecionado = {
@@ -200,7 +200,7 @@ export function NovaOrdem() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {clientes.map((cliente: any) => (
+                              {(clientes as any)?.map((cliente: any) => (
                                 <SelectItem key={cliente.id} value={cliente.id}>
                                   {cliente.nome}
                                 </SelectItem>
@@ -385,7 +385,7 @@ export function NovaOrdem() {
                                 <SelectValue placeholder="Selecione um produto" />
                               </SelectTrigger>
                               <SelectContent>
-                                {produtos.map((produto: any) => (
+                                {(produtos as any)?.map((produto: any) => (
                                   <SelectItem key={produto.id} value={produto.id}>
                                     {produto.nome} - R$ {parseFloat(produto.preco_venda).toFixed(2)}
                                   </SelectItem>

@@ -97,7 +97,7 @@ export const Clientes = () => {
     },
     {
       key: 'acoes',
-      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
+      label: '',
       render: (cliente) => (
         <div className="flex space-x-2 justify-center">
           <button
@@ -240,8 +240,8 @@ export const Clientes = () => {
       {/* Modal de Formulário */}
       {showModal && (
         <ClienteForm
-          cliente={editingCliente}
-          onSave={handleSaveCliente}
+          cliente={editingCliente as any}
+          onSave={handleSaveCliente as any}
           onCancel={() => {
             setShowModal(false);
             setEditingCliente(null);

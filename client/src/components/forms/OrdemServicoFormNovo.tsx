@@ -87,7 +87,7 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
 
   // Buscar clientes
   const { data: clientes = [], isLoading: loadingClientes } = useQuery({
-    queryKey: ['/clientes'],
+    queryKey: ['/api/clientes'],
   });
 
   // Carregar produtos utilizados quando initialData muda
@@ -178,7 +178,7 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {clientes.map((cliente: any) => (
+                      {(clientes as any[]).map((cliente: any) => (
                         <SelectItem key={cliente.id} value={cliente.id}>
                           {cliente.nome} - {cliente.telefone}
                         </SelectItem>

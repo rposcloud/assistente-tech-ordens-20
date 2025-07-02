@@ -453,7 +453,7 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Data de Abertura</label>
-                  <p className="mt-1">{formatDate(ordem.data_abertura)}</p>
+                  <p className="mt-1">{formatDate(ordem.data_abertura?.toString())}</p>
                 </div>
               </div>
             </CardContent>
@@ -683,11 +683,11 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Previsão de Entrega</label>
-                  <p className="mt-1">{formatDate(ordem.data_previsao_entrega)}</p>
+                  <p className="mt-1">{formatDate(ordem.data_previsao_entrega as any)}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-600">Data de Aprovação</label>
-                  <p className="mt-1">{formatDate(ordem.data_aprovacao)}</p>
+                  <p className="mt-1">{formatDate(ordem.data_aprovacao as any)}</p>
                 </div>
               </div>
             </CardContent>
@@ -712,13 +712,13 @@ export const OrdemDetalhesModal = ({ isOpen, onClose, ordem }: OrdemDetalhesModa
                   {ordem.data_pagamento && (
                     <div>
                       <label className="text-sm font-medium text-gray-600">Data do Pagamento</label>
-                      <p className="mt-1">{formatDate(ordem.data_pagamento)}</p>
+                      <p className="mt-1">{formatDate(ordem.data_pagamento?.toString())}</p>
                     </div>
                   )}
                   {ordem.data_vencimento && (
                     <div>
                       <label className="text-sm font-medium text-gray-600">Data de Vencimento</label>
-                      <p className="mt-1">{formatDate(ordem.data_vencimento)}</p>
+                      <p className="mt-1">{formatDate(ordem.data_vencimento?.toString())}</p>
                     </div>
                   )}
                 </div>

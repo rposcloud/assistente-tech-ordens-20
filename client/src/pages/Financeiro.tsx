@@ -412,7 +412,7 @@ export const Financeiro = () => {
     },
     {
       key: 'actions',
-      label: <MoreHorizontal className="h-4 w-4 mx-auto" />,
+      label: '',
       sortable: false,
       render: (entrada) => (
         <div className="flex gap-2">
