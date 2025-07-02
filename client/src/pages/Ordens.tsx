@@ -420,19 +420,30 @@ export const Ordens = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header Responsivo */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ordens de Serviço</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Ordens de Serviço</h1>
+          <p className="text-gray-600 text-sm sm:text-base hidden sm:block">
             Gerencie suas ordens de serviço e acompanhe o progresso dos reparos
           </p>
         </div>
-        <Button onClick={handleNewOrdem} className="flex items-center bg-blue-600 hover:bg-blue-700 text-white">
+        {/* Botão desktop */}
+        <Button onClick={handleNewOrdem} className="hidden sm:flex items-center bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="mr-2 h-4 w-4" />
           Nova Ordem
         </Button>
       </div>
+
+      {/* Botão Flutuante Mobile (FAB) */}
+      <Button 
+        onClick={handleNewOrdem} 
+        className="sm:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+        size="icon"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {/* Busca simples e compacta */}
       <div className="flex items-center gap-2 max-w-md">
@@ -457,52 +468,53 @@ export const Ordens = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-gray-600">
+      {/* Cards de Estatísticas - Responsivos */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
               Em Análise
             </CardTitle>
-            <Clock className="h-3 w-3 text-yellow-600" />
+            <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.aberta}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.aberta}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-gray-600">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
               Em Reparo
             </CardTitle>
-            <AlertCircle className="h-3 w-3 text-blue-600" />
+            <AlertCircle className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.em_andamento}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.em_andamento}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-gray-600">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
               Prontas
             </CardTitle>
-            <CheckCircle className="h-3 w-3 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.pronta}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.pronta}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-            <CardTitle className="text-xs font-medium text-gray-600">
+        <Card className="hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
               Total
             </CardTitle>
-            <FileText className="h-3 w-3 text-gray-600" />
+            <FileText className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent className="pt-1">
-            <div className="text-lg font-bold">{stats.total}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
       </div>

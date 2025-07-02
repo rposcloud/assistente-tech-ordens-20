@@ -13,7 +13,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <Sidebar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <main className="flex-1 p-4 sm:p-6 overflow-auto pt-16 lg:pt-6">
+        <main className="flex-1 p-4 sm:p-6 overflow-auto pt-16 lg:pt-6 pb-20 sm:pb-6">
           {children}
         </main>
       </div>

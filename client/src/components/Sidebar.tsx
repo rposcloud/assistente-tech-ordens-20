@@ -27,12 +27,12 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Botão Menu Mobile */}
+      {/* Botão Menu Mobile - Touch-friendly */}
       <button
         onClick={toggleMobileMenu}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-md border border-gray-200"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-xl shadow-lg border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
       >
-        {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
       {/* Overlay Mobile */}
@@ -61,12 +61,12 @@ export const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 onClick={closeMobileMenu}
-                className={`flex items-center px-4 lg:px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors ${
+                className={`flex items-center px-4 lg:px-6 py-4 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 active:bg-blue-100 ${
                   isActive(item.path) ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : ''
                 }`}
               >
-                <Icon size={20} className="mr-3" />
-                <span className="text-sm lg:text-base">{item.label}</span>
+                <Icon size={22} className="mr-4" />
+                <span className="text-base font-medium">{item.label}</span>
               </Link>
             );
           })}
@@ -78,10 +78,10 @@ export const Sidebar = () => {
               logout();
               closeMobileMenu();
             }}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors rounded-lg"
+            className="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-200 active:bg-red-100 rounded-lg"
           >
-            <LogOut size={20} className="mr-3" />
-            <span className="text-sm lg:text-base">Sair</span>
+            <LogOut size={22} className="mr-4" />
+            <span className="text-base font-medium">Sair</span>
           </button>
         </div>
       </div>

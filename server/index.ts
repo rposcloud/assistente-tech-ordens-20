@@ -24,10 +24,10 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false // Mantido false para compatibilidade com Vite
 }));
 
-// Rate limiting
+// Rate limiting - Configuração flexível para desenvolvimento
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 requisições por IP por window
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // Limite maior em desenvolvimento
   message: 'Muitas requisições deste IP, tente novamente mais tarde.',
   standardHeaders: true,
   legacyHeaders: false,
