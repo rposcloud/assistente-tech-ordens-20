@@ -54,6 +54,11 @@ interface AuthRequest extends Request {
 }
 
 const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  // Debug para PUT /api/ordens
+  if (req.method === 'PUT' && req.path.includes('/api/ordens/')) {
+    console.log('🔐 AUTH: PUT para ordens recebido:', req.path);
+  }
+  
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 
