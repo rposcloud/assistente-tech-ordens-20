@@ -154,12 +154,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
                   {profile?.empresa || 'OS Cloud - Sistema de Gestão'}
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-gray-600 print:text-sm">
-                  {profile?.cnpj && (
-                    <p>CNPJ: {profile.cnpj}</p>
-                  )}
-                  {profile?.inscricao_estadual && (
-                    <p>IE: {profile.inscricao_estadual}</p>
-                  )}
+                  <p>CNPJ: {profile?.cnpj || 'Não informado'}</p>
                 </div>
               </div>
             </div>
