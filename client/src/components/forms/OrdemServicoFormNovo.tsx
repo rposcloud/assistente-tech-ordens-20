@@ -92,22 +92,13 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
 
   // Carregar produtos utilizados quando initialData muda
   useEffect(() => {
-    console.log('🔧 FormNovo: useEffect initialData changed:', {
-      initialData: !!initialData,
-      produtos_utilizados: initialData?.produtos_utilizados?.length || 0,
-      pecas_utilizadas: initialData?.pecas_utilizadas?.length || 0,
-      detalhes_produtos: initialData?.produtos_utilizados,
-      detalhes_pecas: initialData?.pecas_utilizadas
-    });
-
     if (initialData) {
       const produtos: ProdutoUtilizado[] = [];
 
       // Adicionar produtos utilizados (produtos cadastrados)
       if (initialData.produtos_utilizados) {
-        console.log('🔧 FormNovo: Processando produtos_utilizados:', initialData.produtos_utilizados);
         initialData.produtos_utilizados.forEach((item: any) => {
-          const produto = {
+          produtos.push({
             id: item.id,
             produto_id: item.produto_id,
             nome: item.produto?.nome || item.nome || 'Produto sem nome',
@@ -116,17 +107,14 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
             valor_unitario: parseFloat(item.valor_unitario) || 0,
             valor_total: parseFloat(item.valor_total) || 0,
             tipo: 'produto' as const
-          };
-          console.log('➕ FormNovo: Adicionando produto:', produto);
-          produtos.push(produto);
+          });
         });
       }
 
       // Adicionar peças utilizadas (itens avulsos)
       if (initialData.pecas_utilizadas) {
-        console.log('🔧 FormNovo: Processando pecas_utilizadas:', initialData.pecas_utilizadas);
         initialData.pecas_utilizadas.forEach((item: any) => {
-          const peca = {
+          produtos.push({
             id: item.id,
             nome: item.nome,
             categoria: 'peca' as const,
@@ -134,13 +122,10 @@ export const OrdemServicoFormNovo: React.FC<OrdemServicoFormProps> = ({
             valor_unitario: parseFloat(item.valor_unitario) || 0,
             valor_total: parseFloat(item.valor_total) || 0,
             tipo: 'peca_avulsa' as const
-          };
-          console.log('➕ FormNovo: Adicionando peça:', peca);
-          produtos.push(peca);
+          });
         });
       }
 
-      console.log('✅ FormNovo: Total de produtos carregados:', produtos.length);
       setProdutosUtilizados(produtos);
     }
   }, [initialData]);

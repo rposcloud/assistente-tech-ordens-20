@@ -289,6 +289,14 @@ Changelog:
   * Solução SIMPLES: usar diretamente os dados da ordem passada como prop
   * Removida complexidade desnecessária de consultas adicionais ao servidor
   * Visualização agora mostra corretamente todos os produtos/serviços da ordem atual
+- July 2, 2025. CORREÇÃO DEFINITIVA DO SISTEMA DE EDIÇÃO DE PRODUTOS EM OS:
+  * Identificado problema crítico: backend ignorava produtos existentes sem produto_id na edição
+  * Frontend não carregava dados iniciais corretamente no formulário de edição
+  * Correção backend: produtos existentes agora salvos como peças avulsas se não têm produto_id
+  * Correção frontend: delay na limpeza do selectedOrdem para permitir carregamento de dados
+  * Sistema testado e validado: ambos produtos cadastrados e peças avulsas mantidos na edição
+  * Logs de debug removidos após correção confirmada
+  * Sistema de edição de OS totalmente funcional preservando todos os itens
 
 ## Best Practices para Assistências Técnicas
 
