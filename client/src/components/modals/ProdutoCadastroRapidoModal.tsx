@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/api';
 import { Produto } from '@shared/schema';
 import { Package, Loader2 } from 'lucide-react';
 
@@ -44,21 +45,11 @@ export const ProdutoCadastroRapidoModal: React.FC<ProdutoCadastroRapidoModalProp
 
   const createProdutoMutation = useMutation({
     mutationFn: async (produtoData: any) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/produtos', {
+      const response = await apiRequest('/produtos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(produtoData),
+        body: JSON.stringify(produtoData)
       });
-      
-      if (!response.ok) {
-        throw new Error('Erro ao criar produto/serviço');
-      }
-      
-      return response.json();
+      return response;
     },
     onSuccess: (produto: Produto) => {
       toast({

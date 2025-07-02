@@ -47,21 +47,11 @@ export const ClienteCadastroRapidoModal: React.FC<ClienteCadastroRapidoModalProp
 
   const createClienteMutation = useMutation({
     mutationFn: async (clienteData: any) => {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/clientes', {
+      const response = await apiRequest('/clientes', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(clienteData),
+        body: JSON.stringify(clienteData)
       });
-      
-      if (!response.ok) {
-        throw new Error('Erro ao criar cliente');
-      }
-      
-      return response.json();
+      return response;
     },
     onSuccess: (cliente: Cliente) => {
       toast({
