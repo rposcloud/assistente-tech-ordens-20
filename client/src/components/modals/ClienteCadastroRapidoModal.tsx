@@ -46,10 +46,12 @@ export const ClienteCadastroRapidoModal: React.FC<ClienteCadastroRapidoModalProp
 
   const createClienteMutation = useMutation({
     mutationFn: async (clienteData: any) => {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/clientes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(clienteData),
       });

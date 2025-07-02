@@ -11,10 +11,11 @@ import { insertOrdemServicoSchema } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, UserPlus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, UserPlus, Package } from "lucide-react";
 import { apiRequest } from "../lib/api";
 import { Badge } from "@/components/ui/badge";
 import { ClienteCadastroRapidoModal } from "@/components/modals/ClienteCadastroRapidoModal";
+import { ProdutoCadastroRapidoModal } from "@/components/modals/ProdutoCadastroRapidoModal";
 
 type ProdutoSelecionado = {
   id: string;
@@ -41,6 +42,7 @@ export function NovaOrdem() {
   const [produtosSelecionados, setProdutosSelecionados] = useState<ProdutoSelecionado[]>([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState('');
   const [showCadastroRapido, setShowCadastroRapido] = useState(false);
+  const [showCadastroProduto, setShowCadastroProduto] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(insertOrdemServicoSchema.extend({
@@ -153,6 +155,15 @@ export function NovaOrdem() {
     form.setValue('cliente_id', cliente.id);
     // Fecha o modal
     setShowCadastroRapido(false);
+  };
+
+  const handleProdutoCreated = (produto: any) => {
+    // Atualiza a lista de produtos no cache
+    queryClient.invalidateQueries({ queryKey: ['/api/produtos'] });
+    // Seleciona automaticamente o novo produto
+    setProdutoSelecionado(produto.id);
+    // Fecha o modal
+    setShowCadastroProduto(false);
   };
 
   return (
@@ -340,6 +351,15 @@ export function NovaOrdem() {
                 </Select>
                 <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCadastroProduto(true)}
+                  className="text-green-600 border-green-600 hover:bg-green-50"
+                >
+                  <Package className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
                   size="sm"
                   onClick={adicionarProduto}
                   disabled={!produtoSelecionado}
@@ -394,11 +414,17 @@ export function NovaOrdem() {
         </div>
       </div>
 
-      {/* Modal de Cadastro Rápido */}
+      {/* Modais de Cadastro Rápido */}
       <ClienteCadastroRapidoModal
         isOpen={showCadastroRapido}
         onClose={() => setShowCadastroRapido(false)}
         onClienteCreated={handleClienteCreated}
+      />
+      
+      <ProdutoCadastroRapidoModal
+        isOpen={showCadastroProduto}
+        onClose={() => setShowCadastroProduto(false)}
+        onProdutoCreated={handleProdutoCreated}
       />
     </div>
   );
