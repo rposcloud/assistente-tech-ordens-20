@@ -12,6 +12,7 @@ import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { toast } from 'sonner';
+import { LinkedToBadge } from '@/components/LinkedToBadge';
 
 const statusColors: { [key: string]: string } = {
   pendente: 'bg-yellow-100 text-yellow-800',
@@ -354,12 +355,14 @@ export const Financeiro = () => {
       label: 'Descrição',
       sortable: true,
       render: (entrada) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
           <span>{entrada.descricao}</span>
           {entrada.ordem_servico_id && (
-            <Badge variant="outline" className="mt-1 text-xs bg-blue-50 text-blue-700 border-blue-200 w-fit">
-              Vinculado à OS
-            </Badge>
+            <LinkedToBadge 
+              type="ordem-servico"
+              linkedId={entrada.ordem_servico_id}
+              size="sm"
+            />
           )}
         </div>
       )

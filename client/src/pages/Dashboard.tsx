@@ -19,7 +19,10 @@ import {
   MoreHorizontal,
   UserPlus,
   ShoppingCart,
-  Calculator
+  Calculator,
+  Shield,
+  Link2,
+  AlertTriangle
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -72,6 +75,17 @@ export const Dashboard = () => {
       const valor = typeof ordem.valor_total === 'string' ? parseFloat(ordem.valor_total) : ordem.valor_total;
       return acc + (valor || 0);
     }, 0) || 0;
+
+  // Métricas de Integridade Financeira
+  const ordensFinalizadas = ordens?.filter(o => o.status === 'finalizada') || [];
+  const entradasVinculadas = Array.isArray(entradas) ? entradas.filter((e: any) => e.ordem_servico_id) : [];
+  const ordensComEntrada = ordensFinalizadas.filter(ordem => 
+    entradasVinculadas.some(entrada => entrada.ordem_servico_id === ordem.id)
+  );
+  const ordensProtegidas = ordensComEntrada.length;
+  const percentualIntegridade = ordensFinalizadas.length > 0 
+    ? Math.round((ordensProtegidas / ordensFinalizadas.length) * 100) 
+    : 100;
 
 
 
@@ -169,6 +183,20 @@ export const Dashboard = () => {
       icon: TrendingUp,
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50'
+    },
+    {
+      title: 'OS Protegidas',
+      value: loadingOrdens || loadingFinanceiro ? '...' : `${ordensProtegidas}/${ordensFinalizadas.length}`,
+      icon: Shield,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50'
+    },
+    {
+      title: 'Integridade',
+      value: loadingOrdens || loadingFinanceiro ? '...' : `${percentualIntegridade}%`,
+      icon: percentualIntegridade >= 90 ? Shield : AlertTriangle,
+      color: percentualIntegridade >= 90 ? 'text-green-600' : 'text-yellow-600',
+      bgColor: percentualIntegridade >= 90 ? 'bg-green-50' : 'bg-yellow-50'
     }
   ];
 
@@ -185,7 +213,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Cards Principais - Responsivos */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
         {cards.map((card, index) => {
           const Icon = card.icon;
           return (

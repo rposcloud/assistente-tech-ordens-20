@@ -16,6 +16,7 @@ import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { OSDeleteConfirmationModal } from '@/components/modals/OSDeleteConfirmationModal';
+import { FinancialStatusBadge } from '@/components/FinancialStatusBadge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -347,12 +348,19 @@ export const Ordens = () => {
       label: 'Status',
       sortable: true,
       render: (ordem) => (
-        <StatusQuickSelector 
-          ordemId={ordem.id} 
-          currentStatus={ordem.status}
-          size="sm"
-          valorTotal={parseFloat(ordem.valor_total || '0')}
-        />
+        <div className="flex flex-col gap-1">
+          <StatusQuickSelector 
+            ordemId={ordem.id} 
+            currentStatus={ordem.status}
+            size="sm"
+            valorTotal={parseFloat(ordem.valor_total || '0')}
+          />
+          <FinancialStatusBadge 
+            ordemId={ordem.id}
+            status={ordem.status}
+            size="sm"
+          />
+        </div>
       )
     },
     {
