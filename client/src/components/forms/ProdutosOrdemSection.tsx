@@ -142,30 +142,76 @@ export const ProdutosOrdemSection: React.FC<ProdutosOrdemSectionProps> = ({
           <div className="space-y-2">
             <Label className="font-medium">Itens Adicionados:</Label>
             {produtosUtilizados.map((item, index) => (
-              <div key={item.id || index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{item.nome}</span>
-                    <Badge variant={item.categoria === 'peca' ? 'default' : 'secondary'}>
-                      {item.categoria === 'peca' ? 'Peça' : 'Serviço'}
-                    </Badge>
-                    {item.tipo === 'peca_avulsa' && (
-                      <Badge variant="outline">Avulsa</Badge>
-                    )}
+              <div key={item.id || index} className="p-3 border rounded-lg bg-gray-50 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{item.nome}</span>
+                  <Badge variant={item.categoria === 'peca' ? 'default' : 'secondary'}>
+                    {item.categoria === 'peca' ? 'Peça' : 'Serviço'}
+                  </Badge>
+                  {item.tipo === 'peca_avulsa' && (
+                    <Badge variant="outline">Avulsa</Badge>
+                  )}
+                </div>
+                
+                {/* Campos editáveis */}
+                <div className="grid grid-cols-4 gap-3 items-end">
+                  <div>
+                    <Label className="text-xs">Quantidade</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantidade}
+                      onChange={(e) => {
+                        const novaQuantidade = parseInt(e.target.value) || 1;
+                        const novosItens = [...produtosUtilizados];
+                        novosItens[index] = {
+                          ...item,
+                          quantidade: novaQuantidade,
+                          valor_total: novaQuantidade * item.valor_unitario
+                        };
+                        onProdutosChange(novosItens);
+                      }}
+                      className="h-8"
+                    />
                   </div>
-                  <div className="text-sm text-gray-600">
-                    Qtd: {item.quantidade} × {formatCurrency(item.valor_unitario)} = {formatCurrency(item.valor_total)}
+                  <div>
+                    <Label className="text-xs">Valor Unit.</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={item.valor_unitario}
+                      onChange={(e) => {
+                        const novoValor = parseFloat(e.target.value) || 0;
+                        const novosItens = [...produtosUtilizados];
+                        novosItens[index] = {
+                          ...item,
+                          valor_unitario: novoValor,
+                          valor_total: item.quantidade * novoValor
+                        };
+                        onProdutosChange(novosItens);
+                      }}
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Total</Label>
+                    <div className="h-8 px-2 border rounded bg-white flex items-center text-sm">
+                      {formatCurrency(item.valor_total)}
+                    </div>
+                  </div>
+                  <div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removerProduto(index)}
+                      className="text-red-600 hover:text-red-700 h-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removerProduto(index)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             ))}
             
