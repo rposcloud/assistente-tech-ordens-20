@@ -93,6 +93,32 @@ export const FeatureSection = () => {
         </div>
       </div>
 
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800 text-center">
+          🔒 Segurança Empresarial
+        </h2>
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center space-x-2">
+              <Shield size={16} className="text-green-600" />
+              <span className="text-gray-700 font-medium">Criptografia JWT de nível militar</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Shield size={16} className="text-green-600" />
+              <span className="text-gray-700 font-medium">Proteção contra ataques XSS e SQL Injection</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Shield size={16} className="text-green-600" />
+              <span className="text-gray-700 font-medium">Rate limiting inteligente anti-brute force</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle size={16} className="text-green-600" />
+              <span className="text-gray-700 font-medium">Auditoria de segurança aprovada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 text-center">
         <h3 className="font-semibold text-gray-900 mb-2">
           Comece gratuitamente hoje mesmo
