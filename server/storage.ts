@@ -345,21 +345,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrdemServico(ordem: InsertOrdemServico, userId: string): Promise<OrdemServico> {
-    // Gerar número sequencial que nunca se repete, mesmo após exclusões
-    const allNumbers = await db
+    // Obter ano atual
+    const currentYear = new Date().getFullYear();
+    
+    // Buscar todas as ordens do ano atual para este usuário
+    const currentYearOrders = await db
       .select({ numero: ordensServico.numero })
       .from(ordensServico)
-      .where(eq(ordensServico.user_id, userId))
-      .orderBy(ordensServico.numero);
+      .where(eq(ordensServico.user_id, userId));
 
-    // Encontrar o maior número existente
-    let maxNumber = 0;
-    if (allNumbers.length > 0) {
-      maxNumber = Math.max(...allNumbers.map(order => parseInt(order.numero || '0')));
+    // Filtrar ordens do ano atual e extrair o número sequencial
+    const currentYearNumbers = currentYearOrders
+      .filter(order => order.numero?.startsWith(`${currentYear}-`))
+      .map(order => {
+        const parts = order.numero?.split('-');
+        return parts && parts.length === 2 ? parseInt(parts[1]) : 0;
+      })
+      .filter(num => !isNaN(num));
+
+    // Encontrar o maior número sequencial do ano atual
+    let maxSequential = 0;
+    if (currentYearNumbers.length > 0) {
+      maxSequential = Math.max(...currentYearNumbers);
     }
 
-    // Próximo número sempre será maior que o maior existente
-    const nextNumber = String(maxNumber + 1).padStart(6, '0');
+    // Próximo número sequencial
+    const nextSequential = maxSequential + 1;
+    const nextNumber = `${currentYear}-${nextSequential}`;
 
     const ordemComDados = {
       ...ordem,
