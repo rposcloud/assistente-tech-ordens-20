@@ -15,6 +15,7 @@ import StatusQuickSelector from '@/components/StatusQuickSelector';
 import { SortableTable, Column } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { OSDeleteConfirmationModal } from '@/components/modals/OSDeleteConfirmationModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,10 +59,14 @@ export const Ordens = () => {
     isOpen: boolean;
     ordem: OrdemServico | null;
     loading: boolean;
+    hasFinancialEntry: boolean;
+    financialEntries: any[];
   }>({
     isOpen: false,
     ordem: null,
-    loading: false
+    loading: false,
+    hasFinancialEntry: false,
+    financialEntries: []
   });
   const [visualizacaoModalOpen, setVisualizacaoModalOpen] = useState(false);
   const [ordemParaVisualizacao, setOrdemParaVisualizacao] = useState<OrdemServico | null>(null);
@@ -154,12 +159,46 @@ export const Ordens = () => {
     setModalOpen(true);
   };
 
-  const handleDeleteClick = (ordem: OrdemServico) => {
-    setDeleteModal({
-      isOpen: true,
-      ordem,
-      loading: false
-    });
+  const handleDeleteClick = async (ordem: OrdemServico) => {
+    // Verificar entradas financeiras vinculadas
+    try {
+      const response = await fetch(`/api/financeiro/check-ordem/${ordem.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const checkResult = await response.json();
+      
+      // Buscar detalhes das entradas se existirem
+      let financialEntries = [];
+      if (checkResult.hasFinancialEntry) {
+        const entriesResponse = await fetch('/api/financeiro', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const allEntries = await entriesResponse.json();
+        financialEntries = allEntries.filter((entry: any) => entry.ordem_servico_id === ordem.id);
+      }
+
+      setDeleteModal({
+        isOpen: true,
+        ordem,
+        loading: false,
+        hasFinancialEntry: checkResult.hasFinancialEntry,
+        financialEntries
+      });
+    } catch (error) {
+      console.error('Erro ao verificar vínculos financeiros:', error);
+      // Fallback para modal simples em caso de erro
+      setDeleteModal({
+        isOpen: true,
+        ordem,
+        loading: false,
+        hasFinancialEntry: false,
+        financialEntries: []
+      });
+    }
   };
 
   const closeDeleteModal = () => {
@@ -167,88 +206,62 @@ export const Ordens = () => {
     setDeleteModal({
       isOpen: false,
       ordem: null,
-      loading: false
+      loading: false,
+      hasFinancialEntry: false,
+      financialEntries: []
     });
   };
 
 
 
-  const confirmDelete = async () => {
-    if (!deleteModal.ordem) return;
+
+
+  const handleOSDeleteConfirm = async (action: 'delete-all' | 'unlink-keep' | 'cancel') => {
+    if (!deleteModal.ordem || action === 'cancel') {
+      closeDeleteModal();
+      return;
+    }
 
     setDeleteModal(prev => ({ ...prev, loading: true }));
 
     try {
-      await deleteOrdem(deleteModal.ordem.id!);
-      toast.success('Ordem excluída com sucesso!');
-      setDeleteModal({
-        isOpen: false,
-        ordem: null,
-        loading: false
-      });
+      if (action === 'delete-all') {
+        if (deleteModal.hasFinancialEntry) {
+          // Excluir OS e entradas financeiras
+          await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=delete_financial`, {
+            method: 'DELETE',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          toast.success('Ordem e entradas financeiras excluídas com sucesso!');
+        } else {
+          // Exclusão simples sem vínculos
+          await deleteOrdem(deleteModal.ordem.id!);
+          toast.success('Ordem excluída com sucesso!');
+        }
+      } else if (action === 'unlink-keep') {
+        // Excluir OS mas manter entradas financeiras
+        await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=keep_financial`, {
+          method: 'DELETE',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        toast.success('Ordem excluída, entradas financeiras mantidas e desvinculadas');
+      }
+
+      closeDeleteModal();
+      // Invalidar cache para atualizar dados
+      queryClient.invalidateQueries({ queryKey: ['/api/ordens'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financeiro'] });
+      
     } catch (error: any) {
       console.error('Error deleting ordem:', error);
-
-      // Verificar se é erro de vínculo financeiro
-      if (error.response?.status === 400 && error.response?.data?.entradas_vinculadas) {
-        const errorData = error.response.data;
-        toast.error(
-          `${errorData.error}\n\n` +
-          `Entradas vinculadas: ${errorData.entradas_vinculadas}\n` +
-          `${errorData.detalhes}`,
-          { duration: 8000 }
-        );
-
-        // Mostrar opções para o usuário
-        if (window.confirm(
-          `Esta OS possui ${errorData.entradas_vinculadas} entrada(s) financeira(s) vinculada(s).\n\n` +
-          `Deseja:\n` +
-          `✓ EXCLUIR também as entradas financeiras?\n` +
-          `✗ MANTER as entradas e apenas desvincular da OS?\n\n` +
-          `Clique OK para EXCLUIR ou Cancelar para MANTER`
-        )) {
-          // Excluir entradas financeiras junto
-          try {
-            await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=delete_financial`, {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' }
-            });
-            toast.success('Ordem e entradas financeiras excluídas com sucesso!');
-            setDeleteModal({
-              isOpen: false,
-              ordem: null,
-              loading: false
-            });
-            // Recarregar dados
-            window.location.reload();
-          } catch (forceError) {
-            toast.error('Erro ao excluir forçadamente');
-            setDeleteModal(prev => ({ ...prev, loading: false }));
-          }
-        } else {
-          // Manter entradas, apenas desvincular
-          try {
-            await fetch(`/api/ordens/${deleteModal.ordem.id}?force=true&action=keep_financial`, {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' }
-            });
-            toast.success('Ordem excluída, entradas financeiras mantidas e desvinculadas');
-            setDeleteModal({
-              isOpen: false,
-              ordem: null,
-              loading: false
-            });
-            // Recarregar dados
-            window.location.reload();
-          } catch (forceError) {
-            toast.error('Erro ao desvincular entradas');
-            setDeleteModal(prev => ({ ...prev, loading: false }));
-          }
-        }
-      } else {
-        toast.error(`Erro ao excluir ordem: ${error.message || 'Erro desconhecido'}`);
-        setDeleteModal(prev => ({ ...prev, loading: false }));
-      }
+      toast.error('Erro ao processar exclusão da ordem');
+      setDeleteModal(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -695,16 +708,18 @@ export const Ordens = () => {
         loading={loadingPagamento}
       />
 
-      {/* Modal de Confirmação de Exclusão */}
-      <ConfirmationModal
+      {/* Modal de Confirmação de Exclusão Inteligente */}
+      <OSDeleteConfirmationModal
         isOpen={deleteModal.isOpen}
         onClose={closeDeleteModal}
-        onConfirm={confirmDelete}
-        title="Excluir Ordem de Serviço"
-        message={`Tem certeza que deseja excluir a ordem de serviço "${deleteModal.ordem?.numero}"? Esta ação não pode ser desfeita.`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
-        type="danger"
+        onConfirm={handleOSDeleteConfirm}
+        ordem={deleteModal.ordem ? {
+          numero: deleteModal.ordem.numero,
+          status: deleteModal.ordem.status,
+          valor_total: parseFloat(deleteModal.ordem.valor_total || '0')
+        } : null}
+        hasFinancialEntry={deleteModal.hasFinancialEntry}
+        financialEntries={deleteModal.financialEntries}
         loading={deleteModal.loading}
       />
     </div>

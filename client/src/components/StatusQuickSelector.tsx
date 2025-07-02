@@ -73,7 +73,7 @@ export const StatusQuickSelector: React.FC<StatusQuickSelectorProps> = ({
   }, [currentStatus]);
 
   // Verificar se existe entrada financeira vinculada
-  const { data: financialCheck } = useQuery({
+  const { data: financialCheck } = useQuery<{hasFinancialEntry: boolean; financialEntry: any}>({
     queryKey: ['/api/financeiro/check-ordem', ordemId],
     enabled: currentStatus === 'finalizada',
     staleTime: 1000 * 60 * 5, // 5 minutos
