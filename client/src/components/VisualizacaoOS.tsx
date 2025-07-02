@@ -54,7 +54,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
     queryKey: ['/api/ordens', ordem?.id],
     queryFn: async () => {
       if (!ordem?.id) return null;
-      const response = await fetch(`/api/ordens/${ordem.id}`);
+      const response = await fetch(`/api/ordens/${ordemCompleta.id}`);
       if (!response.ok) throw new Error('Erro ao buscar ordem');
       return response.json();
     },
@@ -217,18 +217,18 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-xl font-bold text-gray-900 print:text-xl">
-                Ordem de Serviço #{ordem.numero}
+                Ordem de Serviço #{ordemCompleta.numero}
               </h1>
               <p className="text-gray-600 text-sm print:text-sm">
-                {ordem.clientes?.nome} - {ordem.clientes?.telefone}
+                {ordemCompleta.clientes?.nome} - {ordemCompleta.clientes?.telefone}
               </p>
             </div>
             <div className="flex gap-2 print:gap-1">
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordem.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {statusLabels[ordem.status as keyof typeof statusLabels] || ordem.status}
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${statusColors[ordemCompleta.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                {statusLabels[ordemCompleta.status as keyof typeof statusLabels] || ordemCompleta.status}
               </Badge>
-              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordem.prioridade as keyof typeof prioridadeColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
-                {ordem.prioridade?.toUpperCase()}
+              <Badge className={`px-2 py-1 text-xs font-medium border print:px-1 ${prioridadeColors[ordemCompleta.prioridade as keyof typeof prioridadeColors] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                {ordemCompleta.prioridade?.toUpperCase()}
               </Badge>
             </div>
           </div>
@@ -249,21 +249,21 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Nome:</p>
-                <p className="text-gray-900">{ordem.clientes?.nome}</p>
+                <p className="text-gray-900">{ordemCompleta.clientes?.nome}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700">Telefone:</p>
-                <p className="text-gray-900">{ordem.clientes?.telefone}</p>
+                <p className="text-gray-900">{ordemCompleta.clientes?.telefone}</p>
               </div>
               <div className="col-span-2">
                 <p className="font-medium text-gray-700">E-mail:</p>
-                <p className="text-gray-900">{ordem.clientes?.email || 'Não informado'}</p>
+                <p className="text-gray-900">{ordemCompleta.clientes?.email || 'Não informado'}</p>
               </div>
               <div className="col-span-2">
                 <p className="font-medium text-gray-700">Endereço:</p>
                 <p className="text-gray-900 text-xs">
-                  {ordem.clientes?.endereco ? 
-                    `${ordem.clientes.endereco}, ${ordem.clientes.numero || 'S/N'} - ${ordem.clientes.bairro}, ${ordem.clientes.cidade}/${ordem.clientes.estado}` 
+                  {ordemCompleta.clientes?.endereco ? 
+                    `${ordemCompleta.clientes.endereco}, ${ordemCompleta.clientes.numero || 'S/N'} - ${ordemCompleta.clientes.bairro}, ${ordemCompleta.clientes.cidade}/${ordemCompleta.clientes.estado}` 
                     : 'Não informado'
                   }
                 </p>
@@ -284,23 +284,23 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="grid grid-cols-2 gap-3 print:gap-2 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Tipo:</p>
-                <p className="text-gray-900 capitalize">{ordem.tipo_equipamento}</p>
+                <p className="text-gray-900 capitalize">{ordemCompleta.tipo_equipamento}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700">Marca:</p>
-                <p className="text-gray-900">{ordem.marca}</p>
+                <p className="text-gray-900">{ordemCompleta.marca}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700">Modelo:</p>
-                <p className="text-gray-900">{ordem.modelo}</p>
+                <p className="text-gray-900">{ordemCompleta.modelo}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700">N° Série:</p>
-                <p className="text-gray-900">{ordem.numero_serie || 'N/A'}</p>
+                <p className="text-gray-900">{ordemCompleta.numero_serie || 'N/A'}</p>
               </div>
               <div className="col-span-2">
                 <p className="font-medium text-gray-700">Senha:</p>
-                <p className="text-gray-900">{ordem.senha_equipamento || 'Não informado'}</p>
+                <p className="text-gray-900">{ordemCompleta.senha_equipamento || 'Não informado'}</p>
               </div>
             </div>
           </div>
@@ -319,24 +319,24 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
           <div>
             <p className="text-xs font-medium text-gray-700 mb-1">Defeito Relatado:</p>
             <p className="text-xs text-gray-900 bg-gray-50 p-2 rounded border print:p-1">
-              {ordem.defeito_relatado}
+              {ordemCompleta.defeito_relatado}
             </p>
           </div>
           
-          {ordem.diagnostico_tecnico && (
+          {ordemCompleta.diagnostico_tecnico && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Diagnóstico Técnico:</p>
               <p className="text-xs text-gray-900 bg-blue-50 p-2 rounded border border-blue-200 print:p-1">
-                {ordem.diagnostico_tecnico}
+                {ordemCompleta.diagnostico_tecnico}
               </p>
             </div>
           )}
           
-          {ordem.solucao_aplicada && (
+          {ordemCompleta.solucao_aplicada && (
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Solução Aplicada:</p>
               <p className="text-xs text-gray-900 bg-green-50 p-2 rounded border border-green-200 print:p-1">
-                {ordem.solucao_aplicada}
+                {ordemCompleta.solucao_aplicada}
               </p>
             </div>
           )}
@@ -359,16 +359,16 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="space-y-2 print:space-y-1 text-xs print:text-sm">
               <div>
                 <p className="font-medium text-gray-700">Data Abertura:</p>
-                <p className="text-gray-900">{formatDate(ordem.data_abertura)}</p>
+                <p className="text-gray-900">{formatDate(ordemCompleta.data_abertura)}</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700">Técnico:</p>
-                <p className="text-gray-900">{ordem.tecnico_responsavel || 'Não atribuído'}</p>
+                <p className="text-gray-900">{ordemCompleta.tecnico_responsavel || 'Não atribuído'}</p>
               </div>
               <div className="flex items-center gap-1">
                 <Shield className="h-3 w-3 text-green-600" />
                 <div>
-                  <p className="font-medium text-gray-700">Garantia: {ordem.garantia} dias</p>
+                  <p className="font-medium text-gray-700">Garantia: {ordemCompleta.garantia} dias</p>
                 </div>
               </div>
             </div>
@@ -376,8 +376,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
         </div>
 
         {/* Produtos e Serviços Utilizados */}
-        {((ordem.produtos_utilizados && ordem.produtos_utilizados.length > 0) || 
-          (ordem.pecas_utilizadas && ordem.pecas_utilizadas.length > 0)) && (
+        {((ordemCompleta.produtos_utilizados && ordemCompleta.produtos_utilizados.length > 0) || 
+          (ordemCompleta.pecas_utilizadas && ordemCompleta.pecas_utilizadas.length > 0)) && (
           <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg">
             <div className="p-3 border-b border-gray-100">
               <h3 className="flex items-center gap-2 text-sm font-semibold print:text-xs">
@@ -388,11 +388,11 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="p-3 print:p-2">
               <div className="space-y-3 print:space-y-2">
                 {/* Produtos Cadastrados */}
-                {ordem.produtos_utilizados && ordem.produtos_utilizados.length > 0 && (
+                {ordemCompleta.produtos_utilizados && ordemCompleta.produtos_utilizados.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-700 mb-2 print:text-xs">Produtos/Serviços:</h4>
                     <div className="space-y-1 print:space-y-1">
-                      {ordem.produtos_utilizados.map((produto: any, index: number) => (
+                      {ordemCompleta.produtos_utilizados.map((produto: any, index: number) => (
                         <div key={index} className="flex justify-between items-center text-xs print:text-xs bg-gray-50 p-2 rounded print:p-1">
                           <div className="flex-1">
                             <span className="font-medium">{produto.produto?.nome || 'Produto'}</span>
@@ -412,11 +412,11 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
                 )}
 
                 {/* Peças Avulsas */}
-                {ordem.pecas_utilizadas && ordem.pecas_utilizadas.length > 0 && (
+                {ordemCompleta.pecas_utilizadas && ordemCompleta.pecas_utilizadas.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-700 mb-2 print:text-xs">Peças Avulsas:</h4>
                     <div className="space-y-1 print:space-y-1">
-                      {ordem.pecas_utilizadas.map((peca: any, index: number) => (
+                      {ordemCompleta.pecas_utilizadas.map((peca: any, index: number) => (
                         <div key={index} className="flex justify-between items-center text-xs print:text-xs bg-gray-50 p-2 rounded print:p-1">
                           <div className="flex-1">
                             <span className="font-medium">{peca.nome}</span>
@@ -449,22 +449,22 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Mão de Obra:</span>
-                  <span>{formatCurrency(ordem.valor_mao_obra)}</span>
+                  <span>{formatCurrency(ordemCompleta.valor_mao_obra)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Orçamento:</span>
-                  <span>{formatCurrency(ordem.valor_orcamento)}</span>
+                  <span>{formatCurrency(ordemCompleta.valor_orcamento)}</span>
                 </div>
-                {parseFloat(ordem.desconto || '0') > 0 && (
+                {parseFloat(ordemCompleta.desconto || '0') > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Desconto:</span>
-                    <span>- {formatCurrency(ordem.desconto)}</span>
+                    <span>- {formatCurrency(ordemCompleta.desconto)}</span>
                   </div>
                 )}
-                {parseFloat(ordem.acrescimo || '0') > 0 && (
+                {parseFloat(ordemCompleta.acrescimo || '0') > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Acréscimo:</span>
-                    <span>+ {formatCurrency(ordem.acrescimo)}</span>
+                    <span>+ {formatCurrency(ordemCompleta.acrescimo)}</span>
                   </div>
                 )}
               </div>
@@ -472,7 +472,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
                 <div className="text-center">
                   <p className="text-xs text-gray-500 mb-1">VALOR TOTAL</p>
                   <p className="text-2xl font-bold text-green-600 print:text-xl">
-                    {formatCurrency(ordem.valor_total)}
+                    {formatCurrency(ordemCompleta.valor_total)}
                   </p>
                 </div>
               </div>
@@ -482,14 +482,14 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
       </div>
 
       {/* Observações Internas */}
-      {ordem.observacoes_internas && (
+      {ordemCompleta.observacoes_internas && (
         <div className="bg-white border border-gray-200 rounded-lg">
           <div className="p-3 border-b border-gray-100">
             <h3 className="text-sm font-semibold print:text-xs">Observações Internas</h3>
           </div>
           <div className="p-3 print:p-2">
             <p className="text-xs text-gray-900 bg-yellow-50 p-2 rounded border border-yellow-200 print:p-1">
-              {ordem.observacoes_internas}
+              {ordemCompleta.observacoes_internas}
             </p>
           </div>
         </div>
@@ -511,8 +511,8 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1 print:text-sm">Assinatura do Cliente</p>
               <div className="border-b-2 border-gray-300 h-10 print:h-8 mb-2 print:mb-1"></div>
               <div className="text-xs text-gray-600 print:text-sm">
-                <p className="font-medium">{ordem.clientes?.nome}</p>
-                <p>CPF/CNPJ: {ordem.clientes?.cpf_cnpj || 'Não informado'}</p>
+                <p className="font-medium">{ordemCompleta.clientes?.nome}</p>
+                <p>CPF/CNPJ: {ordemCompleta.clientes?.cpf_cnpj || 'Não informado'}</p>
                 <p>Data: ___/___/______</p>
               </div>
             </div>
@@ -522,7 +522,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
               <p className="text-xs font-medium text-gray-700 mb-2 print:mb-1 print:text-sm">Assinatura do Técnico</p>
               <div className="border-b-2 border-gray-300 h-10 print:h-8 mb-2 print:mb-1"></div>
               <div className="text-xs text-gray-600 print:text-sm">
-                <p className="font-medium">{ordem.tecnico_responsavel || 'Técnico Responsável'}</p>
+                <p className="font-medium">{ordemCompleta.tecnico_responsavel || 'Técnico Responsável'}</p>
                 <p>Empresa: {profile?.empresa || 'Nome da Empresa'}</p>
                 <p>Data: ___/___/______</p>
               </div>
@@ -534,7 +534,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
             <div className="text-xs text-gray-600 print:text-sm space-y-1">
               <p className="font-medium text-center">TERMO DE RESPONSABILIDADE</p>
               <p className="text-justify leading-tight">
-                Declaro que recebi o equipamento descrito nesta ordem de serviço em perfeitas condições de funcionamento e que todos os serviços foram executados conforme solicitado. Estou ciente da garantia oferecida e das condições de uso.{ordem.garantia && ` A garantia dos serviços prestados é de ${ordem.garantia} dias a partir da data de entrega.`}
+                Declaro que recebi o equipamento descrito nesta ordem de serviço em perfeitas condições de funcionamento e que todos os serviços foram executados conforme solicitado. Estou ciente da garantia oferecida e das condições de uso.{ordemCompleta.garantia && ` A garantia dos serviços prestados é de ${ordemCompleta.garantia} dias a partir da data de entrega.`}
               </p>
               <p className="text-center mt-2 print:mt-1 text-xs print:text-sm">
                 <strong>Data de entrega:</strong> ___/___/______ às ___:___ h
@@ -546,7 +546,7 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
 
       {/* Botões de Ação */}
       <div className="flex justify-end items-center print:hidden">
-        {ordem.status !== 'finalizada' && (
+        {ordemCompleta.status !== 'finalizada' && (
           <Button 
             onClick={abrirDialogoFinalizar}
             className="bg-green-600 hover:bg-green-700 text-white"
