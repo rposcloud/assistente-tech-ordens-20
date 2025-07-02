@@ -418,15 +418,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Salvando produtos utilizados:', produtos_utilizados);
         
         for (const produto of produtos_utilizados) {
-          if (produto.tipo === 'produto' && produto.produto_id) {
+          console.log('Processando produto:', produto);
+          
+          if (produto.produto_id) {
+            // É um produto cadastrado
             await storage.addProdutoUtilizado(
               ordem.id, 
               produto.produto_id, 
               produto.quantidade, 
               produto.valor_unitario
             );
-            console.log(`Produto adicionado: ${produto.nome}`);
-          } else if (produto.tipo === 'peca_avulsa') {
+            console.log(`Produto cadastrado adicionado: ID ${produto.produto_id}`);
+          } else if (produto.nome) {
+            // É uma peça avulsa
             await storage.addPecaUtilizada(
               ordem.id, 
               produto.nome, 
