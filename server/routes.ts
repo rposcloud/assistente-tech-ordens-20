@@ -443,6 +443,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { produtos_utilizados, ...dadosOrdem } = req.body;
+      
+      console.log('🚀 Server: PUT /api/ordens/' + id + ' recebido');
+      console.log('📋 Server: Body completo:', req.body);
+      console.log('📦 Server: produtos_utilizados extraído:', produtos_utilizados);
+      
       const ordemData = insertOrdemServicoSchema.partial().parse(dadosOrdem);
       
       // Verificar se o status está sendo alterado para "entregue"
