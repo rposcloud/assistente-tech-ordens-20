@@ -612,7 +612,7 @@ export const Ordens = () => {
                                   const valorPeca = parseFloat(peca.valor_total?.toString() || '0');
                                   return total + valorPeca;
                                 }, 0) || 0;
-                                
+
                                 valor = valorBase + valorProdutos + valorPecas;
                               }
                               return `R$ ${valor.toFixed(2).replace('.', ',')}`;
