@@ -243,21 +243,25 @@ export class DatabaseStorage implements IStorage {
 
       // Calcular valor total dos produtos utilizados
       const valorProdutos = produtosUtilizadosData.reduce((total, produto) => {
-        return total + (produto.valor_total || 0);
+        const valorProduto = typeof produto.valor_total === 'string' ? parseFloat(produto.valor_total) : produto.valor_total;
+        return total + (valorProduto || 0);
       }, 0);
 
       // Calcular valor total das peças utilizadas
       const valorPecas = pecasUtilizadasData.reduce((total, peca) => {
-        return total + (peca.valor_total || 0);
+        const valorPeca = typeof peca.valor_total === 'string' ? parseFloat(peca.valor_total) : peca.valor_total;
+        return total + (valorPeca || 0);
       }, 0);
 
       // Valor base da ordem
       const valorBase = parseFloat(ordem.valor_total?.toString() || '0');
-      const valorAvulso = parseFloat(ordem.valor_avulso?.toString() || '0');
+      const valorMaoObra = parseFloat(ordem.valor_mao_obra?.toString() || '0');
+      const valorOrcamento = parseFloat(ordem.valor_orcamento?.toString() || '0');
       const desconto = parseFloat(ordem.desconto?.toString() || '0');
+      const acrescimo = parseFloat(ordem.acrescimo?.toString() || '0');
 
       // Calcular valor final total
-      const valorFinal = valorBase + valorAvulso + valorProdutos + valorPecas - desconto;
+      const valorFinal = valorBase + valorMaoObra + valorOrcamento + valorProdutos + valorPecas + acrescimo - desconto;
 
       return {
         ...ordem,
