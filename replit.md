@@ -254,6 +254,39 @@ Changelog:
   * Layout profissional com espaços adequados para assinaturas físicas
   * Layout otimizado: assinaturas lado a lado horizontalmente, mais compacto
   * Alturas reduzidas (h-10) para melhor aproveitamento de espaço na impressão
+- July 2, 2025. IMPLEMENTAÇÃO PADRÃO DE DADOS DA EMPRESA EM CABEÇALHOS OS:
+  * Corrigido problema: VisualizacaoOS usava useQuery incorretamente para buscar profile
+  * Solução padrão implementada: usar sempre useAuth() do contexto para acessar profile
+  * Dados da empresa agora aparecem corretamente em todas as visualizações de OS
+  * Padrão estabelecido: NUNCA usar useQuery para profile, sempre useAuth context
+  * OrdemPrintView recebe profile como parâmetro corretamente via props
+  * Sistema validado: empresa "Rp Informática Teste" com todos os dados exibidos
+  * Regra para futuras implementações: componentes que precisam de dados da empresa devem usar useAuth()
+
+## Best Practices para Assistências Técnicas
+
+### Integração de Dados da Empresa
+**REGRA FUNDAMENTAL**: Componentes que precisam exibir dados da empresa devem SEMPRE usar o contexto de autenticação:
+
+```typescript
+// ✅ CORRETO - usar contexto de autenticação
+import { useAuth } from '@/contexts/AuthContext';
+const { profile } = useAuth();
+
+// ❌ INCORRETO - NÃO usar useQuery para profile
+const { data: profile } = useQuery({ queryKey: ['/api/profile'] });
+```
+
+### Exibição de Dados da Empresa em Cabeçalhos
+- **Nome da empresa**: `profile?.empresa || 'Nome da Empresa'`
+- **CNPJ e IE**: Exibir apenas se existirem
+- **Endereço completo**: Construir dinamicamente com fallbacks
+- **Contatos**: Telefone, email_empresa e site com verificação de existência
+
+### Padrão de Fallbacks
+- Usar condicionais `{profile?.campo && <elemento>}` para campos opcionais
+- Sempre fornecer fallbacks informativos para campos essenciais
+- Construir endereços dinamicamente evitando campos vazios
 
 ## User Preferences
 

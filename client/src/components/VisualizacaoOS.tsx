@@ -49,9 +49,6 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   // Buscar dados do perfil da empresa do contexto de autenticação
   const { profile } = useAuth();
   
-  // Debug - verificar se profile está sendo carregado
-  console.log('Profile no VisualizacaoOS:', profile);
-  
   const abrirDialogoFinalizar = () => {
     if (ordem?.status === 'finalizada') {
       toast({
