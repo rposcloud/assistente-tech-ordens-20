@@ -9,6 +9,7 @@ import { OrdemServico } from '@/types';
 import { OrdemServicoModal } from '@/components/modals/OrdemServicoModal';
 import { VisualizacaoOSModal } from '@/components/modals/VisualizacaoOSModal';
 import { PagamentoOSModal } from '@/components/modals/PagamentoOSModal';
+import StatusQuickSelector from '@/components/StatusQuickSelector';
 
 
 import { SortableTable, Column } from '@/components/ui/sortable-table';
@@ -235,21 +236,7 @@ export const Ordens = () => {
 
 
 
-  const handleChangeStatus = async (ordem: OrdemServico, newStatus: string) => {
-    try {
-      await updateOrdem(ordem.id!, {
-        ...ordem,
-        status: newStatus
-      });
-      
-      // Lógica simplificada: não abrir modal automaticamente na mudança de status
-      
-      toast.success(`Status alterado para: ${statusLabels[newStatus as keyof typeof statusLabels]}`);
-    } catch (error: any) {
-      console.error('Erro ao alterar status:', error);
-      toast.error('Erro ao alterar status');
-    }
-  };
+
 
   // Função para abrir modal de finalização/pagamento
   const handleFinalizarOS = async (ordem: OrdemServico) => {
@@ -314,40 +301,12 @@ export const Ordens = () => {
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (ordem) => ordem.status === 'finalizada' ? (
-        <Badge className={statusColors[ordem.status]}>
-          {statusLabels[ordem.status]}
-        </Badge>
-      ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <span className="text-sm cursor-pointer hover:underline">
-              {statusLabels[ordem.status] || 'Aberta'}
-            </span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-48">
-            {statusOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (option.value !== ordem.status) {
-                    handleChangeStatus(ordem, option.value);
-                  }
-                }}
-                className={`${ordem.status === option.value ? 'bg-gray-100 font-medium' : ''} cursor-pointer`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${statusColors[option.value]?.split(' ')[0] || 'bg-gray-400'}`} />
-                  {option.label}
-                  {ordem.status === option.value && (
-                    <span className="ml-auto text-xs text-gray-500">(atual)</span>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      render: (ordem) => (
+        <StatusQuickSelector 
+          ordemId={ordem.id} 
+          currentStatus={ordem.status}
+          size="sm"
+        />
       )
     },
     {
@@ -625,41 +584,11 @@ export const Ordens = () => {
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <div className="text-gray-500 text-xs">Status</div>
-                          {ordem.status === 'finalizada' ? (
-                            <Badge className={statusColors[ordem.status]}>
-                              {statusLabels[ordem.status]}
-                            </Badge>
-                          ) : (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <span className="text-sm cursor-pointer hover:underline">
-                                  {statusLabels[ordem.status] || 'Aberta'}
-                                </span>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="start" className="min-w-48">
-                                {statusOptions.map((option) => (
-                                  <DropdownMenuItem
-                                    key={option.value}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (option.value !== ordem.status) {
-                                        handleChangeStatus(ordem, option.value);
-                                      }
-                                    }}
-                                    className={`${ordem.status === option.value ? 'bg-gray-100 font-medium' : ''} cursor-pointer`}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-2 h-2 rounded-full ${statusColors[option.value]?.split(' ')[0] || 'bg-gray-400'}`} />
-                                      {option.label}
-                                      {ordem.status === option.value && (
-                                        <span className="ml-auto text-xs text-gray-500">(atual)</span>
-                                      )}
-                                    </div>
-                                  </DropdownMenuItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
+                          <StatusQuickSelector 
+                            ordemId={ordem.id} 
+                            currentStatus={ordem.status}
+                            size="md"
+                          />
                         </div>
                         
                         <div>
