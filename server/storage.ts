@@ -447,13 +447,6 @@ export class DatabaseStorage implements IStorage {
   // Produtos Utilizados
   async addProdutoUtilizado(ordemId: string, produtoId: string, quantidade: number, valorUnitario: number): Promise<any> {
     const valorTotal = quantidade * valorUnitario;
-    console.log('=== SALVANDO PRODUTO UTILIZADO ===');
-    console.log('Ordem ID:', ordemId);
-    console.log('Produto ID:', produtoId);
-    console.log('Quantidade:', quantidade);
-    console.log('Valor Unitário:', valorUnitario);
-    console.log('Valor Total:', valorTotal);
-    
     const result = await db.insert(produtosUtilizados).values({
       ordem_servico_id: ordemId,
       produto_id: produtoId,
@@ -461,8 +454,6 @@ export class DatabaseStorage implements IStorage {
       valor_unitario: valorUnitario.toString(),
       valor_total: valorTotal.toString()
     }).returning();
-    
-    console.log('Produto salvo:', result[0]);
     return result[0];
   }
 

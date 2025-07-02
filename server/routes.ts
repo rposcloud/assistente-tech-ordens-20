@@ -397,29 +397,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/ordens', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      console.log('Dados recebidos para ordem:', req.body);
-      console.log('User ID:', req.userId);
-      
       const { produtos_utilizados, ...dadosOrdem } = req.body;
       const ordemData = insertOrdemServicoSchema.parse({
         ...dadosOrdem,
         user_id: req.userId!
       });
       
-      console.log('=== DEBUG CRIAÇÃO ORDEM ===');
-      console.log('Produtos utilizados no request body:', req.body.produtos_utilizados);
-      console.log('Dados validados para ordem:', ordemData);
-      
       const ordem = await storage.createOrdemServico(ordemData, req.userId!);
-      console.log('Ordem criada com ID:', ordem.id);
       
       // Processar produtos utilizados se fornecidos
       if (produtos_utilizados && Array.isArray(produtos_utilizados)) {
-        console.log('Salvando produtos utilizados:', produtos_utilizados);
-        
         for (const produto of produtos_utilizados) {
-          console.log('Processando produto:', produto);
-          
           if (produto.produto_id) {
             // É um produto cadastrado
             await storage.addProdutoUtilizado(
@@ -428,7 +416,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               produto.quantidade, 
               produto.valor_unitario
             );
-            console.log(`Produto cadastrado adicionado: ID ${produto.produto_id}`);
           } else if (produto.nome) {
             // É uma peça avulsa
             await storage.addPecaUtilizada(
@@ -437,7 +424,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               produto.quantidade, 
               produto.valor_unitario
             );
-            console.log(`Peça avulsa adicionada: ${produto.nome}`);
           }
         }
       }

@@ -376,7 +376,10 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   // Tipo de equipamento - opcional
   tipo_equipamento: z.enum(["smartphone", "notebook", "desktop", "tablet", "outros", "todos"]).nullable().optional(),
   
-  // Campos opcionais - aceita string, null ou undefined
+  // Campos opcionais - aceita string vazia, null ou undefined
+  marca: z.string().optional(),
+  modelo: z.string().optional(),
+  defeito_relatado: z.string().optional(),
   numero_serie: z.string().nullable().optional(),
   senha_equipamento: z.string().nullable().optional(),
   acessorios: z.string().nullable().optional(),
