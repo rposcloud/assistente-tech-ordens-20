@@ -6,6 +6,7 @@ import { Calendar, User, Wrench, Package, CreditCard, FileText, Clock, Shield, B
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,11 +46,11 @@ export const VisualizacaoOS: React.FC<VisualizacaoOSProps> = ({ ordem }) => {
   const [formaPagamento, setFormaPagamento] = useState('dinheiro');
   const [dataVencimento, setDataVencimento] = useState(new Date().toISOString().split('T')[0]);
   
-  // Buscar dados do perfil da empresa - hook deve estar no topo
-  const { data: profile } = useQuery({
-    queryKey: ['/api/profile'],
-    enabled: !!ordem // só executa se ordem existir
-  }) as { data: any };
+  // Buscar dados do perfil da empresa do contexto de autenticação
+  const { profile } = useAuth();
+  
+  // Debug - verificar se profile está sendo carregado
+  console.log('Profile no VisualizacaoOS:', profile);
   
   const abrirDialogoFinalizar = () => {
     if (ordem?.status === 'finalizada') {
