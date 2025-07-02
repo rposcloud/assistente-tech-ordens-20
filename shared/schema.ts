@@ -90,7 +90,7 @@ export const ordensServico = pgTable("ordens_servico", {
   user_id: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   numero: text("numero").notNull(),
   cliente_id: uuid("cliente_id").notNull().references(() => clientes.id, { onDelete: "restrict" }),
-  tipo_equipamento: tipoEquipamentoEnum("tipo_equipamento").notNull(),
+  tipo_equipamento: tipoEquipamentoEnum("tipo_equipamento"),
   marca: text("marca").notNull(),
   modelo: text("modelo").notNull(),
   numero_serie: text("numero_serie"),
@@ -191,7 +191,7 @@ export const tiposDefeito = pgTable("tipos_defeito", {
   user_id: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   nome: text("nome").notNull(),
   descricao: text("descricao"),
-  tipo_equipamento: tipoEquipamentoEnum("tipo_equipamento").notNull(),
+  tipo_equipamento: tipoEquipamentoEnum("tipo_equipamento"),
   ativo: boolean("ativo").default(true).notNull(),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -372,6 +372,9 @@ export const insertOrdemServicoSchema = createInsertSchema(ordensServico).omit({
   
   // Campos de pagamento - aceita null
   forma_pagamento: z.enum(["dinheiro", "cartao_credito", "cartao_debito", "pix", "transferencia", "parcelado"]).nullable().optional(),
+  
+  // Tipo de equipamento - opcional
+  tipo_equipamento: z.enum(["smartphone", "notebook", "desktop", "tablet", "outros", "todos"]).nullable().optional(),
   
   // Campos opcionais - aceita string, null ou undefined
   numero_serie: z.string().nullable().optional(),
